@@ -39,7 +39,7 @@ CFLAGS = -g -Wall -Wextra -pedantic -std=c11 -I.
 
 LINKER   = gcc
 # linking flags here
-LFLAGS   = -Wall -I. -lm -lSDL2
+LFLAGS   = -Wall -I. -lm -lSDL2 -lSDL2_image
 
 # change these to proper directories where each file should be
 SRCDIR   = src
@@ -69,3 +69,6 @@ clean:
 remove: clean
 	@$(rm) $(BINDIR)/$(TARGET)
 	@echo "Executable removed!"
+
+run: $(BINDIR)/$(TARGET)
+	$(BINDIR)/$(TARGET)
