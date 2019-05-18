@@ -39,7 +39,7 @@ CFLAGS = -g -Wall -Wextra -pedantic -std=c11 -I.
 
 LINKER   = gcc
 # linking flags here
-LFLAGS   = -Wall -I. -lm -lSDL2 -lSDL2_image
+LFLAGS   = -Wall -I. -lm -lSDL2 -lSDL2_image -lSDL2_ttf
 
 # change these to proper directories where each file should be
 SRCDIR   = src
