@@ -20,6 +20,12 @@ const int WINDOW_WIDTH = 600;
 const int WINDOW_HEIGHT = 400;
 const char WINDOW_TITLE[] = "sdl_fungeoid";
 
+const SDL_Color COLOR_BG = { 0x2E, 0x43, 0x4e, 0xFF };
+const SDL_Color COLOR_LINES = { 0x67, 0x72, 0x78, 0xFF };
+const SDL_Color COLOR_SELECT_1 = { 0xAB, 0x96, 0x44, 0xFF };
+const SDL_Color COLOR_SELECT_2 = { 0xAB, 0x44, 0x44, 0xFF };
+const SDL_Color COLOR_WHITE = { 0xFF, 0xFF, 0xFF, 0xFF };
+
 void main_loop(SDL_Renderer *renderer, SDL_Texture *tex)
 {
     bool running = true;
@@ -33,8 +39,27 @@ void main_loop(SDL_Renderer *renderer, SDL_Texture *tex)
                 running = false;
             }
         }
+        juan_set_render_draw_color(renderer, &COLOR_BG);
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, tex, NULL, NULL);
+
+        juan_set_render_draw_color(renderer, &COLOR_LINES);
+        for (int i = 0; i < 10; i++)
+        {
+            SDL_Rect rect = { i * 64 - 2, 0, 2, WINDOW_HEIGHT };
+            SDL_RenderFillRect(renderer, &rect);
+            SDL_Rect rect2 = { 0, i * 64 - 2, WINDOW_WIDTH, 2 };
+            SDL_RenderFillRect(renderer, &rect2);
+        }
+
+        juan_set_render_draw_color(renderer, &COLOR_SELECT_1);
+        SDL_Rect rect = { 10, 10, 400, 10 };
+        SDL_RenderFillRect(renderer, &rect);
+
+        int w = 0;
+        int h = 0;
+        SDL_QueryTexture(tex, NULL, NULL, &w, &h);
+        SDL_Rect r = { 64, 64, w, h };
+        SDL_RenderCopy(renderer, tex, NULL, &r);
         SDL_RenderPresent(renderer);
     }
 }

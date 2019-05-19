@@ -50,4 +50,6 @@ SDL_Texture *juan_text_texture(
     SDL_Color color
 );
 
+int juan_set_render_draw_color(SDL_Renderer *renderer, const SDL_Color *color);
+
 #endif

@@ -104,3 +104,15 @@ SDL_Texture *juan_text_texture(
 
     return texture;
 }
+
+int juan_set_render_draw_color(SDL_Renderer *renderer, const SDL_Color *color) {
+    int r = SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);
+    if (r != 0) {
+        printf(
+            "Unable to set color: %#x, %#x, %#x, %#x\n",
+            color->r, color->g, color->b, color->a
+        );
+        printf("SDL_SetRenderDrawColor Error: %s\n", SDL_GetError());
+    }
+    return r;
+}
