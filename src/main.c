@@ -3,9 +3,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+
+/* #include <SDL2/SDL.h> */
+/* #include <SDL2/SDL_image.h> */
+/* #include <SDL2/SDL_ttf.h> */
 
 #include "juan.h"
 #include "res.h"
@@ -58,7 +62,7 @@ void main_loop(SDL_Renderer *renderer, SDL_Texture *tex)
         int w = 0;
         int h = 0;
         SDL_QueryTexture(tex, NULL, NULL, &w, &h);
-        SDL_Rect r = { 64, 64, w, h };
+        SDL_Rect r = { 64, 64, w/2, h/2 };
         SDL_RenderCopy(renderer, tex, NULL, &r);
         SDL_RenderPresent(renderer);
     }
@@ -66,6 +70,8 @@ void main_loop(SDL_Renderer *renderer, SDL_Texture *tex)
 
 int main(int argc, char *argv[])
 {
+    SDL_Log("sdl_fungeoid starting")
+
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
 

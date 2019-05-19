@@ -6,7 +6,42 @@ Fungeoid (Befuge-like) game written on C and SDL2
 
 ```
 sudo apt install build-essential libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+sudo apt install openjdk-8-jdk ant android-sdk-platform-tools-common
 ```
+
+- sdk-tools-linux-4333796
+
+## Android
+
+Accept licenses:
+
+```
+env JAVA_HOME="/android/java-se-8u40-ri" /home/mbernardi/extra/async/android/sdk-tools-linux/tools/bin/sdkmanager --licenses
+```
+
+Install build tools, SDK and NDK for the target version. I had to use `--no_https`:
+
+```
+env JAVA_HOME="/home/mbernardi/extra/async/android/java-se-8u40-ri" /home/mbernardi/extra/async/android/sdk-tools-linux/tools/bin/sdkmanager --no_https "build-tools;26.0.0" "platforms;android-26"
+env JAVA_HOME="/home/mbernardi/extra/async/android/java-se-8u40-ri" /home/mbernardi/extra/async/android/sdk-tools-linux/tools/bin/sdkmanager --no_https "ndk-bundle"
+```
+
+For compiling:
+
+```
+env ANDROID_HOME="/home/mbernardi/extra/async/android/sdk-tools-linux" JAVA_HOME="/home/mbernardi/extra/async/android/java-se-8u40-ri" ./gradlew installDebug
+```
+
+## Remember
+
+I'm just copying and pasting the SDL sources into this repo so the Android build
+works. I should update them manually.
+
+Also I had to do modifications to `Android.mk` on `SDL_image`:
+
+- Change to `SUPPORT_WEBP ?= false`.
+
+- Delete `IMG_WIC.c       \`
 
 ## Acknowledgments
 
@@ -22,6 +57,12 @@ SDL: zlib license.
 - https://www.willusher.io/pages/sdl2/
 
 - http://lazyfoo.net/tutorials/SDL/index.php
+
+## References
+
+- https://wiki.libsdl.org/Android
+
+- https://hg.libsdl.org/SDL/file/default/docs/README-android.md
 
 # Other
 
