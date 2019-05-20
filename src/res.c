@@ -1,24 +1,18 @@
 #include "res.h"
 
-#include <SDL.h>
-#include <SDL_ttf.h>
-
-/* #include <SDL2/SDL.h> */
-/* #include <SDL2/SDL_ttf.h> */
-
 #include "juan.h"
 
 TTF_Font* font_128 = NULL;
 
 int res_load_all(SDL_Renderer *renderer)
 {
-    RES_TEXTURES[RES_TEX_BALL] = juan_load_texture(renderer, "test.png");
+    RES_TEXTURES[RES_TEX_BALL] = juan_load_texture(renderer, "res/test.png");
     if (RES_TEXTURES[RES_TEX_BALL] == NULL) {
         // Remember to free succesfully loaded textures
         return 1;
     }
 
-    font_128 = juan_load_font("inconsolata/Inconsolata-Bold.ttf", 128);
+    font_128 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 128);
     if (font_128 == NULL)
     {
         SDL_DestroyTexture(RES_TEXTURES[RES_TEX_BALL]);

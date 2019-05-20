@@ -1,47 +1,15 @@
-# CC = gcc
-# CFLAGS = -g -Wall -Wextra -pedantic -std=c11
-# LINKER_OPTS = -lSDL2 -lm
-#
-# OBJECTS = main.o
-# HEADERS =
-#
-# .c.o:
-	# $(CC) $(CFLAGS) -c $<
-#
-# all: $(OBJECTS)
-	# $(CC) *.o -o main $(LINKER_OPTS)
-#
-# run: all
-	# ./main
-#
-# clear:
-	# rm -f *.o main
-
-# ------------------------------------------------
-# Generic Makefile
-#
-# Author: yanick.rochon@gmail.com
-# Date  : 2011-08-10
-#
-# Changelog :
-#   2010-11-05 - first version
-#   2011-08-10 - added structure : sources, objects, binaries
-#                thanks to http://stackoverflow.com/users/128940/beta
-#   2017-04-24 - changed order of linker params
-# ------------------------------------------------
-
-# project name (generate executable with this name)
 TARGET   = sdl_fungeoid
-
 CC       = gcc
-# compiling flags here
-CFLAGS = -g -Wall -Wextra -pedantic -std=c11 -I.
-
 LINKER   = gcc
-# linking flags here
-LFLAGS   = -Wall -I. -lm -lSDL2 -lSDL2_image -lSDL2_ttf
 
-# change these to proper directories where each file should be
+# I add the SDL2 directory so I can #include <SDL.h> instead of
+# #include <SDL2/SDL.h>. Because on the Android version I don't have the headers
+# inside a SDL2/ directory.
+CFLAGS = -g -Wall -Wextra -pedantic -std=c11 -isystem /usr/include/SDL2/
+
+LFLAGS   = -Wall -lm -lSDL2 -lSDL2_image -lSDL2_ttf
+
+# Directories
 SRCDIR   = src
 OBJDIR   = obj
 BINDIR   = bin

@@ -6,6 +6,7 @@ def Settings( **kwargs ):
             '-Wall',
             '-Wextra',
             '-pedantic',
-            '-Werror'
+            '-Werror',
+            '-isystem', '/usr/include/SDL2/',
         ],
     }

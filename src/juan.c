@@ -28,7 +28,7 @@ int juan_init(
         return 1;
     }
 
-    SDL_Rect gScreenRect = { 0, 0, 320, 240 };
+    SDL_Rect screen_rect = { 0, 0, 320, 240 };
     SDL_DisplayMode display_mode;
     if(SDL_GetCurrentDisplayMode(0, &display_mode) == 0)
     {

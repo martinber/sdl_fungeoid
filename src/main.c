@@ -3,14 +3,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
-
-/* #include <SDL2/SDL.h> */
-/* #include <SDL2/SDL_image.h> */
-/* #include <SDL2/SDL_ttf.h> */
-
 #include "juan.h"
 #include "res.h"
 
@@ -70,7 +62,7 @@ void main_loop(SDL_Renderer *renderer, SDL_Texture *tex)
 
 int main(int argc, char *argv[])
 {
-    SDL_Log("sdl_fungeoid starting")
+    SDL_Log("sdl_fungeoid starting");
 
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
