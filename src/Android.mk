@@ -13,7 +13,7 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/$(SDL_PATH)/include $(LOCAL_PATH)/$(SDL_IMG_PA
 # Add your application source files here...
 # LOCAL_SRC_FILES := $(wildcard $(*.c))
 # LOCAL_SRC_FILES := main.c juan.c res.c
-LOCAL_SRC_FILES := main.c juan.c res.c const.c
+LOCAL_SRC_FILES := main.c juan.c res.c const.c canvas.c
 
 LOCAL_SHARED_LIBRARIES := SDL2 SDL2_image SDL2_ttf
 

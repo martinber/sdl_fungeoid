@@ -16,6 +16,8 @@
 /// IDs of every instruction
 enum INSTR_ID
 {
+    INSTR_NULL, // Invalid instruction
+    INSTR_SPACE,
     INSTR_A,
     INSTR_B,
     INSTR_C,

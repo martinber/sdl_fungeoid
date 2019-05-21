@@ -134,6 +134,8 @@ SDL: zlib license.
 Movements
 ---------
 
+SPACE:
+
 RIGHT: >
 LEFT: <
 DOWN: v

@@ -28,7 +28,7 @@ void res_free_all();
 
 /// Get texture by theme and id.
 /*
- *
+ * Returns NULL on invalid IDs, e.g. INSTR_NULL or INSTR_SPACE.
  */
 SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id);
 

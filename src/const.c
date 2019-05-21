@@ -4,6 +4,7 @@ char const_befunge_char(enum INSTR_ID id)
 {
     switch (id)
     {
+        case INSTR_SPACE: return ' ';
         case INSTR_A: return 'a';
         case INSTR_B: return 'b';
         case INSTR_C: return 'c';

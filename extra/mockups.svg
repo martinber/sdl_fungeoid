@@ -194,9 +194,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="371.07587"
-     inkscape:cy="728.99186"
+     inkscape:zoom="1.0645786"
+     inkscape:cx="419.10446"
+     inkscape:cy="1195.0505"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -207,7 +207,10 @@
      inkscape:window-maximized="1"
      inkscape:object-paths="true"
      inkscape:snap-intersection-paths="true"
-     inkscape:snap-smooth-nodes="true" />
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-object-midpoints="true" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -224,6 +227,15 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="opacity:0.57999998;vector-effect:none;fill:none;fill-opacity:1;stroke:#ab4444;stroke-width:0;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+       id="rect1122"
+       width="67.73333"
+       height="67.73333"
+       x="31.458117"
+       y="-87.900703"
+       inkscape:export-xdpi="27"
+       inkscape:export-ydpi="27" />
     <rect
        style="opacity:1;fill:#2e434e;fill-opacity:1;stroke:none;stroke-width:2.16499996;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
        id="rect821"
@@ -454,5 +466,67 @@
        height="10.27078"
        x="92.780716"
        y="68.692566" />
+    <g
+       id="g1129"
+       transform="matrix(4.7779799,0,0,4.7779803,-567.96638,42.679497)"
+       inkscape:export-xdpi="27"
+       inkscape:export-ydpi="27">
+      <rect
+         ry="0"
+         rx="0"
+         y="-25.376898"
+         x="127.40832"
+         height="10.270783"
+         width="10.270783"
+         id="rect821-5"
+         style="opacity:1;fill:#2e434e;fill-opacity:1;stroke:none;stroke-width:0.11081961;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers" />
+      <rect
+         y="-25.376898"
+         x="127.40832"
+         height="10.27078"
+         width="10.270781"
+         id="rect1013-7"
+         style="opacity:1;vector-effect:none;fill:none;fill-opacity:0.27433627;stroke:#ab9644;stroke-width:0.95200008;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill" />
+      <path
+         transform="matrix(0.86099756,0,0,0.86561337,57.245489,-84.046356)"
+         inkscape:transform-center-x="-0.7942937"
+         d="m 90.530137,73.710564 -2.767583,1.597865 -2.767582,1.597864 0,-3.195729 0,-3.19573 2.767583,1.597865 z"
+         inkscape:randomized="0"
+         inkscape:rounded="0"
+         inkscape:flatsided="false"
+         sodipodi:arg2="1.0471976"
+         sodipodi:arg1="0"
+         sodipodi:r2="1.8450553"
+         sodipodi:r1="3.6901102"
+         sodipodi:cy="73.710564"
+         sodipodi:cx="86.840027"
+         sodipodi:sides="3"
+         id="path1984-9"
+         style="opacity:1;fill:#ab4444;fill-opacity:1;stroke:none;stroke-width:1.00196648;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
+         sodipodi:type="star" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.52478743px;line-height:3.45299196px;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.13811968"
+       x="113.4879"
+       y="-57.64735"
+       id="text1133"><tspan
+         sodipodi:role="line"
+         id="tspan1131"
+         x="113.4879"
+         y="-57.64735"
+         style="stroke-width:0.13811968">I<tspan
+   style="line-height:5.19606256px;stroke-width:0.13811968"
+   id="tspan1139">con, has an invisible border</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="113.4879"
+         y="-52.451286"
+         style="line-height:5.19606256px;stroke-width:0.13811968"
+         id="tspan1135">to leave space around when</tspan><tspan
+         sodipodi:role="line"
+         x="113.4879"
+         y="-47.255226"
+         style="line-height:5.19606256px;stroke-width:0.13811968"
+         id="tspan1137">saving as PNG</tspan></text>
   </g>
 </svg>
