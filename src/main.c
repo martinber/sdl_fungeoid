@@ -7,30 +7,93 @@
 #include "juan.h"
 #include "res.h"
 #include "canvas.h"
+#include "keyb.h"
 
-static const int WINDOW_WIDTH = 600;
-static const int WINDOW_HEIGHT = 400;
+#ifdef __ANDROID__
+static int CELL_SIZE = 128;
+#else
+static int CELL_SIZE = 64;
+#endif
+// Window dimensions, initial values are used for desktop, when on Android or
+// resizing these values will be updated
+static int WINDOW_WIDTH = 64 * 10;
+static int WINDOW_HEIGHT = 64 * 14;
 static const char WINDOW_TITLE[] = "sdl_fungeoid";
 
-const SDL_Color COLOR_BG = { 0x2E, 0x43, 0x4e, 0xFF };
-const SDL_Color COLOR_LINES = { 0x67, 0x72, 0x78, 0xFF };
-const SDL_Color COLOR_SELECT_1 = { 0xAB, 0x96, 0x44, 0xFF };
-const SDL_Color COLOR_SELECT_2 = { 0xAB, 0x44, 0x44, 0xFF };
-const SDL_Color COLOR_WHITE = { 0xFF, 0xFF, 0xFF, 0xFF };
+/// Draw horizontal line with square cap.
+/**
+ * Width should be even.
+ *
+ * The line has a square cap on both ends, so the line is actually width pixels
+ * longer than the given length.
+ */
+static void draw_h_line_cap
+(
+    SDL_Renderer *renderer,
+    int x,
+    int y,
+    int length,
+    int width
+) {
+    SDL_Rect rect =
+    {
+        x - width / 2,
+        y - width / 2,
+        length + width,
+        width,
+    };
+    SDL_RenderFillRect(renderer, &rect);
+}
+
+/// Draw vertical line with square cap.
+/**
+ * Width should be even.
+ *
+ * The line has a square cap on both ends, so the line is actually width pixels
+ * longer than the given length.
+ */
+static void draw_v_line_cap
+(
+    SDL_Renderer *renderer,
+    int x,
+    int y,
+    int length,
+    int width
+) {
+    SDL_Rect rect =
+    {
+        x - width / 2,
+        y - width / 2,
+        width,
+        length + width,
+    };
+    SDL_RenderFillRect(renderer, &rect);
+}
 
 static void draw_canvas(SDL_Renderer *renderer, int width, int height)
 {
-    for (int x = 0; x < width; x++) {
-        for (int y = 0; y < height; y++) {
+    // Draw lines
+    juan_set_render_draw_color(renderer, &COLOR_LINES);
+    int line_width = CELL_SIZE / 20;
+    for (int x = 0; x < width + 1; x++)
+    {
+        draw_v_line_cap(renderer, x * CELL_SIZE, 0, height * CELL_SIZE, line_width);
+    }
+    for (int y = 0; y < height + 1; y++)
+    {
+        draw_h_line_cap(renderer, 0, y * CELL_SIZE, width * CELL_SIZE, line_width);
+    }
 
+    // Draw instructions
+    for (int x = 0; x < width; x++)
+    {
+        for (int y = 0; y < height; y++)
+        {
             enum INSTR_ID id = canvas_get_instr(x, y);
             if (id != INSTR_NULL && id != INSTR_SPACE)
             {
-                int w;
-                int h;
                 SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, id);
-                SDL_QueryTexture(tex, NULL, NULL, &w, &h);
-                SDL_Rect r = { x*64, y*64, w/2, h/2 };
+                SDL_Rect r = { x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE };
                 SDL_RenderCopy(renderer, tex, NULL, &r);
             }
         }
@@ -51,10 +114,12 @@ static void main_loop(SDL_Renderer *renderer)
     canvas_set_instr(1, 0, INSTR_B);
     canvas_set_instr(0, 1, INSTR_C);
     canvas_set_instr(9, 6, INSTR_D);
-    canvas_set_instr(4, 13, INSTR_E);
-    canvas_set_instr(9, 13, INSTR_F);
-    canvas_set_instr(1, 1, INSTR_A);
-    canvas_set_instr(1, 1, INSTR_SPACE);
+    canvas_set_instr(4, 13, INSTR_CHAROUT);
+    canvas_set_instr(9, 13, INSTR_POP);
+    int ip_x = 4;
+    int ip_y = 1;
+
+    Keyboard keyb = keyb_create(WINDOW_WIDTH, WINDOW_HEIGHT, CELL_SIZE);
 
     while (running)
     {
@@ -69,7 +134,25 @@ static void main_loop(SDL_Renderer *renderer)
                 switch (event.key.keysym.sym)
                 {
                     case SDLK_UP:
-                        /* x = 100; */
+                        ip_y -= 1;
+                        break;
+                    case SDLK_DOWN:
+                        ip_y += 1;
+                        break;
+                    case SDLK_LEFT:
+                        ip_x -= 1;
+                        break;
+                    case SDLK_RIGHT:
+                        ip_x += 1;
+                        break;
+                    case SDLK_a:
+                        canvas_set_instr(ip_x, ip_y, INSTR_A);
+                        break;
+                    case SDLK_b:
+                        canvas_set_instr(ip_x, ip_y, INSTR_B);
+                        break;
+                    case SDLK_SPACE:
+                        canvas_set_instr(ip_x, ip_y, INSTR_SPACE);
                         break;
                     case SDLK_AC_BACK:
                         running = false;
@@ -78,7 +161,8 @@ static void main_loop(SDL_Renderer *renderer)
             }
             else if (event.type == SDL_FINGERDOWN)
             {
-                /* x = event.tfinger.x * WINDOW_WIDTH; */
+                ip_x = event.tfinger.x * WINDOW_WIDTH / CELL_SIZE;
+                ip_y = event.tfinger.y * WINDOW_HEIGHT / CELL_SIZE;
             }
             else if (event.type == SDL_FINGERMOTION)
             {
@@ -88,24 +172,32 @@ static void main_loop(SDL_Renderer *renderer)
             {
                 /* x = 0; */
             }
+            else if (event.type == SDL_WINDOWEVENT)
+            {
+                switch (event.window.event)
+                {
+                    case SDL_WINDOWEVENT_SIZE_CHANGED:
+                        WINDOW_WIDTH = event.window.data1;
+                        WINDOW_HEIGHT = event.window.data2;
+                        keyb_update_geometry(&keyb, WINDOW_WIDTH, WINDOW_HEIGHT, CELL_SIZE);
+                        break;
+                }
+            }
         }
         juan_set_render_draw_color(renderer, &COLOR_BG);
         SDL_RenderClear(renderer);
 
-        juan_set_render_draw_color(renderer, &COLOR_LINES);
-        for (int i = 0; i < 10; i++)
-        {
-            SDL_Rect rect = { i * 64 - 2, 0, 2, WINDOW_HEIGHT };
-            SDL_RenderFillRect(renderer, &rect);
-            SDL_Rect rect2 = { 0, i * 64 - 2, WINDOW_WIDTH, 2 };
-            SDL_RenderFillRect(renderer, &rect2);
-        }
-
-        juan_set_render_draw_color(renderer, &COLOR_SELECT_1);
-        SDL_Rect rect = { 10, 10, 400, 10 };
-        SDL_RenderFillRect(renderer, &rect);
-
         draw_canvas(renderer, canvas_width, canvas_height);
+
+        // Draw IP
+        int ip_width = CELL_SIZE / 8;
+        juan_set_render_draw_color(renderer, &COLOR_SELECT_1);
+        draw_h_line_cap(renderer, ip_x * CELL_SIZE, ip_y * CELL_SIZE, CELL_SIZE, ip_width);
+        draw_h_line_cap(renderer, ip_x * CELL_SIZE, (ip_y + 1) * CELL_SIZE, CELL_SIZE, ip_width);
+        draw_v_line_cap(renderer, ip_x * CELL_SIZE, ip_y * CELL_SIZE, CELL_SIZE, ip_width);
+        draw_v_line_cap(renderer, (ip_x + 1) * CELL_SIZE, ip_y * CELL_SIZE, CELL_SIZE, ip_width);
+
+        keyb_draw(renderer, &keyb);
 
         SDL_RenderPresent(renderer);
     }

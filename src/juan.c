@@ -47,7 +47,7 @@ int juan_init(
     (
         title,
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        height, width,
+        width, height,
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     if (*window == NULL)
@@ -72,6 +72,9 @@ int juan_init(
         SDL_Quit();
         return 1;
     }
+
+    // Antialiasing for scaling
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
     return 0;
 }

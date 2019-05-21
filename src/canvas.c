@@ -81,14 +81,14 @@ int canvas_set_instr(int x, int y, enum INSTR_ID id)
         SDL_Log("Tried to use NULL canvas\n");
         return 1;
     }
-    if (x >= CANVAS_WIDTH)
+    if (x >= CANVAS_WIDTH || x < 0)
     {
-        SDL_Log("x position %d out of canvas width %d\n", x, CANVAS_WIDTH);
+        SDL_Log("x position %d out of bounds", x);
         return 1;
     }
-    if (y >= CANVAS_HEIGHT)
+    if (y >= CANVAS_HEIGHT || y < 0)
     {
-        SDL_Log("y position %d out of canvas height %d\n", y, CANVAS_HEIGHT);
+        SDL_Log("y position %d out of bounds", y);
         return 1;
     }
 
