@@ -1,16 +1,8 @@
 #ifndef RES_H
 #define RES_H
 
+#include "const.h"
 #include "juan.h"
-
-enum
-{
-    RES_TEX_BALL,
-    RES_TEX_CHAR_G,
-    RES_TEX_TOTAL
-};
-
-SDL_Texture *RES_TEXTURES[RES_TEX_TOTAL];
 
 /**
  * Resources manager.
@@ -29,8 +21,15 @@ int res_load_all(SDL_Renderer *renderer);
 
 /// Free all resources.
 /**
- *
+ * Can free resources correctly even when res_load_all() failed (that is, when
+ * there are textures pointing to NULL).
  */
 void res_free_all();
+
+/// Get texture by theme and id.
+/*
+ *
+ */
+SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id);
 
 #endif

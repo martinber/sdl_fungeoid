@@ -3,18 +3,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "const.h"
 #include "juan.h"
 #include "res.h"
 
-/*
- * Functions return non-zero on error
- *
- * https://www.willusher.io/pages/sdl2/
- */
-
-const int WINDOW_WIDTH = 600;
-const int WINDOW_HEIGHT = 400;
-const char WINDOW_TITLE[] = "sdl_fungeoid";
+static const int WINDOW_WIDTH = 600;
+static const int WINDOW_HEIGHT = 400;
+static const char WINDOW_TITLE[] = "sdl_fungeoid";
 
 const SDL_Color COLOR_BG = { 0x2E, 0x43, 0x4e, 0xFF };
 const SDL_Color COLOR_LINES = { 0x67, 0x72, 0x78, 0xFF };
@@ -22,7 +17,7 @@ const SDL_Color COLOR_SELECT_1 = { 0xAB, 0x96, 0x44, 0xFF };
 const SDL_Color COLOR_SELECT_2 = { 0xAB, 0x44, 0x44, 0xFF };
 const SDL_Color COLOR_WHITE = { 0xFF, 0xFF, 0xFF, 0xFF };
 
-void main_loop(SDL_Renderer *renderer, SDL_Texture *tex)
+static void main_loop(SDL_Renderer *renderer, SDL_Texture *tex)
 {
     bool running = true;
     SDL_Event event;
@@ -62,6 +57,8 @@ void main_loop(SDL_Renderer *renderer, SDL_Texture *tex)
 
 int main(int argc, char *argv[])
 {
+    UNUSED(argc);
+    UNUSED(argv);
     SDL_Log("sdl_fungeoid starting");
 
     SDL_Window *window = NULL;
@@ -74,7 +71,7 @@ int main(int argc, char *argv[])
 
     if (res_load_all(renderer) == 0)
     {
-        main_loop(renderer, RES_TEXTURES[RES_TEX_CHAR_G]);
+        main_loop(renderer, res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_A));
         res_free_all();
     }
 
