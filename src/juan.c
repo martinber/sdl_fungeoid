@@ -4,8 +4,8 @@ int juan_init(
     SDL_Window **window,
     SDL_Renderer **renderer,
     const char *title,
-    const int width,
-    const int height
+    int width,
+    int height
 ) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -28,19 +28,26 @@ int juan_init(
         return 1;
     }
 
-    SDL_Rect screen_rect = { 0, 0, 320, 240 };
+#ifdef __ANDROID__
+    // Get phone screen size
     SDL_DisplayMode display_mode;
-    if(SDL_GetCurrentDisplayMode(0, &display_mode) == 0)
+    if(SDL_GetCurrentDisplayMode(0, &display_mode) != 0)
     {
-        screen_rect.w = display_mode.w;
-        screen_rect.h = display_mode.h;
+        SDL_Log("SDL_GetCurrentDisplayMode Error: %s\n", SDL_GetError());
+        TTF_Quit();
+        IMG_Quit();
+        SDL_Quit();
+        return 1;
     }
+    width = display_mode.w;
+    height = display_mode.h;
+#endif
 
     *window = SDL_CreateWindow
     (
         title,
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        screen_rect.w, screen_rect.h,
+        height, width,
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     if (*window == NULL)

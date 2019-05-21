@@ -13,13 +13,17 @@
 /// Start SDL and open the window.
 /**
  * Returns 0 on success.
+ *
+ * On GNU/Linux tries to open a resizable window with the given size, on Android
+ * the size will be ignored and the screen size will be used instead.
+ *
  */
 int juan_init(
     SDL_Window **window,
     SDL_Renderer **renderer,
     const char *title,
-    const int width,
-    const int height
+    int width,
+    int height
 );
 
 /// Load texture from PNG.
