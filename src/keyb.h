@@ -9,10 +9,7 @@
 
 typedef struct Keyboard
 {
-    int x;
-    int y;
-    int width;
-    int height;
+    SDL_Rect geometry;
     int button_size;
 } Keyboard;
 
