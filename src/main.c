@@ -100,6 +100,85 @@ static void draw_canvas(SDL_Renderer *renderer, int width, int height)
     }
 }
 
+static void handle_touch(Keyboard *keyb, int *ip_x, int *ip_y, SDL_Event event)
+{
+    SDL_Point point =
+    {
+        event.tfinger.x * WINDOW_WIDTH,
+        event.tfinger.y * WINDOW_HEIGHT,
+    };
+    if (event.type == SDL_FINGERDOWN)
+    {
+        if (SDL_PointInRect(&point, &keyb->geometry))
+        {
+            KeyboardEvent event = keyb_handle_fingerdown(keyb, &point);
+            if (event.type == KEYB_EVENT_ADD_INSTR)
+            {
+                canvas_set_instr(*ip_x, *ip_y, event.instr_id);
+            }
+            if (event.type == KEYB_EVENT_RM_INSTR)
+            {
+                canvas_set_instr(*ip_x, *ip_y, INSTR_SPACE);
+            }
+        }
+        else
+        {
+            *ip_x = point.x / CELL_SIZE;
+            *ip_y = point.y / CELL_SIZE;
+        }
+    }
+    else if (event.type == SDL_FINGERMOTION)
+    {
+        if (SDL_PointInRect(&point, &keyb->geometry))
+        {
+            KeyboardEvent event = keyb_handle_fingermotion(keyb, &point);
+        }
+    }
+    else if (event.type == SDL_FINGERUP)
+    {
+        if (SDL_PointInRect(&point, &keyb->geometry))
+        {
+            KeyboardEvent event = keyb_handle_fingerup(keyb, &point);
+        }
+    }
+}
+
+static void handle_mouse(Keyboard *keyb, int *ip_x, int *ip_y, SDL_Event event)
+{
+    SDL_Point point =
+    {
+        event.button.x,
+        event.button.y,
+    };
+    if (event.type == SDL_MOUSEBUTTONDOWN)
+    {
+        if (SDL_PointInRect(&point, &keyb->geometry))
+        {
+            KeyboardEvent event = keyb_handle_fingerdown(keyb, &point);
+            if (event.type == KEYB_EVENT_ADD_INSTR)
+            {
+                canvas_set_instr(*ip_x, *ip_y, event.instr_id);
+            }
+            if (event.type == KEYB_EVENT_RM_INSTR)
+            {
+                canvas_set_instr(*ip_x, *ip_y, INSTR_SPACE);
+            }
+        }
+        else
+        {
+            *ip_x = point.x / CELL_SIZE;
+            *ip_y = point.y / CELL_SIZE;
+        }
+    }
+    else if (event.type == SDL_MOUSEBUTTONUP)
+    {
+        if (SDL_PointInRect(&point, &keyb->geometry))
+        {
+            KeyboardEvent event = keyb_handle_fingerup(keyb, &point);
+        }
+    }
+}
+
 static void main_loop(SDL_Renderer *renderer)
 {
     bool running = true;
@@ -159,18 +238,20 @@ static void main_loop(SDL_Renderer *renderer)
                         break;
                 }
             }
-            else if (event.type == SDL_FINGERDOWN)
-            {
-                ip_x = event.tfinger.x * WINDOW_WIDTH / CELL_SIZE;
-                ip_y = event.tfinger.y * WINDOW_HEIGHT / CELL_SIZE;
+            else if
+            (
+                event.type == SDL_FINGERDOWN
+                || event.type == SDL_FINGERMOTION
+                || event.type == SDL_FINGERUP
+            ) {
+                handle_touch(&keyb, &ip_x, &ip_y, event);
             }
-            else if (event.type == SDL_FINGERMOTION)
-            {
-                /* x = event.tfinger.x * WINDOW_WIDTH; */
-            }
-            else if (event.type == SDL_FINGERUP)
-            {
-                /* x = 0; */
+            else if
+            (
+                event.type == SDL_MOUSEBUTTONDOWN
+                || event.type == SDL_MOUSEBUTTONUP
+            ) {
+                handle_mouse(&keyb, &ip_x, &ip_y, event);
             }
             else if (event.type == SDL_WINDOWEVENT)
             {

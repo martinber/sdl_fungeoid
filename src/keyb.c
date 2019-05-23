@@ -1,12 +1,32 @@
 #include "keyb.h"
 
-#include "const.h"
 #include "res.h"
 
 Keyboard keyb_create(int window_width, int window_height, int button_size)
 {
+    // Initialize structs, leaving undefined geometries until I call
+    // keyb_update_geometry()
     SDL_Rect geometry = { 0, 0, 0, 0 };
-    Keyboard keyb = { .geometry=geometry, .button_size=button_size };
+    Keyboard keyb =
+    {
+        .geometry = geometry,
+        .button_size = button_size,
+        // .instr_buttons = empty for now
+    };
+
+    // WARNING: Probably in the future I'll have to change the limits of this
+    // loop
+    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+    {
+        SDL_Rect but_geom = { 0, 0, 0, 0 };
+        InstrButton but =
+        {
+            .geometry = but_geom,
+            .id = i,
+        };
+        keyb.instr_buttons[i] = but;
+    }
+
     keyb_update_geometry(&keyb, window_width, window_height, button_size);
     return keyb;
 }
@@ -18,23 +38,28 @@ void keyb_update_geometry
     int window_height,
     int button_size
 ) {
+    // Set keyboard size
     keyb->button_size = button_size;
     keyb->geometry.w = window_width;
     keyb->geometry.h = button_size * 5;
     keyb->geometry.x = 0;
     keyb->geometry.y = window_height - keyb->geometry.h;
-}
 
-void keyb_get_pos(Keyboard *keyb, int *x, int *y)
-{
-    *x = keyb->geometry.x;
-    *y = keyb->geometry.y;
-}
+    int margin = keyb->button_size / 2;
+    int spacing = keyb->button_size / 8;
 
-void keyb_get_size(Keyboard *keyb, int *width, int *height)
-{
-    *width = keyb->geometry.w;
-    *height = keyb->geometry.h;
+    // Set buttons positions and sizes
+    // WARNING: Probably in the future I'll have to change the limits of this
+    // loop
+    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+    {
+        keyb->instr_buttons[i].geometry.w = button_size;
+        keyb->instr_buttons[i].geometry.h = button_size;
+
+        keyb->instr_buttons[i].geometry.x = keyb->geometry.x +
+            margin + button_size * i + spacing * (i - 1);
+        keyb->instr_buttons[i].geometry.y = keyb->geometry.y + margin;
+    }
 }
 
 void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
@@ -98,28 +123,86 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
         SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_UP);
         SDL_RenderCopy(renderer, tex, NULL, &rect);
     }
+
+    // Draw buttons
+    // WARNING: Probably in the future I'll have to change the limits of this
+    // loop
+    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+    {
+        juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
+        SDL_RenderFillRect(renderer, &keyb->instr_buttons[i].geometry);
+
+        if (i != INSTR_NULL && i != INSTR_SPACE)
+        {
+            SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR,
+                keyb->instr_buttons[i].id);
+            SDL_RenderCopy(renderer, tex, NULL, &keyb->instr_buttons[i].geometry);
+        }
+    }
 }
 
 /// Handle fingerdown event
-void keyb_handle_fingerdown
+KeyboardEvent keyb_handle_fingerdown
 (
     Keyboard *keyb,
-    int x,
-    int y
-) { }
+    SDL_Point *point
+) {
+    // WARNING: Probably in the future I'll have to change the limits of this
+    // loop
+    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+    {
+        if (SDL_PointInRect(point, &keyb->instr_buttons[i].geometry))
+        {
+            KeyboardEvent event =
+            {
+                .type = 0,
+                .instr_id = keyb->instr_buttons[i].id,
+            };
+            if (
+                keyb->instr_buttons[i].id != INSTR_NULL
+                && keyb->instr_buttons[i].id != INSTR_SPACE
+            ) {
+                event.type = KEYB_EVENT_ADD_INSTR;
+            }
+            else
+            {
+                event.type = KEYB_EVENT_RM_INSTR;
+            }
+            return event;
+        }
+    }
+    KeyboardEvent event =
+    {
+        .type = KEYB_EVENT_NONE,
+        .instr_id = INSTR_NULL,
+    };
+    return event;
+}
 
 /// Handle fingermotion event
-void keyb_handle_fingermotion
+KeyboardEvent keyb_handle_fingermotion
 (
     Keyboard *keyb,
-    int x,
-    int y
-) { }
+    SDL_Point *point
+) {
+    KeyboardEvent event =
+    {
+        .type = KEYB_EVENT_NONE,
+        .instr_id = INSTR_NULL,
+    };
+    return event;
+}
 
 /// Handle fingerup event
-void keyb_handle_fingerup
+KeyboardEvent keyb_handle_fingerup
 (
     Keyboard *keyb,
-    int x,
-    int y
-) { }
+    SDL_Point *point
+) {
+    KeyboardEvent event =
+    {
+        .type = KEYB_EVENT_NONE,
+        .instr_id = INSTR_NULL,
+    };
+    return event;
+}
