@@ -1,5 +1,9 @@
 #include "juan.h"
 
+#include <math.h>
+#include <assert.h>
+#include <limits.h>
+
 int juan_init(
     SDL_Window **window,
     SDL_Renderer **renderer,
@@ -133,4 +137,52 @@ int juan_set_render_draw_color(SDL_Renderer *renderer, const SDL_Color *color) {
         SDL_Log("SDL_SetRenderDrawColor Error: %s\n", SDL_GetError());
     }
     return r;
+}
+
+
+float juan_point_abs(SDL_Point *a)
+{
+    return hypotf((float) a->x, (float) a->y);
+}
+
+/// Absolute value squared
+float juan_point_sqabs(SDL_Point *a)
+{
+    float x = (float) a->x;
+    float y = (float) a->y;
+    return x*x + y*y;
+}
+
+SDL_Point juan_point_add(SDL_Point *a, SDL_Point *b)
+{
+    SDL_Point point = { 0, 0 };
+    point.x = a->x + b->x;
+    point.y = a->y + b->y;
+    return point;
+}
+
+SDL_Point juan_point_sub(SDL_Point *a, SDL_Point *b)
+{
+    SDL_Point point = { 0, 0 };
+    point.x = a->x - b->x;
+    point.y = a->y - b->y;
+    return point;
+}
+
+/// Distance squared
+float juan_point_sq_dist(SDL_Point *a, SDL_Point *b)
+{
+    SDL_Point sub = juan_point_sub(a, b);
+    return juan_point_sqabs(&sub);
+}
+
+int juan_ftoi(float x)
+{
+    assert(x >= INT_MIN-0.5);
+    assert(x <= INT_MAX+0.5);
+    if (x >= 0)
+    {
+        return (int) (x+0.5);
+    }
+    return (int) (x-0.5);
 }

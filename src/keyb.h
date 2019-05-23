@@ -3,6 +3,7 @@
 
 #include "juan.h"
 #include "const.h"
+#include "input.h"
 
 /**
  * On-screen keyboard
@@ -18,6 +19,7 @@ typedef struct Keyboard
 {
     SDL_Rect geometry;
     int button_size;
+    int buttons_offset; // For scrolling
 
     // One button per instruction ignoring the fact that INSTR_NULL wont be
     // used
@@ -53,25 +55,10 @@ void keyb_update_geometry
 /// Draw keyboard
 void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb);
 
-/// Handle fingerdown event
-KeyboardEvent keyb_handle_fingerdown
+KeyboardEvent keyb_handle_input
 (
     Keyboard *keyb,
-    SDL_Point *point
-);
-
-/// Handle fingermotion event
-KeyboardEvent keyb_handle_fingermotion
-(
-    Keyboard *keyb,
-    SDL_Point *point
-);
-
-/// Handle fingerup event
-KeyboardEvent keyb_handle_fingerup
-(
-    Keyboard *keyb,
-    SDL_Point *point
+    Input *input
 );
 
 #endif

@@ -11,6 +11,7 @@ Keyboard keyb_create(int window_width, int window_height, int button_size)
     {
         .geometry = geometry,
         .button_size = button_size,
+        .buttons_offset = 0,
         // .instr_buttons = empty for now
     };
 
@@ -142,67 +143,49 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
 }
 
 /// Handle fingerdown event
-KeyboardEvent keyb_handle_fingerdown
+KeyboardEvent keyb_handle_input
 (
     Keyboard *keyb,
-    SDL_Point *point
+    Input *input
 ) {
-    // WARNING: Probably in the future I'll have to change the limits of this
-    // loop
-    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+    KeyboardEvent event =
     {
-        if (SDL_PointInRect(point, &keyb->instr_buttons[i].geometry))
+        .type = KEYB_EVENT_NONE,
+        .instr_id = INSTR_NULL,
+    };
+
+    if (input->type == INPUT_CLICK_UP)
+    {
+        // WARNING: Probably in the future I'll have to change the limits of this
+        // loop
+        for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
         {
-            KeyboardEvent event =
+            if (SDL_PointInRect(&input->point, &keyb->instr_buttons[i].geometry))
             {
-                .type = 0,
-                .instr_id = keyb->instr_buttons[i].id,
-            };
-            if (
-                keyb->instr_buttons[i].id != INSTR_NULL
-                && keyb->instr_buttons[i].id != INSTR_SPACE
-            ) {
-                event.type = KEYB_EVENT_ADD_INSTR;
+                if (
+                    keyb->instr_buttons[i].id != INSTR_NULL
+                    && keyb->instr_buttons[i].id != INSTR_SPACE
+                ) {
+                    event.type = KEYB_EVENT_ADD_INSTR;
+                    event.instr_id = keyb->instr_buttons[i].id;
+                }
+                else
+                {
+                    event.type = KEYB_EVENT_RM_INSTR;
+                    event.instr_id = keyb->instr_buttons[i].id;
+                }
+                break;
             }
-            else
-            {
-                event.type = KEYB_EVENT_RM_INSTR;
-            }
-            return event;
         }
     }
-    KeyboardEvent event =
+    else if (input->type == INPUT_CLICK_MOVE)
     {
-        .type = KEYB_EVENT_NONE,
-        .instr_id = INSTR_NULL,
-    };
-    return event;
-}
-
-/// Handle fingermotion event
-KeyboardEvent keyb_handle_fingermotion
-(
-    Keyboard *keyb,
-    SDL_Point *point
-) {
-    KeyboardEvent event =
-    {
-        .type = KEYB_EVENT_NONE,
-        .instr_id = INSTR_NULL,
-    };
-    return event;
-}
-
-/// Handle fingerup event
-KeyboardEvent keyb_handle_fingerup
-(
-    Keyboard *keyb,
-    SDL_Point *point
-) {
-    KeyboardEvent event =
-    {
-        .type = KEYB_EVENT_NONE,
-        .instr_id = INSTR_NULL,
-    };
+        // WARNING: Probably in the future I'll have to change the limits of this
+        // loop
+        for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+        {
+            keyb->instr_buttons[i].geometry.x += input->diff.x;
+        }
+    }
     return event;
 }

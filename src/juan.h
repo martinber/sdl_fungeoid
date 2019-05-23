@@ -57,4 +57,19 @@ SDL_Texture *juan_text_texture(
 
 int juan_set_render_draw_color(SDL_Renderer *renderer, const SDL_Color *color);
 
+float juan_point_abs(SDL_Point *a);
+
+/// Absolute value squared
+float juan_point_sq_abs(SDL_Point *a);
+
+SDL_Point juan_point_add(SDL_Point *a, SDL_Point *b);
+
+SDL_Point juan_point_sub(SDL_Point *a, SDL_Point *b);
+
+/// Distance squared
+float juan_point_sq_dist(SDL_Point *a, SDL_Point *b);
+
+/// Convert float to int and check for overflow
+int juan_ftoi(float x);
+
 #endif

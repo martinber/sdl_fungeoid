@@ -8,6 +8,7 @@
 #include "res.h"
 #include "canvas.h"
 #include "keyb.h"
+#include "input.h"
 
 #ifdef __ANDROID__
 static int CELL_SIZE = 128;
@@ -100,85 +101,6 @@ static void draw_canvas(SDL_Renderer *renderer, int width, int height)
     }
 }
 
-static void handle_touch(Keyboard *keyb, int *ip_x, int *ip_y, SDL_Event event)
-{
-    SDL_Point point =
-    {
-        event.tfinger.x * WINDOW_WIDTH,
-        event.tfinger.y * WINDOW_HEIGHT,
-    };
-    if (event.type == SDL_FINGERDOWN)
-    {
-        if (SDL_PointInRect(&point, &keyb->geometry))
-        {
-            KeyboardEvent event = keyb_handle_fingerdown(keyb, &point);
-            if (event.type == KEYB_EVENT_ADD_INSTR)
-            {
-                canvas_set_instr(*ip_x, *ip_y, event.instr_id);
-            }
-            if (event.type == KEYB_EVENT_RM_INSTR)
-            {
-                canvas_set_instr(*ip_x, *ip_y, INSTR_SPACE);
-            }
-        }
-        else
-        {
-            *ip_x = point.x / CELL_SIZE;
-            *ip_y = point.y / CELL_SIZE;
-        }
-    }
-    else if (event.type == SDL_FINGERMOTION)
-    {
-        if (SDL_PointInRect(&point, &keyb->geometry))
-        {
-            KeyboardEvent event = keyb_handle_fingermotion(keyb, &point);
-        }
-    }
-    else if (event.type == SDL_FINGERUP)
-    {
-        if (SDL_PointInRect(&point, &keyb->geometry))
-        {
-            KeyboardEvent event = keyb_handle_fingerup(keyb, &point);
-        }
-    }
-}
-
-static void handle_mouse(Keyboard *keyb, int *ip_x, int *ip_y, SDL_Event event)
-{
-    SDL_Point point =
-    {
-        event.button.x,
-        event.button.y,
-    };
-    if (event.type == SDL_MOUSEBUTTONDOWN)
-    {
-        if (SDL_PointInRect(&point, &keyb->geometry))
-        {
-            KeyboardEvent event = keyb_handle_fingerdown(keyb, &point);
-            if (event.type == KEYB_EVENT_ADD_INSTR)
-            {
-                canvas_set_instr(*ip_x, *ip_y, event.instr_id);
-            }
-            if (event.type == KEYB_EVENT_RM_INSTR)
-            {
-                canvas_set_instr(*ip_x, *ip_y, INSTR_SPACE);
-            }
-        }
-        else
-        {
-            *ip_x = point.x / CELL_SIZE;
-            *ip_y = point.y / CELL_SIZE;
-        }
-    }
-    else if (event.type == SDL_MOUSEBUTTONUP)
-    {
-        if (SDL_PointInRect(&point, &keyb->geometry))
-        {
-            KeyboardEvent event = keyb_handle_fingerup(keyb, &point);
-        }
-    }
-}
-
 static void main_loop(SDL_Renderer *renderer)
 {
     bool running = true;
@@ -199,6 +121,7 @@ static void main_loop(SDL_Renderer *renderer)
     int ip_y = 1;
 
     Keyboard keyb = keyb_create(WINDOW_WIDTH, WINDOW_HEIGHT, CELL_SIZE);
+    InputHandler input = input_create();
 
     while (running)
     {
@@ -207,51 +130,6 @@ static void main_loop(SDL_Renderer *renderer)
             if (event.type == SDL_QUIT)
             {
                 running = false;
-            }
-            else if (event.type == SDL_KEYDOWN)
-            {
-                switch (event.key.keysym.sym)
-                {
-                    case SDLK_UP:
-                        ip_y -= 1;
-                        break;
-                    case SDLK_DOWN:
-                        ip_y += 1;
-                        break;
-                    case SDLK_LEFT:
-                        ip_x -= 1;
-                        break;
-                    case SDLK_RIGHT:
-                        ip_x += 1;
-                        break;
-                    case SDLK_a:
-                        canvas_set_instr(ip_x, ip_y, INSTR_A);
-                        break;
-                    case SDLK_b:
-                        canvas_set_instr(ip_x, ip_y, INSTR_B);
-                        break;
-                    case SDLK_SPACE:
-                        canvas_set_instr(ip_x, ip_y, INSTR_SPACE);
-                        break;
-                    case SDLK_AC_BACK:
-                        running = false;
-                        break;
-                }
-            }
-            else if
-            (
-                event.type == SDL_FINGERDOWN
-                || event.type == SDL_FINGERMOTION
-                || event.type == SDL_FINGERUP
-            ) {
-                handle_touch(&keyb, &ip_x, &ip_y, event);
-            }
-            else if
-            (
-                event.type == SDL_MOUSEBUTTONDOWN
-                || event.type == SDL_MOUSEBUTTONUP
-            ) {
-                handle_mouse(&keyb, &ip_x, &ip_y, event);
             }
             else if (event.type == SDL_WINDOWEVENT)
             {
@@ -263,6 +141,35 @@ static void main_loop(SDL_Renderer *renderer)
                         keyb_update_geometry(&keyb, WINDOW_WIDTH, WINDOW_HEIGHT, CELL_SIZE);
                         break;
                 }
+            }
+
+            SDL_Point window_size = { WINDOW_WIDTH, WINDOW_HEIGHT };
+            Input i = input_handle_event(&input, &window_size, &event);
+            switch (i.type)
+            {
+                case (INPUT_CLICK_UP):
+                    if (SDL_PointInRect(&i.point, &keyb.geometry))
+                    {
+                        KeyboardEvent event = keyb_handle_input(&keyb, &i);
+                        if (event.type == KEYB_EVENT_ADD_INSTR)
+                        {
+                            canvas_set_instr(ip_x, ip_y, event.instr_id);
+                        }
+                        if (event.type == KEYB_EVENT_RM_INSTR)
+                        {
+                            canvas_set_instr(ip_x, ip_y, INSTR_SPACE);
+                        }
+                    }
+                    else
+                    {
+                        ip_x = i.point.x / CELL_SIZE;
+                        ip_y = i.point.y / CELL_SIZE;
+                    }
+                case (INPUT_CLICK_MOVE):
+                    if (SDL_PointInRect(&i.down_point, &keyb.geometry))
+                    {
+                        KeyboardEvent event = keyb_handle_input(&keyb, &i);
+                    }
             }
         }
         juan_set_render_draw_color(renderer, &COLOR_BG);
