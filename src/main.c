@@ -20,23 +20,28 @@ static int BUTTON_SIZE = 64;
 #endif
 // Window dimensions, initial values are used for desktop, when on Android or
 // resizing these values will be updated
-static int WINDOW_WIDTH = 64 * 10;
-static int WINDOW_HEIGHT = 64 * 14;
+static SDL_Point WINDOW_SIZE = { 64 * 10, 64 * 14 };
 static const char WINDOW_TITLE[] = "sdl_fungeoid";
 
 static void main_loop(SDL_Renderer *renderer)
 {
-    bool running = true;
-    SDL_Event event;
+    Field field = field_create(10, 14, &WINDOW_SIZE, CELL_SIZE);
 
-    SDL_Point screen_size = { WINDOW_WIDTH, WINDOW_HEIGHT };
-    Field field = field_create(10, 14, &screen_size, CELL_SIZE);
-
-    Keyboard keyb = keyb_create(WINDOW_WIDTH, WINDOW_HEIGHT, BUTTON_SIZE);
+    Keyboard keyb = keyb_create(WINDOW_SIZE, BUTTON_SIZE);
     InputHandler input = input_create();
 
+    // Time in milliseconds since start of the game
+    Uint32 time_abs_ms = SDL_GetTicks();
+    // Time in milliseconds since last loop
+    Uint32 time_rel_ms = time_abs_ms;
+
+    bool running = true;
+    SDL_Event event;
     while (running)
     {
+        time_rel_ms = SDL_GetTicks() - time_abs_ms;
+        time_abs_ms = SDL_GetTicks();
+
         while (SDL_PollEvent(&event) != 0)
         {
             if (event.type == SDL_QUIT)
@@ -48,17 +53,15 @@ static void main_loop(SDL_Renderer *renderer)
                 switch (event.window.event)
                 {
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        WINDOW_WIDTH = event.window.data1;
-                        WINDOW_HEIGHT = event.window.data2;
-                        SDL_Point screen_size = { WINDOW_WIDTH, WINDOW_HEIGHT };
-                        field_resize_screen(&field, &screen_size, CELL_SIZE);
-                        keyb_update_geometry(&keyb, WINDOW_WIDTH, WINDOW_HEIGHT, BUTTON_SIZE);
+                        WINDOW_SIZE.x = event.window.data1;
+                        WINDOW_SIZE.y = event.window.data2;
+                        field_resize_screen(&field, &WINDOW_SIZE, CELL_SIZE);
+                        keyb_update_geometry(&keyb, WINDOW_SIZE, BUTTON_SIZE);
                         break;
                 }
             }
 
-            SDL_Point window_size = { WINDOW_WIDTH, WINDOW_HEIGHT };
-            Input i = input_handle_event(&input, &window_size, &event);
+            Input i = input_handle_event(&input, &WINDOW_SIZE, &event);
             switch (i.type)
             {
                 case (INPUT_CLICK_UP):
@@ -87,6 +90,8 @@ static void main_loop(SDL_Renderer *renderer)
                     break;
             }
         }
+        field_update(&field, time_abs_ms);
+
         juan_set_render_draw_color(renderer, &COLOR_BG);
         SDL_RenderClear(renderer);
 
@@ -108,7 +113,7 @@ int main(int argc, char *argv[])
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
 
-    if (juan_init(&window, &renderer, WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT) != 0) {
+    if (juan_init(&window, &renderer, WINDOW_TITLE, WINDOW_SIZE.x, WINDOW_SIZE.y) != 0) {
         printf("Error creating window or renderer\n");
         return 1;
     }

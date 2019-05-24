@@ -50,6 +50,7 @@ enum INSTR_ID
     INSTR_DOWN,
     INSTR_LEFT,
     INSTR_RIGHT,
+    INSTR_BRIDGE,
 
     INSTR_ADD,
     INSTR_SUB,

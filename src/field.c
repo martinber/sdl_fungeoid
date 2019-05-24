@@ -5,6 +5,8 @@ Field field_create(int width, int height, SDL_Point *screen_size, int cell_size)
     Field field =
     {
         .canvas = canvas_init(width, height),
+        .state = FIELD_EDITING,
+        .last_step_ms = 0,
         .screen_size = *screen_size,
         .ip = { 0, 0 },
         .speed = { 1, 0 },
@@ -35,45 +37,120 @@ int field_free(Field *field)
     return canvas_free(&field->canvas);
 }
 
+/// Run simulation step
+/**
+ * Executes instruction directly on IP and then moves the IP
+ */
+static void field_step(Field *field)
+{
+    SDL_Point *ip = &field->ip;
+    SDL_Point *speed = &field->speed;
+    enum INSTR_ID instr = canvas_get_instr(&field->canvas, field->ip.x, field->ip.y);
+
+    switch (instr)
+    {
+        case INSTR_UP:
+            speed->x = 0;
+            speed->y = -1;
+            break;
+        case INSTR_DOWN:
+            speed->x = 0;
+            speed->y = +1;
+            break;
+        case INSTR_LEFT:
+            speed->x = -1;
+            speed->y = 0;
+            break;
+        case INSTR_RIGHT:
+            speed->x = +1;
+            speed->y = 0;
+            break;
+        case INSTR_BRIDGE:
+            ip->x += speed->x;
+            ip->y += speed->y;
+            break;
+
+        default:
+            break;
+    }
+
+    ip->x += speed->x;
+    ip->y += speed->y;
+}
+
+void field_update(Field *field, Uint32 time_abs_ms)
+{
+    if (field->state == FIELD_RUNNING)
+    {
+        if (time_abs_ms - field->last_step_ms > 300)
+        {
+            field->last_step_ms = time_abs_ms;
+            field_step(field);
+        }
+    }
+}
+
 void field_handle_input(Field *field, Input *input)
 {
-    if (input->type == INPUT_CLICK_UP)
+    if (field->state == FIELD_EDITING)
     {
-        field->ip.x = input->point.x / field->cell_size;
-        field->ip.y = input->point.y / field->cell_size;
-    }
-    else if (input->type == INPUT_CLICK_MOVE)
-    {
+        if (input->type == INPUT_CLICK_UP)
+        {
+            field->ip.x = input->point.x / field->cell_size;
+            field->ip.y = input->point.y / field->cell_size;
+        }
+        else if (input->type == INPUT_CLICK_MOVE)
+        {
 
+        }
     }
 }
 
 void field_handle_keyb(Field *field, KeyboardEvent *event)
 {
-    switch (event->type)
+    if (field->state == FIELD_EDITING)
     {
-        case KEYB_EVENT_ADD_INSTR:
-            canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, event->instr_id);
-            break;
-        case KEYB_EVENT_RM_INSTR:
-            canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, INSTR_SPACE);
-            break;
+        switch (event->type)
+        {
+            case KEYB_EVENT_ADD_INSTR:
+                canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, event->instr_id);
+                break;
+            case KEYB_EVENT_RM_INSTR:
+                canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, INSTR_SPACE);
+                break;
 
-        case KEYB_EVENT_MOVE_UP:
-            field->ip.y -= 1;
-            break;
-        case KEYB_EVENT_MOVE_DOWN:
-            field->ip.y += 1;
-            break;
-        case KEYB_EVENT_MOVE_LEFT:
-            field->ip.x -= 1;
-            break;
-        case KEYB_EVENT_MOVE_RIGHT:
-            field->ip.x += 1;
-            break;
+            case KEYB_EVENT_MOVE_UP:
+                field->ip.y -= 1;
+                break;
+            case KEYB_EVENT_MOVE_DOWN:
+                field->ip.y += 1;
+                break;
+            case KEYB_EVENT_MOVE_LEFT:
+                field->ip.x -= 1;
+                break;
+            case KEYB_EVENT_MOVE_RIGHT:
+                field->ip.x += 1;
+                break;
 
-        default:
-            break;
+            case KEYB_EVENT_START:
+                field->state = FIELD_RUNNING;
+                break;
+
+            default:
+                break;
+        }
+    }
+    else if (field->state == FIELD_RUNNING)
+    {
+        switch (event->type)
+        {
+            case KEYB_EVENT_STOP:
+                field->state = FIELD_EDITING;
+                break;
+
+            default:
+                break;
+        }
     }
 }
 

@@ -37,6 +37,7 @@ char const_befunge_char(enum INSTR_ID id)
         case INSTR_DOWN: return 'v';
         case INSTR_LEFT: return '<';
         case INSTR_RIGHT: return '>';
+        case INSTR_BRIDGE: return '#';
 
         case INSTR_ADD: return '+';
         case INSTR_SUB: return '-';

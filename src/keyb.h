@@ -52,6 +52,8 @@ enum KEYB_EVENT_TYPE
     KEYB_EVENT_MOVE_DOWN,
     KEYB_EVENT_MOVE_LEFT,
     KEYB_EVENT_MOVE_RIGHT,
+    KEYB_EVENT_START,
+    KEYB_EVENT_STOP,
     KEYB_EVENT_TYPE_TOTAL,
 };
 
@@ -62,24 +64,15 @@ typedef struct KeyboardEvent
 } KeyboardEvent;
 
 /// Create keyb
-Keyboard keyb_create(int window_width, int window_height, int button_size);
+Keyboard keyb_create(SDL_Point window_size, int button_size);
 
 /// Update size and position from window and cell size
-void keyb_update_geometry
-(
-    Keyboard *keyb,
-    int window_width,
-    int window_height,
-    int button_size
-);
+void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size, int button_size);
 
 /// Draw keyboard
 void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb);
 
-KeyboardEvent keyb_handle_input
-(
-    Keyboard *keyb,
-    Input *input
-);
+/// Handle touch/mouse/key input
+KeyboardEvent keyb_handle_input(Keyboard *keyb, Input *input);
 
 #endif

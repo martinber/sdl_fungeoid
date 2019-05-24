@@ -2,7 +2,7 @@
 
 #include "res.h"
 
-Keyboard keyb_create(int window_width, int window_height, int button_size)
+Keyboard keyb_create(SDL_Point window_size, int button_size)
 {
     // Initialize structs, leaving undefined geometries until I call
     // keyb_update_geometry()
@@ -32,23 +32,17 @@ Keyboard keyb_create(int window_width, int window_height, int button_size)
         keyb.instr_buttons[i] = but;
     }
 
-    keyb_update_geometry(&keyb, window_width, window_height, button_size);
+    keyb_update_geometry(&keyb, window_size, button_size);
     return keyb;
 }
 
-void keyb_update_geometry
-(
-    Keyboard *keyb,
-    int window_width,
-    int window_height,
-    int button_size
-) {
+void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size, int button_size) {
     // Set keyboard size
     keyb->button_size = button_size;
-    keyb->geometry.w = window_width;
+    keyb->geometry.w = window_size.x;
     keyb->geometry.h = button_size * 5;
     keyb->geometry.x = 0;
-    keyb->geometry.y = window_height - keyb->geometry.h;
+    keyb->geometry.y = window_size.y - keyb->geometry.h;
 
     int margin = keyb->button_size / 2;
     int spacing = keyb->button_size / 8;
@@ -184,6 +178,16 @@ KeyboardEvent keyb_handle_input
         else if (SDL_PointInRect(&input->point, &keyb->but_right))
         {
             event.type = KEYB_EVENT_MOVE_RIGHT;
+        }
+        // Check shift buttons
+
+        else if (SDL_PointInRect(&input->point, &keyb->but_shift_1))
+        {
+            event.type = KEYB_EVENT_START;
+        }
+        else if (SDL_PointInRect(&input->point, &keyb->but_shift_2))
+        {
+            event.type = KEYB_EVENT_STOP;
         }
 
         // Check instruction buttons
