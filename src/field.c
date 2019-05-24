@@ -50,13 +50,30 @@ void field_handle_input(Field *field, Input *input)
 
 void field_handle_keyb(Field *field, KeyboardEvent *event)
 {
-    if (event->type == KEYB_EVENT_ADD_INSTR)
+    switch (event->type)
     {
-        canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, event->instr_id);
-    }
-    if (event->type == KEYB_EVENT_RM_INSTR)
-    {
-        canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, INSTR_SPACE);
+        case KEYB_EVENT_ADD_INSTR:
+            canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, event->instr_id);
+            break;
+        case KEYB_EVENT_RM_INSTR:
+            canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, INSTR_SPACE);
+            break;
+
+        case KEYB_EVENT_MOVE_UP:
+            field->ip.y -= 1;
+            break;
+        case KEYB_EVENT_MOVE_DOWN:
+            field->ip.y += 1;
+            break;
+        case KEYB_EVENT_MOVE_LEFT:
+            field->ip.x -= 1;
+            break;
+        case KEYB_EVENT_MOVE_RIGHT:
+            field->ip.x += 1;
+            break;
+
+        default:
+            break;
     }
 }
 

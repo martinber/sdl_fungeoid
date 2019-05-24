@@ -6,23 +6,27 @@ Keyboard keyb_create(int window_width, int window_height, int button_size)
 {
     // Initialize structs, leaving undefined geometries until I call
     // keyb_update_geometry()
-    SDL_Rect geometry = { 0, 0, 0, 0 };
     Keyboard keyb =
     {
-        .geometry = geometry,
+        .geometry = { 0, 0, 0, 0 },
         .button_size = button_size,
-        .buttons_offset = 0,
+        .shift_state = KEYB_SHIFT_NONE,
         // .instr_buttons = empty for now
+        .but_up = { 0, 0, 0, 0 },
+        .but_down = { 0, 0, 0, 0 },
+        .but_left = { 0, 0, 0, 0 },
+        .but_right = { 0, 0, 0, 0 },
+        .but_shift_1 = { 0, 0, 0, 0 },
+        .but_shift_2 = { 0, 0, 0, 0 },
     };
 
     // WARNING: Probably in the future I'll have to change the limits of this
     // loop
     for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
     {
-        SDL_Rect but_geom = { 0, 0, 0, 0 };
         InstrButton but =
         {
-            .geometry = but_geom,
+            .geometry = { 0, 0, 0, 0 },
             .id = i,
         };
         keyb.instr_buttons[i] = but;
@@ -48,6 +52,10 @@ void keyb_update_geometry
 
     int margin = keyb->button_size / 2;
     int spacing = keyb->button_size / 8;
+    int keyb_x = keyb->geometry.x;
+    int keyb_y = keyb->geometry.y;
+    int keyb_w = keyb->geometry.w;
+    int keyb_h = keyb->geometry.h;
 
     // Set buttons positions and sizes
     // WARNING: Probably in the future I'll have to change the limits of this
@@ -57,10 +65,40 @@ void keyb_update_geometry
         keyb->instr_buttons[i].geometry.w = button_size;
         keyb->instr_buttons[i].geometry.h = button_size;
 
-        keyb->instr_buttons[i].geometry.x = keyb->geometry.x +
+        keyb->instr_buttons[i].geometry.x = keyb_x +
             margin + button_size * i + spacing * (i - 1);
-        keyb->instr_buttons[i].geometry.y = keyb->geometry.y + margin;
+        keyb->instr_buttons[i].geometry.y = keyb_y + margin;
     }
+
+    keyb->but_up.x = keyb_x + keyb_w - margin - 2 * button_size - spacing;
+    keyb->but_up.y = keyb_y + keyb_h - margin - 2 * button_size - spacing;
+    keyb->but_up.w = button_size;
+    keyb->but_up.h = button_size;
+
+    keyb->but_down.x = keyb_x + keyb_w - margin - 2 * button_size - spacing;
+    keyb->but_down.y = keyb_y + keyb_h - margin - button_size;
+    keyb->but_down.w = button_size;
+    keyb->but_down.h = button_size;
+
+    keyb->but_left.x = keyb_x + keyb_w - margin - 3 * button_size - 2 * spacing;
+    keyb->but_left.y = keyb_y + keyb_h - margin - button_size;
+    keyb->but_left.w = button_size;
+    keyb->but_left.h = button_size;
+
+    keyb->but_right.x = keyb_x + keyb_w - margin - button_size;
+    keyb->but_right.y = keyb_y + keyb_h - margin - button_size;
+    keyb->but_right.w = button_size;
+    keyb->but_right.h = button_size;
+
+    keyb->but_shift_1.x = keyb_x + margin;
+    keyb->but_shift_1.y = keyb_y + keyb_h - margin - 2 * button_size - spacing;
+    keyb->but_shift_1.w = button_size;
+    keyb->but_shift_1.h = button_size;
+
+    keyb->but_shift_2.x = keyb_x + margin;
+    keyb->but_shift_2.y = keyb_y + keyb_h - margin - button_size;
+    keyb->but_shift_2.w = button_size;
+    keyb->but_shift_2.h = button_size;
 }
 
 void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
@@ -72,65 +110,39 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
     }
 
-    int margin = keyb->button_size / 2;
-    int spacing = keyb->button_size / 8;
-    int keyb_x = keyb->geometry.x;
-    int keyb_y = keyb->geometry.y;
-    int keyb_w = keyb->geometry.w;
-    int keyb_h = keyb->geometry.h;
-
     // Draw arrows
-    {
-        int x = keyb_x + keyb_w - margin - keyb->button_size;
-        int y = keyb_y + keyb_h - margin - keyb->button_size;
-        SDL_Rect rect = { x, y, keyb->button_size, keyb->button_size };
 
-        juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
-        SDL_RenderFillRect(renderer, &rect);
+    SDL_Texture* tex = NULL;
+    juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
 
-        SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_RIGHT);
-        SDL_RenderCopy(renderer, tex, NULL, &rect);
-    }
-    {
-        int x = keyb_x + keyb_w - margin - 2 * keyb->button_size - spacing;
-        int y = keyb_y + keyb_h - margin - keyb->button_size;
-        SDL_Rect rect = { x, y, keyb->button_size, keyb->button_size };
+    SDL_RenderFillRect(renderer, &keyb->but_up);
+    tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_UP);
+    SDL_RenderCopy(renderer, tex, NULL, &keyb->but_up);
 
-        juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
-        SDL_RenderFillRect(renderer, &rect);
+    SDL_RenderFillRect(renderer, &keyb->but_down);
+    tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_DOWN);
+    SDL_RenderCopy(renderer, tex, NULL, &keyb->but_down);
 
-        SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_DOWN);
-        SDL_RenderCopy(renderer, tex, NULL, &rect);
-    }
-    {
-        int x = keyb_x + keyb_w - margin - 3 * keyb->button_size - 2 * spacing;
-        int y = keyb_y + keyb_h - margin - keyb->button_size;
-        SDL_Rect rect = { x, y, keyb->button_size, keyb->button_size };
+    SDL_RenderFillRect(renderer, &keyb->but_left);
+    tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_LEFT);
+    SDL_RenderCopy(renderer, tex, NULL, &keyb->but_left);
 
-        juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
-        SDL_RenderFillRect(renderer, &rect);
+    SDL_RenderFillRect(renderer, &keyb->but_right);
+    tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_RIGHT);
+    SDL_RenderCopy(renderer, tex, NULL, &keyb->but_right);
 
-        SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_LEFT);
-        SDL_RenderCopy(renderer, tex, NULL, &rect);
-    }
-    {
-        int x = keyb_x + keyb_w - margin - 2 * keyb->button_size - spacing;
-        int y = keyb_y + keyb_h - margin - 2 * keyb->button_size - spacing;
-        SDL_Rect rect = { x, y, keyb->button_size, keyb->button_size };
-
-        juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
-        SDL_RenderFillRect(renderer, &rect);
-
-        SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_UP);
-        SDL_RenderCopy(renderer, tex, NULL, &rect);
-    }
+    // Draw shift
+    juan_set_render_draw_color(renderer, &COLOR_BUTTON_2);
+    SDL_RenderFillRect(renderer, &keyb->but_shift_1);
+    juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
+    SDL_RenderFillRect(renderer, &keyb->but_shift_2);
 
     // Draw buttons
     // WARNING: Probably in the future I'll have to change the limits of this
     // loop
+    juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
     for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
     {
-        juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
         SDL_RenderFillRect(renderer, &keyb->instr_buttons[i].geometry);
 
         if (i != INSTR_NULL && i != INSTR_SPACE)
@@ -155,6 +167,26 @@ KeyboardEvent keyb_handle_input
 
     if (input->type == INPUT_CLICK_UP)
     {
+        // Check arrows
+
+        if (SDL_PointInRect(&input->point, &keyb->but_up))
+        {
+            event.type = KEYB_EVENT_MOVE_UP;
+        }
+        else if (SDL_PointInRect(&input->point, &keyb->but_down))
+        {
+            event.type = KEYB_EVENT_MOVE_DOWN;
+        }
+        else if (SDL_PointInRect(&input->point, &keyb->but_left))
+        {
+            event.type = KEYB_EVENT_MOVE_LEFT;
+        }
+        else if (SDL_PointInRect(&input->point, &keyb->but_right))
+        {
+            event.type = KEYB_EVENT_MOVE_RIGHT;
+        }
+
+        // Check instruction buttons
         // WARNING: Probably in the future I'll have to change the limits of this
         // loop
         for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)

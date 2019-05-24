@@ -13,7 +13,7 @@
 
 #ifdef __ANDROID__
 static int CELL_SIZE = 64;
-static int BUTTON_SIZE = 96;
+static int BUTTON_SIZE = 128;
 #else
 static int CELL_SIZE = 32;
 static int BUTTON_SIZE = 64;
@@ -23,7 +23,6 @@ static int BUTTON_SIZE = 64;
 static int WINDOW_WIDTH = 64 * 10;
 static int WINDOW_HEIGHT = 64 * 14;
 static const char WINDOW_TITLE[] = "sdl_fungeoid";
-
 
 static void main_loop(SDL_Renderer *renderer)
 {
@@ -83,6 +82,8 @@ static void main_loop(SDL_Renderer *renderer)
                     {
                         field_handle_input(&field, &i);
                     }
+                    break;
+                default:
                     break;
             }
         }

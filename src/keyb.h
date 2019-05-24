@@ -15,15 +15,32 @@ typedef struct InstrButton
     enum INSTR_ID id;
 } InstrButton;
 
+enum KEYB_SHIFT_STATE
+{
+    KEYB_SHIFT_NONE,
+    KEYB_SHIFT_1,
+    KEYB_SHIFT_2,
+    KEYB_SHIFT_STATE_TOTAL,
+};
+
 typedef struct Keyboard
 {
     SDL_Rect geometry;
     int button_size;
-    int buttons_offset; // For scrolling
+
+    enum KEYB_SHIFT_STATE shift_state;
 
     // One button per instruction ignoring the fact that INSTR_NULL wont be
     // used
     InstrButton instr_buttons[INSTR_ID_TOTAL];
+
+    // Remaining buttons
+    SDL_Rect but_up;
+    SDL_Rect but_down;
+    SDL_Rect but_left;
+    SDL_Rect but_right;
+    SDL_Rect but_shift_1;
+    SDL_Rect but_shift_2;
 } Keyboard;
 
 enum KEYB_EVENT_TYPE
@@ -31,6 +48,10 @@ enum KEYB_EVENT_TYPE
     KEYB_EVENT_NONE,
     KEYB_EVENT_ADD_INSTR,
     KEYB_EVENT_RM_INSTR,
+    KEYB_EVENT_MOVE_UP,
+    KEYB_EVENT_MOVE_DOWN,
+    KEYB_EVENT_MOVE_LEFT,
+    KEYB_EVENT_MOVE_RIGHT,
     KEYB_EVENT_TYPE_TOTAL,
 };
 
