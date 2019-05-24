@@ -142,7 +142,6 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
     }
 }
 
-/// Handle fingerdown event
 KeyboardEvent keyb_handle_input
 (
     Keyboard *keyb,

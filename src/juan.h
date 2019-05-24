@@ -72,4 +72,36 @@ float juan_point_sq_dist(SDL_Point *a, SDL_Point *b);
 /// Convert float to int and check for overflow
 int juan_ftoi(float x);
 
+/// Draw horizontal line with square cap.
+/**
+ * Width should be even.
+ *
+ * The line has a square cap on both ends, so the line is actually width pixels
+ * longer than the given length.
+ */
+void juan_draw_h_line_cap
+(
+    SDL_Renderer *renderer,
+    int x,
+    int y,
+    int length,
+    int width
+);
+
+/// Draw vertical line with square cap.
+/**
+ * Width should be even.
+ *
+ * The line has a square cap on both ends, so the line is actually width pixels
+ * longer than the given length.
+ */
+void juan_draw_v_line_cap
+(
+    SDL_Renderer *renderer,
+    int x,
+    int y,
+    int length,
+    int width
+);
+
 #endif

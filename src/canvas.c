@@ -2,47 +2,42 @@
 
 #include <stdlib.h>
 
-/// Pointer to malloc of canvas.
-/**
- * Consists of integers that represent values of enum INSTR_ID.
- *
- * The first integer represents (x, y) = (0, 0), the second one (1, 0), the
- * third (2, 0), etc.
- */
-static int* CANVAS = NULL;
-static int CANVAS_WIDTH = 0;
-static int CANVAS_HEIGHT = 0;
 
-int canvas_init(int width, int height)
+Canvas canvas_init(int width, int height)
 {
-    CANVAS = (int*) malloc(sizeof(int) * width * height);
-    if (CANVAS == NULL)
+    Canvas canvas =
     {
-        CANVAS_WIDTH = 0;
-        CANVAS_HEIGHT = 0;
+        .width = width,
+        .height = height,
+
+        .matrix = NULL,
+    };
+
+    canvas.matrix = (int*) malloc(sizeof(int) * width * height);
+    if (canvas.matrix == NULL)
+    {
+        canvas.width = 0;
+        canvas.height = 0;
         SDL_Log("Failed to malloc canvas\n");
-        return 1;
     }
     else
     {
-        CANVAS_WIDTH = width;
-        CANVAS_HEIGHT = height;
-        for (int i = 0; i < CANVAS_WIDTH * CANVAS_HEIGHT; i++)
+        for (int i = 0; i < canvas.width * canvas.height; i++)
         {
-            CANVAS[i] = INSTR_SPACE;
+            canvas.matrix[i] = INSTR_SPACE;
         }
-        return 0;
     }
+    return canvas;
 }
 
-int canvas_free()
+int canvas_free(Canvas *canvas)
 {
-    CANVAS_WIDTH = 0;
-    CANVAS_HEIGHT = 0;
+    canvas->width = 0;
+    canvas->width = 0;
 
-    if (CANVAS != NULL)
+    if (canvas->matrix != NULL)
     {
-        free(CANVAS);
+        free(canvas->matrix);
     }
     else
     {
@@ -52,47 +47,47 @@ int canvas_free()
     return 0;
 }
 
-enum INSTR_ID canvas_get_instr(int x, int y)
+enum INSTR_ID canvas_get_instr(Canvas *canvas, int x, int y)
 {
-    if (CANVAS == NULL)
+    if (canvas->matrix == NULL)
     {
         SDL_Log("Tried to use NULL canvas\n");
         return INSTR_NULL;
     }
-    if (x >= CANVAS_WIDTH)
+    if (x >= canvas->width)
     {
-        SDL_Log("x position %d out of canvas width %d\n", x, CANVAS_WIDTH);
+        SDL_Log("x position %d out of canvas width %d\n", x, canvas->width);
         return INSTR_NULL;
     }
-    if (y >= CANVAS_HEIGHT)
+    if (y >= canvas->height)
     {
-        SDL_Log("y position %d out of canvas height %d\n", y, CANVAS_HEIGHT);
+        SDL_Log("y position %d out of canvas height %d\n", y, canvas->height);
         return INSTR_NULL;
     }
 
-    int memory_position = y * CANVAS_WIDTH + x;
-    return CANVAS[memory_position];
+    int memory_position = y * canvas->width + x;
+    return canvas->matrix[memory_position];
 }
 
-int canvas_set_instr(int x, int y, enum INSTR_ID id)
+int canvas_set_instr(Canvas *canvas, int x, int y, enum INSTR_ID id)
 {
-    if (CANVAS == NULL)
+    if (canvas->matrix == NULL)
     {
         SDL_Log("Tried to use NULL canvas\n");
         return 1;
     }
-    if (x >= CANVAS_WIDTH || x < 0)
+    if (x >= canvas->width || x < 0)
     {
         SDL_Log("x position %d out of bounds", x);
         return 1;
     }
-    if (y >= CANVAS_HEIGHT || y < 0)
+    if (y >= canvas->height || y < 0)
     {
         SDL_Log("y position %d out of bounds", y);
         return 1;
     }
 
-    int memory_position = y * CANVAS_WIDTH + x;
-    CANVAS[memory_position] = id;
+    int memory_position = y * canvas->width + x;
+    canvas->matrix[memory_position] = id;
     return 0;
 }

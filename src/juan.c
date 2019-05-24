@@ -186,3 +186,53 @@ int juan_ftoi(float x)
     }
     return (int) (x-0.5);
 }
+
+/// Draw horizontal line with square cap.
+/**
+ * Width should be even.
+ *
+ * The line has a square cap on both ends, so the line is actually width pixels
+ * longer than the given length.
+ */
+void juan_draw_h_line_cap
+(
+    SDL_Renderer *renderer,
+    int x,
+    int y,
+    int length,
+    int width
+) {
+    SDL_Rect rect =
+    {
+        x - width / 2,
+        y - width / 2,
+        length + width,
+        width,
+    };
+    SDL_RenderFillRect(renderer, &rect);
+}
+
+/// Draw vertical line with square cap.
+/**
+ * Width should be even.
+ *
+ * The line has a square cap on both ends, so the line is actually width pixels
+ * longer than the given length.
+ */
+void juan_draw_v_line_cap
+(
+    SDL_Renderer *renderer,
+    int x,
+    int y,
+    int length,
+    int width
+) {
+    SDL_Rect rect =
+    {
+        x - width / 2,
+        y - width / 2,
+        width,
+        length + width,
+    };
+    SDL_RenderFillRect(renderer, &rect);
+}

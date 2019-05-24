@@ -9,11 +9,14 @@
 #include "canvas.h"
 #include "keyb.h"
 #include "input.h"
+#include "field.h"
 
 #ifdef __ANDROID__
-static int CELL_SIZE = 128;
-#else
 static int CELL_SIZE = 64;
+static int BUTTON_SIZE = 96;
+#else
+static int CELL_SIZE = 32;
+static int BUTTON_SIZE = 64;
 #endif
 // Window dimensions, initial values are used for desktop, when on Android or
 // resizing these values will be updated
@@ -21,106 +24,16 @@ static int WINDOW_WIDTH = 64 * 10;
 static int WINDOW_HEIGHT = 64 * 14;
 static const char WINDOW_TITLE[] = "sdl_fungeoid";
 
-/// Draw horizontal line with square cap.
-/**
- * Width should be even.
- *
- * The line has a square cap on both ends, so the line is actually width pixels
- * longer than the given length.
- */
-static void draw_h_line_cap
-(
-    SDL_Renderer *renderer,
-    int x,
-    int y,
-    int length,
-    int width
-) {
-    SDL_Rect rect =
-    {
-        x - width / 2,
-        y - width / 2,
-        length + width,
-        width,
-    };
-    SDL_RenderFillRect(renderer, &rect);
-}
-
-/// Draw vertical line with square cap.
-/**
- * Width should be even.
- *
- * The line has a square cap on both ends, so the line is actually width pixels
- * longer than the given length.
- */
-static void draw_v_line_cap
-(
-    SDL_Renderer *renderer,
-    int x,
-    int y,
-    int length,
-    int width
-) {
-    SDL_Rect rect =
-    {
-        x - width / 2,
-        y - width / 2,
-        width,
-        length + width,
-    };
-    SDL_RenderFillRect(renderer, &rect);
-}
-
-static void draw_canvas(SDL_Renderer *renderer, int width, int height)
-{
-    // Draw lines
-    juan_set_render_draw_color(renderer, &COLOR_LINES);
-    int line_width = CELL_SIZE / 20;
-    for (int x = 0; x < width + 1; x++)
-    {
-        draw_v_line_cap(renderer, x * CELL_SIZE, 0, height * CELL_SIZE, line_width);
-    }
-    for (int y = 0; y < height + 1; y++)
-    {
-        draw_h_line_cap(renderer, 0, y * CELL_SIZE, width * CELL_SIZE, line_width);
-    }
-
-    // Draw instructions
-    for (int x = 0; x < width; x++)
-    {
-        for (int y = 0; y < height; y++)
-        {
-            enum INSTR_ID id = canvas_get_instr(x, y);
-            if (id != INSTR_NULL && id != INSTR_SPACE)
-            {
-                SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, id);
-                SDL_Rect r = { x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE };
-                SDL_RenderCopy(renderer, tex, NULL, &r);
-            }
-        }
-    }
-}
 
 static void main_loop(SDL_Renderer *renderer)
 {
     bool running = true;
     SDL_Event event;
 
-    int canvas_width = 10;
-    int canvas_height = 14;
-    if (canvas_init(canvas_width, canvas_height) != 0) {
-        return;
-    }
-    canvas_set_instr(0, 0, INSTR_A);
-    canvas_set_instr(1, 0, INSTR_B);
-    canvas_set_instr(0, 1, INSTR_C);
-    canvas_set_instr(9, 6, INSTR_D);
-    canvas_set_instr(4, 13, INSTR_CHAROUT);
-    canvas_set_instr(9, 13, INSTR_POP);
-    int ip_x = 4;
-    int ip_y = 1;
+    SDL_Point screen_size = { WINDOW_WIDTH, WINDOW_HEIGHT };
+    Field field = field_create(10, 14, &screen_size, CELL_SIZE);
 
-    Keyboard keyb = keyb_create(WINDOW_WIDTH, WINDOW_HEIGHT, CELL_SIZE);
+    Keyboard keyb = keyb_create(WINDOW_WIDTH, WINDOW_HEIGHT, BUTTON_SIZE);
     InputHandler input = input_create();
 
     while (running)
@@ -138,7 +51,9 @@ static void main_loop(SDL_Renderer *renderer)
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                         WINDOW_WIDTH = event.window.data1;
                         WINDOW_HEIGHT = event.window.data2;
-                        keyb_update_geometry(&keyb, WINDOW_WIDTH, WINDOW_HEIGHT, CELL_SIZE);
+                        SDL_Point screen_size = { WINDOW_WIDTH, WINDOW_HEIGHT };
+                        field_resize_screen(&field, &screen_size, CELL_SIZE);
+                        keyb_update_geometry(&keyb, WINDOW_WIDTH, WINDOW_HEIGHT, BUTTON_SIZE);
                         break;
                 }
             }
@@ -151,46 +66,36 @@ static void main_loop(SDL_Renderer *renderer)
                     if (SDL_PointInRect(&i.point, &keyb.geometry))
                     {
                         KeyboardEvent event = keyb_handle_input(&keyb, &i);
-                        if (event.type == KEYB_EVENT_ADD_INSTR)
-                        {
-                            canvas_set_instr(ip_x, ip_y, event.instr_id);
-                        }
-                        if (event.type == KEYB_EVENT_RM_INSTR)
-                        {
-                            canvas_set_instr(ip_x, ip_y, INSTR_SPACE);
-                        }
+                        field_handle_keyb(&field, &event);
                     }
                     else
                     {
-                        ip_x = i.point.x / CELL_SIZE;
-                        ip_y = i.point.y / CELL_SIZE;
+                        field_handle_input(&field, &i);
                     }
+                    break;
                 case (INPUT_CLICK_MOVE):
                     if (SDL_PointInRect(&i.down_point, &keyb.geometry))
                     {
                         KeyboardEvent event = keyb_handle_input(&keyb, &i);
+                        field_handle_keyb(&field, &event);
                     }
+                    else
+                    {
+                        field_handle_input(&field, &i);
+                    }
+                    break;
             }
         }
         juan_set_render_draw_color(renderer, &COLOR_BG);
         SDL_RenderClear(renderer);
 
-        draw_canvas(renderer, canvas_width, canvas_height);
-
-        // Draw IP
-        int ip_width = CELL_SIZE / 8;
-        juan_set_render_draw_color(renderer, &COLOR_SELECT_1);
-        draw_h_line_cap(renderer, ip_x * CELL_SIZE, ip_y * CELL_SIZE, CELL_SIZE, ip_width);
-        draw_h_line_cap(renderer, ip_x * CELL_SIZE, (ip_y + 1) * CELL_SIZE, CELL_SIZE, ip_width);
-        draw_v_line_cap(renderer, ip_x * CELL_SIZE, ip_y * CELL_SIZE, CELL_SIZE, ip_width);
-        draw_v_line_cap(renderer, (ip_x + 1) * CELL_SIZE, ip_y * CELL_SIZE, CELL_SIZE, ip_width);
-
+        field_draw(renderer, &field);
         keyb_draw(renderer, &keyb);
 
         SDL_RenderPresent(renderer);
     }
 
-    canvas_free();
+    field_free(&field);
 }
 
 int main(int argc, char *argv[])
