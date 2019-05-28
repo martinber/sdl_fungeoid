@@ -11,18 +11,14 @@ Field field_create(int width, int height, SDL_Point *screen_size, int cell_size)
         .ip = { 0, 0 },
         .speed = { 1, 0 },
         .cell_size = cell_size,
+        .stack = stack_befunge_init(),
     };
 
-    if (field.canvas.matrix == NULL) {
+    if (field.canvas.matrix == NULL || field.stack.alloc_size == 0) {
+        SDL_Log("Error creating field.canvas or field.stack");
         return field;
         // TODO
     }
-    canvas_set_instr(&field.canvas, 0, 0, INSTR_A);
-    canvas_set_instr(&field.canvas, 1, 0, INSTR_B);
-    canvas_set_instr(&field.canvas, 0, 1, INSTR_C);
-    canvas_set_instr(&field.canvas, 9, 6, INSTR_D);
-    canvas_set_instr(&field.canvas, 4, 13, INSTR_CHAROUT);
-    canvas_set_instr(&field.canvas, 9, 13, INSTR_POP);
     return field;
 }
 
@@ -34,7 +30,17 @@ void field_resize_screen(Field *field, SDL_Point *screen_size, int cell_size)
 
 int field_free(Field *field)
 {
-    return canvas_free(&field->canvas);
+    if
+    (
+        canvas_free(&field->canvas) != 0
+        || stack_befunge_free(&field->stack) != 0
+    ) {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 /// Run simulation step
@@ -45,6 +51,7 @@ static void field_step(Field *field)
 {
     SDL_Point *ip = &field->ip;
     SDL_Point *speed = &field->speed;
+    BefungeStack *stack = &field->stack;
     enum INSTR_ID instr = canvas_get_instr(&field->canvas, field->ip.x, field->ip.y);
 
     switch (instr)
@@ -68,6 +75,117 @@ static void field_step(Field *field)
         case INSTR_BRIDGE:
             ip->x += speed->x;
             ip->y += speed->y;
+            break;
+
+        case INSTR_0: stack_befunge_push(stack, 0); break;
+        case INSTR_1: stack_befunge_push(stack, 1); break;
+        case INSTR_2: stack_befunge_push(stack, 2); break;
+        case INSTR_3: stack_befunge_push(stack, 3); break;
+        case INSTR_4: stack_befunge_push(stack, 4); break;
+        case INSTR_5: stack_befunge_push(stack, 5); break;
+        case INSTR_6: stack_befunge_push(stack, 6); break;
+        case INSTR_7: stack_befunge_push(stack, 7); break;
+        case INSTR_8: stack_befunge_push(stack, 8); break;
+        case INSTR_9: stack_befunge_push(stack, 9); break;
+        case INSTR_A: stack_befunge_push(stack, 10); break;
+        case INSTR_B: stack_befunge_push(stack, 11); break;
+        case INSTR_C: stack_befunge_push(stack, 12); break;
+        case INSTR_D: stack_befunge_push(stack, 13); break;
+        case INSTR_E: stack_befunge_push(stack, 14); break;
+        case INSTR_F: stack_befunge_push(stack, 15); break;
+
+        case INSTR_ADD:
+            {
+                signed long int a;
+                signed long int b;
+                if (stack_befunge_pop(stack, &a) == 0
+                        && stack_befunge_pop(stack, &b) == 0)
+                {
+                    stack_befunge_push(stack, b + a);
+                }
+            }
+            break;
+        case INSTR_SUB:
+            {
+                signed long int a;
+                signed long int b;
+                if (stack_befunge_pop(stack, &a) == 0
+                        && stack_befunge_pop(stack, &b) == 0)
+                {
+                    stack_befunge_push(stack, b - a);
+                }
+            }
+            break;
+        case INSTR_MUL:
+            {
+                signed long int a;
+                signed long int b;
+                if (stack_befunge_pop(stack, &a) == 0
+                        && stack_befunge_pop(stack, &b) == 0)
+                {
+                    stack_befunge_push(stack, b * a);
+                }
+            }
+            break;
+        case INSTR_INTDIV:
+            {
+                signed long int a;
+                signed long int b;
+                if (stack_befunge_pop(stack, &a) == 0
+                        && stack_befunge_pop(stack, &b) == 0)
+                {
+                    stack_befunge_push(stack, b / a);
+                }
+            }
+            break;
+
+        case INSTR_DUP:
+            {
+                signed long int v;
+                if (stack_befunge_pop(stack, &v) == 0)
+                {
+                    stack_befunge_push(stack, v);
+                    stack_befunge_push(stack, v);
+                }
+            }
+            break;
+        case INSTR_SWP:
+            {
+                signed long int a;
+                signed long int b;
+                if (stack_befunge_pop(stack, &a) == 0
+                        && stack_befunge_pop(stack, &b) == 0)
+                {
+                    stack_befunge_push(stack, a);
+                    stack_befunge_push(stack, b);
+                }
+            }
+            break;
+        case INSTR_POP:
+            {
+                signed long int v;
+                stack_befunge_pop(stack, &v);
+            }
+            break;
+
+        case INSTR_INTOUT:
+            {
+                signed long int v;
+                if (stack_befunge_pop(stack, &v) == 0)
+                {
+                    SDL_Log("INTOUT: %lu", v);
+                }
+            }
+            break;
+        case INSTR_CHAROUT:
+            {
+                signed long int v;
+                if (stack_befunge_pop(stack, &v) == 0)
+                {
+                    SDL_Log("CHAROUT: %lx", v);
+                    // TODO is printing hex instead of char
+                }
+            }
             break;
 
         default:

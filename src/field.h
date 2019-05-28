@@ -3,6 +3,7 @@
 
 #include "juan.h"
 #include "canvas.h"
+#include "stack.h"
 #include "input.h"
 #include "keyb.h"
 #include "res.h"
@@ -30,6 +31,7 @@ typedef struct Field
     SDL_Point ip; // Instruction pointer
     SDL_Point speed; // Next relative motion of IP, e.g. (-1, 0)
     int cell_size;
+    BefungeStack stack;
 } Field;
 
 /// Create field
