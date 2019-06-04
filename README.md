@@ -31,6 +31,21 @@ I have to remember to:
         NULL pointer because `free()` can handle NULL pointers, but if the the
         struct has pointers I have to free them before checking for NULL pointer.
 
+- Input handling:
+
+    - `main.c` handles window and quit events, then, calls
+        `input_handle_event()` so the input handles the touch/mouse/keyboard
+        events.
+
+    - `input_handle_event()` returns an `Input` struct, `main.c` passes the
+        struct to the keyboard
+
+    - If the keyboard returns KEYB_EVENT_NOT_HANDLED then `main.c` should pass
+        the input to the element below, e.g. the HUD.
+
+    - If the HUD doens not handle the input then the input is passed to the
+        field.
+
 ## Android
 
 ```

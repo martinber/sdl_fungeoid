@@ -5,17 +5,15 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
     Field *field = (Field*) malloc(sizeof(Field));
     if (field == NULL)
     {
-        SDL_Log("Failed to malloc field\n");
+        SDL_Log("Failed to malloc Field\n");
         return NULL;
     }
     field->canvas = NULL;
     field->state = FIELD_EDITING;
     field->last_step_ms = 0;
     field->screen_size = *screen_size;
-    field->ip.x = 0;
-    field->ip.y = 0;
-    field->speed.x = 1;
-    field->speed.y = 0;
+    field->ip = (SDL_Point) { 0, 0 };
+    field->speed = (SDL_Point) { 1, 0 };
     field->cell_size = cell_size;
     field->stack = NULL;
 

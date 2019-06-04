@@ -7,7 +7,7 @@ Canvas *canvas_create(int width, int height)
     Canvas *canvas = (Canvas*) malloc(sizeof(Canvas));
     if (canvas == NULL)
     {
-        SDL_Log("Failed to malloc canvas\n");
+        SDL_Log("Failed to malloc Canvas\n");
         return NULL;
     }
     canvas->width = width;

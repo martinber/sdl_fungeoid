@@ -72,32 +72,14 @@ static void main_loop(SDL_Renderer *renderer)
             }
 
             Input i = input_handle_event(input, &WINDOW_SIZE, &event);
-            switch (i.type)
+            KeyboardEvent event = keyb_handle_input(keyb, &i);
+            if (event.type == KEYB_EVENT_NOT_HANDLED)
             {
-                case (INPUT_CLICK_UP):
-                    if (SDL_PointInRect(&i.point, &keyb->geometry))
-                    {
-                        KeyboardEvent event = keyb_handle_input(keyb, &i);
-                        field_handle_keyb(field, &event);
-                    }
-                    else
-                    {
-                        field_handle_input(field, &i);
-                    }
-                    break;
-                case (INPUT_CLICK_MOVE):
-                    if (SDL_PointInRect(&i.down_point, &keyb->geometry))
-                    {
-                        KeyboardEvent event = keyb_handle_input(keyb, &i);
-                        field_handle_keyb(field, &event);
-                    }
-                    else
-                    {
-                        field_handle_input(field, &i);
-                    }
-                    break;
-                default:
-                    break;
+                field_handle_input(field, &i);
+            }
+            else
+            {
+                field_handle_keyb(field, &event);
             }
         }
         field_update(field, time_abs_ms);

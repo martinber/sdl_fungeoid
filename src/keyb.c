@@ -7,49 +7,24 @@ Keyboard *keyb_create(SDL_Point window_size, int button_size)
     Keyboard *keyb = (Keyboard*) malloc(sizeof(Keyboard));
     if (keyb == NULL)
     {
-        SDL_Log("Failed to malloc keyb");
+        SDL_Log("Failed to malloc Keyboard");
         return NULL;
     }
-    keyb->geometry.x = 0;
-    keyb->geometry.y = 0;
-    keyb->geometry.w = 0;
-    keyb->geometry.h = 0;
+    keyb->geometry = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->button_size = button_size;
     keyb->shift_state = KEYB_SHIFT_NONE;
-    keyb->but_up.x = 0;
-    keyb->but_up.y = 0;
-    keyb->but_up.w = 0;
-    keyb->but_up.h = 0;
-    keyb->but_down.x = 0;
-    keyb->but_down.y = 0;
-    keyb->but_down.w = 0;
-    keyb->but_down.h = 0;
-    keyb->but_left.x = 0;
-    keyb->but_left.y = 0;
-    keyb->but_left.w = 0;
-    keyb->but_left.h = 0;
-    keyb->but_right.x = 0;
-    keyb->but_right.y = 0;
-    keyb->but_right.w = 0;
-    keyb->but_right.h = 0;
-    keyb->but_shift_1.x = 0;
-    keyb->but_shift_1.y = 0;
-    keyb->but_shift_1.w = 0;
-    keyb->but_shift_1.h = 0;
-    keyb->but_shift_2.x = 0;
-    keyb->but_shift_2.y = 0;
-    keyb->but_shift_2.w = 0;
-    keyb->but_shift_2.h = 0;
+    keyb->but_up = (SDL_Rect) { 0, 0, 0, 0 };
+    keyb->but_down = (SDL_Rect) { 0, 0, 0, 0 };
+    keyb->but_left = (SDL_Rect) { 0, 0, 0, 0 };
+    keyb->but_right = (SDL_Rect) { 0, 0, 0, 0 };
+    keyb->but_shift_1 = (SDL_Rect) { 0, 0, 0, 0 };
+    keyb->but_shift_2 = (SDL_Rect) { 0, 0, 0, 0 };
 
     // WARNING: Probably in the future I'll have to change the limits of this
     // loop
     for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
     {
-        InstrButton but =
-        {
-            .geometry = { 0, 0, 0, 0 },
-            .id = i,
-        };
+        InstrButton but = { .geometry = { 0, 0, 0, 0 }, .id = i };
         keyb->instr_buttons[i] = but;
     }
 
@@ -182,9 +157,33 @@ KeyboardEvent keyb_handle_input
 ) {
     KeyboardEvent event =
     {
-        .type = KEYB_EVENT_NONE,
+        .type = KEYB_EVENT_NOT_HANDLED,
         .instr_id = INSTR_NULL,
     };
+
+    // Ignore events outside the keyboard
+
+    switch (input->type)
+    {
+        case (INPUT_CLICK_UP):
+            if (!SDL_PointInRect(&input->point, &keyb->geometry))
+            {
+                return event; // KEYB_EVENT_NOT_HANDLED
+            }
+            break;
+        case (INPUT_CLICK_MOVE):
+        case (INPUT_CLICK_MOVE_UP):
+            if (!SDL_PointInRect(&input->down_point, &keyb->geometry))
+            {
+                return event; // KEYB_EVENT_NOT_HANDLED
+            }
+            break;
+        default:
+            return event; // KEYB_EVENT_NOT_HANDLED
+    }
+
+    // Indicate that the input was handled
+    event.type = KEYB_EVENT_NONE;
 
     if (input->type == INPUT_CLICK_UP)
     {

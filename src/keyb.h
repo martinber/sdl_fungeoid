@@ -46,6 +46,7 @@ typedef struct Keyboard
 enum KEYB_EVENT_TYPE
 {
     KEYB_EVENT_NONE,
+    KEYB_EVENT_NOT_HANDLED,
     KEYB_EVENT_ADD_INSTR,
     KEYB_EVENT_RM_INSTR,
     KEYB_EVENT_MOVE_UP,
@@ -80,6 +81,10 @@ void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size, int button_size
 void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb);
 
 /// Handle touch/mouse/key input
+/**
+ * Returns event of type KEY_EVENT_NOT_HANDLED if the input lies outside of the
+ * keyboard and should be handled by another element
+ */
 KeyboardEvent keyb_handle_input(Keyboard *keyb, Input *input);
 
 #endif

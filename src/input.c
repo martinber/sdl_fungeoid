@@ -11,8 +11,7 @@ InputHandler *input_create()
 
     handler->click_candidate = INPUT_NONE;
     handler->last_touch_id = 0;
-    handler->down_point.x = 0;
-    handler->down_point.y = 0;
+    handler->down_point = (SDL_Point) { 0, 0 };
     handler->sq_threshold = 40*40;
 
     return handler;
