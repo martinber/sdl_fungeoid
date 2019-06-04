@@ -31,7 +31,7 @@ typedef struct Field
     SDL_Point ip; // Instruction pointer
     SDL_Point speed; // Next relative motion of IP, e.g. (-1, 0)
     int cell_size;
-    BefungeStack *stack;
+    Stack *stack;
 } Field;
 
 /// Create field
@@ -52,6 +52,8 @@ void field_update(Field *field, Uint32 time_abs_ms);
 void field_handle_input(Field *field, Input *input);
 
 void field_handle_keyb(Field *field, KeyboardEvent *event);
+
+Stack *field_get_stack(Field *field);
 
 void field_draw(SDL_Renderer *renderer, Field *field);
 

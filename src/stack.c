@@ -5,7 +5,7 @@
 #include "juan.h"
 
 /// Check if we need to realloc, both to grow and to shrink
-static int stack_befunge_realloc(BefungeStack *stack, size_t new_size)
+static int stack_realloc(Stack *stack, size_t new_size)
 {
     if (
         new_size > stack->alloc_size
@@ -32,9 +32,9 @@ static int stack_befunge_realloc(BefungeStack *stack, size_t new_size)
     return 0;
 }
 
-BefungeStack *stack_befunge_create()
+Stack *stack_create()
 {
-    BefungeStack *stack = (BefungeStack*) malloc(sizeof(BefungeStack));
+    Stack *stack = (Stack*) malloc(sizeof(Stack));
     if (stack == NULL)
     {
         SDL_Log("Failed to malloc stack\n");
@@ -59,7 +59,7 @@ BefungeStack *stack_befunge_create()
     return stack;
 }
 
-void stack_befunge_free(BefungeStack *stack)
+void stack_free(Stack *stack)
 {
     if (stack != NULL)
     {
@@ -70,9 +70,9 @@ void stack_befunge_free(BefungeStack *stack)
     stack = NULL;
 }
 
-int stack_befunge_push(BefungeStack *stack, signed long int v)
+int stack_push(Stack *stack, signed long int v)
 {
-    if (stack_befunge_realloc(stack, stack->size + 1) != 0)
+    if (stack_realloc(stack, stack->size + 1) != 0)
     {
         SDL_Log("Failed to push to stack\n");
         return 2;
@@ -83,9 +83,9 @@ int stack_befunge_push(BefungeStack *stack, signed long int v)
     return 0;
 }
 
-int stack_befunge_pop(BefungeStack *stack, signed long int *v)
+int stack_pop(Stack *stack, signed long int *v)
 {
-    if (stack_befunge_realloc(stack, stack->size - 1) != 0)
+    if (stack_realloc(stack, stack->size - 1) != 0)
     {
         SDL_Log("Failed to pull from stack\n");
         return 2;
@@ -101,7 +101,7 @@ int stack_befunge_pop(BefungeStack *stack, signed long int *v)
     return 0;
 }
 
-void stack_befunge_print(BefungeStack *stack)
+void stack_print(Stack *stack)
 {
     SDL_Log("size: %lu, alloc_size: %lu\n", stack->size, stack->alloc_size);
     SDL_Log("Bottom of stack... (first item pushed)\n");

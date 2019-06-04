@@ -8,7 +8,7 @@
  * Grows dynamically when needed, Consider the member variables private
  * excluding alloc_size.
  */
-typedef struct BefungeStack
+typedef struct Stack
 {
     // Maximum amount of numbers (not bytes) to hold, realloc() will be called
     // only if this maximum was not reached
@@ -33,11 +33,11 @@ typedef struct BefungeStack
 
     // Pointer to memory
     signed long int *memory;
-} BefungeStack;
+} Stack;
 
 /*
-/// Stack of befunge stacks
-typedef struct BefungeStackStack
+/// Stack of stacks
+typedef struct StackStack
 {
     // Maximum amount of stacks to hold, realloc() will be called only if this
     // maximum was not reached
@@ -63,17 +63,17 @@ typedef struct BefungeStackStack
  *
  * On error returns NULL.
  */
-BefungeStack *stack_befunge_create();
+Stack *stack_create();
 
 /// Free stack memory
-void stack_befunge_free(BefungeStack *stack);
+void stack_free(Stack *stack);
 
 /// Push value to stack
 /**
  * Returns 2 if failed to allocate memory, remember to later free the stack
  * anyways
  */
-int stack_befunge_push(BefungeStack *stack, signed long int v);
+int stack_push(Stack *stack, signed long int v);
 
 /// Pop value from stack
 /**
@@ -81,9 +81,9 @@ int stack_befunge_push(BefungeStack *stack, signed long int v);
  * Returns 2 if failed to allocate memory, remember to later free the stack
  * anyways
  */
-int stack_befunge_pop(BefungeStack *stack, signed long int *v);
+int stack_pop(Stack *stack, signed long int *v);
 
 /// Print stack to SDL_Log for debugging
-void stack_befunge_print(BefungeStack *stack);
+void stack_print(Stack *stack);
 
 #endif

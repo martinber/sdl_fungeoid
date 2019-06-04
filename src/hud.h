@@ -3,6 +3,7 @@
 
 #include "juan.h"
 #include "input.h"
+#include "stack.h"
 
 enum HUD_STATE
 {
@@ -18,6 +19,7 @@ typedef struct Hud
     SDL_Point window_size;
     int line_spacing;
     enum HUD_STATE state;
+    Stack *stack;
 } Hud;
 
 /// Create hud
@@ -26,7 +28,7 @@ typedef struct Hud
  *
  * On error returns NULL.
  */
-Hud *hud_create(SDL_Point window_size, int line_height);
+Hud *hud_create(SDL_Point window_size, int line_height, Stack *stack);
 
 void hud_free(Hud *hud);
 

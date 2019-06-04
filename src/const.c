@@ -38,20 +38,35 @@ char const_befunge_char(enum INSTR_ID id)
         case INSTR_LEFT: return '<';
         case INSTR_RIGHT: return '>';
         case INSTR_BRIDGE: return '#';
+        case INSTR_RND: return '?';
+        case INSTR_STOP: return '@';
 
         case INSTR_ADD: return '+';
         case INSTR_SUB: return '-';
         case INSTR_MUL: return '*';
         case INSTR_INTDIV: return '/';
+        case INSTR_MOD: return '%';
+        case INSTR_NOT: return '!';
+        case INSTR_GT: return '`';
+        case INSTR_LT: return ',';
 
         case INSTR_DUP: return ':';
         case INSTR_SWP: return '\\';
         case INSTR_POP: return '$';
-
+        case INSTR_HIF: return '_';
+        case INSTR_VIF: return '|';
         case INSTR_STR: return '"';
+        case INSTR_ITER: return 'k';
 
+        case INSTR_INTIN: return '&';
+        case INSTR_CHARIN: return '~';
         case INSTR_INTOUT: return '.';
         case INSTR_CHAROUT: return ',';
+
+        case INSTR_GET: return 'g';
+        case INSTR_PUT: return 'p';
+        case INSTR_FETCH: return '\'';
+        case INSTR_STORE: return 's';
 
         default: SDL_Log("Invalid instruction %d", id);
                  return 0;

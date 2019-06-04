@@ -18,7 +18,7 @@ static void hud_toggle(Hud *hud)
     hud_update_geometry(hud, hud->window_size, hud->line_spacing);
 }
 
-Hud *hud_create(SDL_Point window_size, int line_height)
+Hud *hud_create(SDL_Point window_size, int line_height, Stack *stack)
 {
     Hud *hud = (Hud*) malloc(sizeof(Hud));
     if (hud == NULL)
@@ -31,6 +31,7 @@ Hud *hud_create(SDL_Point window_size, int line_height)
     hud->window_size = window_size;
     hud->line_spacing = line_height;
     hud->state = HUD_STATE_OPEN;
+    hud->stack = stack;
 
     hud_update_geometry(hud, window_size, line_height);
     return hud;
@@ -80,19 +81,18 @@ void hud_draw(SDL_Renderer *renderer, Hud *hud)
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
     }
 
-    // TODO: improve
-    int STACK_SIZE = 7;
-    int stack[7] = { 1, 45, 73, 24, 63, 7345, 65475676 };
+    int stack_size = hud->stack->size;
+    signed long int *stack_elements = hud->stack->memory;
+
     SDL_Texture *tex = NULL;
     SDL_Rect position = { 0, 0, 0, 0 };
     char str_buf[10]; // Buffer of maximum 9 chars
-    for (int i = 0; i < STACK_SIZE; i++)
+    for (int i = 0; i < stack_size; i++)
     {
-        snprintf(str_buf, 9, "%d", stack[i]);
+        snprintf(str_buf, 9, "%lu", stack_elements[i]);
         str_buf[8] = '~';
         str_buf[9] = '\0';
-        tex = juan_text_texture
-        (
+        tex = juan_text_texture (
             renderer,
             res_get_font(RES_FONT_STACK),
             str_buf,
@@ -100,7 +100,7 @@ void hud_draw(SDL_Renderer *renderer, Hud *hud)
         );
         if (tex == NULL)
         {
-            SDL_Log("Error rendering text for stack value: %d", stack[i]);
+            SDL_Log("Error rendering text for stack value: %lu", stack_elements[i]);
             return;
         }
         SDL_QueryTexture(tex, NULL, NULL, &position.w, &position.h);

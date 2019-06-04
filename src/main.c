@@ -28,7 +28,7 @@ static void main_loop(SDL_Renderer *renderer)
 {
     Field *field = field_create(10, 14, &WINDOW_SIZE, CELL_SIZE);
     Keyboard *keyb = keyb_create(WINDOW_SIZE, BUTTON_SIZE);
-    Hud *hud = hud_create(WINDOW_SIZE, 32);
+    Hud *hud = hud_create(WINDOW_SIZE, 32, field_get_stack(field));
     InputHandler *input = input_create();
     if (field == NULL || keyb == NULL || hud == NULL || input == NULL)
     {

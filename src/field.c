@@ -18,12 +18,12 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
     field->stack = NULL;
 
     field->canvas = canvas_create(width, height);
-    field->stack = stack_befunge_create();
+    field->stack = stack_create();
     if (field->canvas == NULL || field->stack == NULL)
     {
         canvas_free(field->canvas);
         field->canvas = NULL;
-        stack_befunge_free(field->stack);
+        stack_free(field->stack);
         field->stack = NULL;
 
         free(field);
@@ -42,7 +42,7 @@ void field_free(Field *field)
     {
         canvas_free(field->canvas);
         field->canvas = NULL;
-        stack_befunge_free(field->stack);
+        stack_free(field->stack);
         field->stack = NULL;
     }
     free(field);
@@ -63,7 +63,7 @@ static void field_step(Field *field)
 {
     SDL_Point *ip = &field->ip;
     SDL_Point *speed = &field->speed;
-    BefungeStack *stack = field->stack;
+    Stack *stack = field->stack;
     enum INSTR_ID instr = canvas_get_instr(field->canvas, field->ip.x, field->ip.y);
 
     switch (instr)
@@ -89,31 +89,31 @@ static void field_step(Field *field)
             ip->y += speed->y;
             break;
 
-        case INSTR_0: stack_befunge_push(stack, 0); break;
-        case INSTR_1: stack_befunge_push(stack, 1); break;
-        case INSTR_2: stack_befunge_push(stack, 2); break;
-        case INSTR_3: stack_befunge_push(stack, 3); break;
-        case INSTR_4: stack_befunge_push(stack, 4); break;
-        case INSTR_5: stack_befunge_push(stack, 5); break;
-        case INSTR_6: stack_befunge_push(stack, 6); break;
-        case INSTR_7: stack_befunge_push(stack, 7); break;
-        case INSTR_8: stack_befunge_push(stack, 8); break;
-        case INSTR_9: stack_befunge_push(stack, 9); break;
-        case INSTR_A: stack_befunge_push(stack, 10); break;
-        case INSTR_B: stack_befunge_push(stack, 11); break;
-        case INSTR_C: stack_befunge_push(stack, 12); break;
-        case INSTR_D: stack_befunge_push(stack, 13); break;
-        case INSTR_E: stack_befunge_push(stack, 14); break;
-        case INSTR_F: stack_befunge_push(stack, 15); break;
+        case INSTR_0: stack_push(stack, 0); break;
+        case INSTR_1: stack_push(stack, 1); break;
+        case INSTR_2: stack_push(stack, 2); break;
+        case INSTR_3: stack_push(stack, 3); break;
+        case INSTR_4: stack_push(stack, 4); break;
+        case INSTR_5: stack_push(stack, 5); break;
+        case INSTR_6: stack_push(stack, 6); break;
+        case INSTR_7: stack_push(stack, 7); break;
+        case INSTR_8: stack_push(stack, 8); break;
+        case INSTR_9: stack_push(stack, 9); break;
+        case INSTR_A: stack_push(stack, 10); break;
+        case INSTR_B: stack_push(stack, 11); break;
+        case INSTR_C: stack_push(stack, 12); break;
+        case INSTR_D: stack_push(stack, 13); break;
+        case INSTR_E: stack_push(stack, 14); break;
+        case INSTR_F: stack_push(stack, 15); break;
 
         case INSTR_ADD:
             {
                 signed long int a;
                 signed long int b;
-                if (stack_befunge_pop(stack, &a) == 0
-                        && stack_befunge_pop(stack, &b) == 0)
+                if (stack_pop(stack, &a) == 0
+                        && stack_pop(stack, &b) == 0)
                 {
-                    stack_befunge_push(stack, b + a);
+                    stack_push(stack, b + a);
                 }
             }
             break;
@@ -121,10 +121,10 @@ static void field_step(Field *field)
             {
                 signed long int a;
                 signed long int b;
-                if (stack_befunge_pop(stack, &a) == 0
-                        && stack_befunge_pop(stack, &b) == 0)
+                if (stack_pop(stack, &a) == 0
+                        && stack_pop(stack, &b) == 0)
                 {
-                    stack_befunge_push(stack, b - a);
+                    stack_push(stack, b - a);
                 }
             }
             break;
@@ -132,10 +132,10 @@ static void field_step(Field *field)
             {
                 signed long int a;
                 signed long int b;
-                if (stack_befunge_pop(stack, &a) == 0
-                        && stack_befunge_pop(stack, &b) == 0)
+                if (stack_pop(stack, &a) == 0
+                        && stack_pop(stack, &b) == 0)
                 {
-                    stack_befunge_push(stack, b * a);
+                    stack_push(stack, b * a);
                 }
             }
             break;
@@ -143,10 +143,10 @@ static void field_step(Field *field)
             {
                 signed long int a;
                 signed long int b;
-                if (stack_befunge_pop(stack, &a) == 0
-                        && stack_befunge_pop(stack, &b) == 0)
+                if (stack_pop(stack, &a) == 0
+                        && stack_pop(stack, &b) == 0)
                 {
-                    stack_befunge_push(stack, b / a);
+                    stack_push(stack, b / a);
                 }
             }
             break;
@@ -154,10 +154,10 @@ static void field_step(Field *field)
         case INSTR_DUP:
             {
                 signed long int v;
-                if (stack_befunge_pop(stack, &v) == 0)
+                if (stack_pop(stack, &v) == 0)
                 {
-                    stack_befunge_push(stack, v);
-                    stack_befunge_push(stack, v);
+                    stack_push(stack, v);
+                    stack_push(stack, v);
                 }
             }
             break;
@@ -165,25 +165,25 @@ static void field_step(Field *field)
             {
                 signed long int a;
                 signed long int b;
-                if (stack_befunge_pop(stack, &a) == 0
-                        && stack_befunge_pop(stack, &b) == 0)
+                if (stack_pop(stack, &a) == 0
+                        && stack_pop(stack, &b) == 0)
                 {
-                    stack_befunge_push(stack, a);
-                    stack_befunge_push(stack, b);
+                    stack_push(stack, a);
+                    stack_push(stack, b);
                 }
             }
             break;
         case INSTR_POP:
             {
                 signed long int v;
-                stack_befunge_pop(stack, &v);
+                stack_pop(stack, &v);
             }
             break;
 
         case INSTR_INTOUT:
             {
                 signed long int v;
-                if (stack_befunge_pop(stack, &v) == 0)
+                if (stack_pop(stack, &v) == 0)
                 {
                     SDL_Log("INTOUT: %lu", v);
                 }
@@ -192,7 +192,7 @@ static void field_step(Field *field)
         case INSTR_CHAROUT:
             {
                 signed long int v;
-                if (stack_befunge_pop(stack, &v) == 0)
+                if (stack_pop(stack, &v) == 0)
                 {
                     SDL_Log("CHAROUT: %lx", v);
                     // TODO is printing hex instead of char
@@ -282,6 +282,11 @@ void field_handle_keyb(Field *field, KeyboardEvent *event)
                 break;
         }
     }
+}
+
+Stack *field_get_stack(Field *field)
+{
+    return field->stack;
 }
 
 void field_draw(SDL_Renderer *renderer, Field *field)

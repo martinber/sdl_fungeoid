@@ -172,11 +172,11 @@ ADD: +
 SUB: -
 MUL: *
 INTDIV: / (93)
-FLTDIV: , (fish)
+// FLTDIV: , (fish)
 MOD: %
 NOT: ! (93)
 GT: ` (93) ( (fish)
-LT: ) (fish)
+LT: , (FUN!geoid) ) (fish)
 
 Stack
 -----
@@ -216,11 +216,37 @@ CHAROUT: , (93) o (fish)
 Write and get from world
 ------------------------
 
+GET g
+PUT p
 FETCH: ' (98)
 STORE: s (98)
-
-???? g and p
 ```
+
+### Keyboard groups
+
+Values:
+
+```
+9 8 7 a b c
+6 5 4 d e f
+3 2 1
+  0
+```
+
+Movement and IO
+
+```
+< v ^ > # ? @
+& ~ . , g p ' s
+```
+
+Operations and conditionals
+```
++ - * / % ! ` ,
+: \ $ _ | " k
+```
+
+### Original commands
 
 - https://esolangs.org/wiki/
 
