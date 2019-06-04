@@ -16,7 +16,6 @@
  *
  * On GNU/Linux tries to open a resizable window with the given size, on Android
  * the size will be ignored and the screen size will be used instead.
- *
  */
 int juan_init(
     SDL_Window **window,

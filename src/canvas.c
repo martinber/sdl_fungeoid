@@ -2,49 +2,43 @@
 
 #include <stdlib.h>
 
-
-Canvas canvas_init(int width, int height)
+Canvas *canvas_create(int width, int height)
 {
-    Canvas canvas =
+    Canvas *canvas = (Canvas*) malloc(sizeof(Canvas));
+    if (canvas == NULL)
     {
-        .width = width,
-        .height = height,
-
-        .matrix = NULL,
-    };
-
-    canvas.matrix = (int*) malloc(sizeof(int) * width * height);
-    if (canvas.matrix == NULL)
-    {
-        canvas.width = 0;
-        canvas.height = 0;
         SDL_Log("Failed to malloc canvas\n");
+        return NULL;
     }
-    else
+    canvas->width = width;
+    canvas->height = height;
+    canvas->matrix = NULL;
+
+    canvas->matrix = (int*) malloc(sizeof(int) * width * height);
+    if (canvas->matrix == NULL)
     {
-        for (int i = 0; i < canvas.width * canvas.height; i++)
-        {
-            canvas.matrix[i] = INSTR_SPACE;
-        }
+        free(canvas);
+        canvas = NULL;
+        SDL_Log("Failed to malloc canvas->matrix\n");
+        return NULL;
+    }
+
+    for (int i = 0; i < canvas->width * canvas->height; i++)
+    {
+        canvas->matrix[i] = INSTR_SPACE;
     }
     return canvas;
 }
 
-int canvas_free(Canvas *canvas)
+void canvas_free(Canvas *canvas)
 {
-    canvas->width = 0;
-    canvas->width = 0;
-
-    if (canvas->matrix != NULL)
+    if (canvas != NULL)
     {
         free(canvas->matrix);
+        canvas->matrix = NULL;
     }
-    else
-    {
-        SDL_Log("Tried to free NULL canvas\n");
-        return 1;
-    }
-    return 0;
+    free(canvas);
+    canvas = NULL;
 }
 
 enum INSTR_ID canvas_get_instr(Canvas *canvas, int x, int y)

@@ -12,10 +12,6 @@ sudo apt install build-essential libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
 
 I have to remember to:
 
-- When declaring a function add const to pointer arguments but not when passing
-  by value. If passing SDL objects I can't use const because SDL functions do
-  not take them.
-
 - Return zero on success and one on error.
 
 - Set variables to some value on declaration, pointers to NULL.
@@ -25,6 +21,15 @@ I have to remember to:
 - Use `static` for global variables and private functions.
 
 - Can't define global variables on header files, see `COLOR_XX` for example
+
+- For every struct with constructor:
+
+    - Create a constructor `_create()` function that returns NULL on error.
+        Remember to free the memory allocated inside the constructor on error.
+
+    - Create a destructor function `_free()` that returns void, do not check for
+        NULL pointer because `free()` can handle NULL pointers, but if the the
+        struct has pointers I have to free them before checking for NULL pointer.
 
 ## Android
 

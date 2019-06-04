@@ -23,19 +23,18 @@ typedef struct Canvas
      * The first integer represents (x, y) = (0, 0), the second one (1, 0), the
      * third (2, 0), etc.
      */
-    int* matrix;
+    int *matrix;
 } Canvas;
 
 /// Create canvas
 /**
- * On error canvas.matrix is NULL.
+ * Must be freed.
  *
- * The canvas must be freed with canvas_free().
+ * On error returns NULL.
  */
-Canvas canvas_init(int width, int height);
+Canvas *canvas_create(int width, int height);
 
-/// Free canvas memory
-int canvas_free(Canvas *canvas);
+void canvas_free(Canvas *canvas);
 
 /// Get instruction on given position
 /**

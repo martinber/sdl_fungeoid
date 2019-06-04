@@ -59,14 +59,14 @@ typedef struct BefungeStackStack
 
 /// Create stack
 /**
- * On error returns stack with alloc_size zero
+ * Must be freed.
  *
- * Memory must be freed using stack_befunge_free()
+ * On error returns NULL.
  */
-BefungeStack stack_befunge_init();
+BefungeStack *stack_befunge_create();
 
 /// Free stack memory
-int stack_befunge_free(BefungeStack *stack);
+void stack_befunge_free(BefungeStack *stack);
 
 /// Push value to stack
 /**

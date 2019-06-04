@@ -2,23 +2,44 @@
 
 #include "res.h"
 
-Keyboard keyb_create(SDL_Point window_size, int button_size)
+Keyboard *keyb_create(SDL_Point window_size, int button_size)
 {
-    // Initialize structs, leaving undefined geometries until I call
-    // keyb_update_geometry()
-    Keyboard keyb =
+    Keyboard *keyb = (Keyboard*) malloc(sizeof(Keyboard));
+    if (keyb == NULL)
     {
-        .geometry = { 0, 0, 0, 0 },
-        .button_size = button_size,
-        .shift_state = KEYB_SHIFT_NONE,
-        // .instr_buttons = empty for now
-        .but_up = { 0, 0, 0, 0 },
-        .but_down = { 0, 0, 0, 0 },
-        .but_left = { 0, 0, 0, 0 },
-        .but_right = { 0, 0, 0, 0 },
-        .but_shift_1 = { 0, 0, 0, 0 },
-        .but_shift_2 = { 0, 0, 0, 0 },
-    };
+        SDL_Log("Failed to malloc keyb");
+        return NULL;
+    }
+    keyb->geometry.x = 0;
+    keyb->geometry.y = 0;
+    keyb->geometry.w = 0;
+    keyb->geometry.h = 0;
+    keyb->button_size = button_size;
+    keyb->shift_state = KEYB_SHIFT_NONE;
+    keyb->but_up.x = 0;
+    keyb->but_up.y = 0;
+    keyb->but_up.w = 0;
+    keyb->but_up.h = 0;
+    keyb->but_down.x = 0;
+    keyb->but_down.y = 0;
+    keyb->but_down.w = 0;
+    keyb->but_down.h = 0;
+    keyb->but_left.x = 0;
+    keyb->but_left.y = 0;
+    keyb->but_left.w = 0;
+    keyb->but_left.h = 0;
+    keyb->but_right.x = 0;
+    keyb->but_right.y = 0;
+    keyb->but_right.w = 0;
+    keyb->but_right.h = 0;
+    keyb->but_shift_1.x = 0;
+    keyb->but_shift_1.y = 0;
+    keyb->but_shift_1.w = 0;
+    keyb->but_shift_1.h = 0;
+    keyb->but_shift_2.x = 0;
+    keyb->but_shift_2.y = 0;
+    keyb->but_shift_2.w = 0;
+    keyb->but_shift_2.h = 0;
 
     // WARNING: Probably in the future I'll have to change the limits of this
     // loop
@@ -29,11 +50,17 @@ Keyboard keyb_create(SDL_Point window_size, int button_size)
             .geometry = { 0, 0, 0, 0 },
             .id = i,
         };
-        keyb.instr_buttons[i] = but;
+        keyb->instr_buttons[i] = but;
     }
 
-    keyb_update_geometry(&keyb, window_size, button_size);
+    keyb_update_geometry(keyb, window_size, button_size);
     return keyb;
+}
+
+void keyb_free(Keyboard *keyb)
+{
+    free(keyb);
+    keyb = NULL;
 }
 
 void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size, int button_size) {

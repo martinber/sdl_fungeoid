@@ -1,46 +1,60 @@
 #include "field.h"
 
-Field field_create(int width, int height, SDL_Point *screen_size, int cell_size)
+Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size)
 {
-    Field field =
+    Field *field = (Field*) malloc(sizeof(Field));
+    if (field == NULL)
     {
-        .canvas = canvas_init(width, height),
-        .state = FIELD_EDITING,
-        .last_step_ms = 0,
-        .screen_size = *screen_size,
-        .ip = { 0, 0 },
-        .speed = { 1, 0 },
-        .cell_size = cell_size,
-        .stack = stack_befunge_init(),
-    };
-
-    if (field.canvas.matrix == NULL || field.stack.alloc_size == 0) {
-        SDL_Log("Error creating field.canvas or field.stack");
-        return field;
-        // TODO
+        SDL_Log("Failed to malloc field\n");
+        return NULL;
     }
+    field->canvas = NULL;
+    field->state = FIELD_EDITING;
+    field->last_step_ms = 0;
+    field->screen_size = *screen_size;
+    field->ip.x = 0;
+    field->ip.y = 0;
+    field->speed.x = 1;
+    field->speed.y = 0;
+    field->cell_size = cell_size;
+    field->stack = NULL;
+
+    field->canvas = canvas_create(width, height);
+    field->stack = stack_befunge_create();
+    if (field->canvas == NULL || field->stack == NULL)
+    {
+        canvas_free(field->canvas);
+        field->canvas = NULL;
+        stack_befunge_free(field->stack);
+        field->stack = NULL;
+
+        free(field);
+        field = NULL;
+
+        SDL_Log("Error creating field->canvas or field->stack");
+        return NULL;
+    }
+
     return field;
+}
+
+void field_free(Field *field)
+{
+    if (field != NULL)
+    {
+        canvas_free(field->canvas);
+        field->canvas = NULL;
+        stack_befunge_free(field->stack);
+        field->stack = NULL;
+    }
+    free(field);
+    field = NULL;
 }
 
 void field_resize_screen(Field *field, SDL_Point *screen_size, int cell_size)
 {
     field->screen_size = *screen_size;
     field->cell_size = cell_size;
-}
-
-int field_free(Field *field)
-{
-    if
-    (
-        canvas_free(&field->canvas) != 0
-        || stack_befunge_free(&field->stack) != 0
-    ) {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
 }
 
 /// Run simulation step
@@ -51,8 +65,8 @@ static void field_step(Field *field)
 {
     SDL_Point *ip = &field->ip;
     SDL_Point *speed = &field->speed;
-    BefungeStack *stack = &field->stack;
-    enum INSTR_ID instr = canvas_get_instr(&field->canvas, field->ip.x, field->ip.y);
+    BefungeStack *stack = field->stack;
+    enum INSTR_ID instr = canvas_get_instr(field->canvas, field->ip.x, field->ip.y);
 
     switch (instr)
     {
@@ -231,10 +245,10 @@ void field_handle_keyb(Field *field, KeyboardEvent *event)
         switch (event->type)
         {
             case KEYB_EVENT_ADD_INSTR:
-                canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, event->instr_id);
+                canvas_set_instr(field->canvas, field->ip.x, field->ip.y, event->instr_id);
                 break;
             case KEYB_EVENT_RM_INSTR:
-                canvas_set_instr(&field->canvas, field->ip.x, field->ip.y, INSTR_SPACE);
+                canvas_set_instr(field->canvas, field->ip.x, field->ip.y, INSTR_SPACE);
                 break;
 
             case KEYB_EVENT_MOVE_UP:
@@ -274,8 +288,8 @@ void field_handle_keyb(Field *field, KeyboardEvent *event)
 
 void field_draw(SDL_Renderer *renderer, Field *field)
 {
-    int width = field->canvas.width;
-    int height = field->canvas.height;
+    int width = field->canvas->width;
+    int height = field->canvas->height;
     int cell_size = field->cell_size;
 
     // Draw lines
@@ -298,7 +312,7 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     {
         for (int y = 0; y < height; y++)
         {
-            enum INSTR_ID id = canvas_get_instr(&field->canvas, x, y);
+            enum INSTR_ID id = canvas_get_instr(field->canvas, x, y);
             if (id != INSTR_NULL && id != INSTR_SPACE)
             {
                 SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, id);

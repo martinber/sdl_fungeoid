@@ -11,7 +11,7 @@ static int stack_befunge_realloc(BefungeStack *stack, size_t new_size)
         new_size > stack->alloc_size
         || new_size < stack->alloc_size - stack->alloc_step
     ) {
-        // Find new alloc size, should be the smalles multiple of alloc_step
+        // Find new alloc size, should be the smallest multiple of alloc_step
         // that can hold the new_size
         size_t new_alloc_size =
                 ((new_size / stack->alloc_step) + 1) * stack->alloc_step;
@@ -32,43 +32,42 @@ static int stack_befunge_realloc(BefungeStack *stack, size_t new_size)
     return 0;
 }
 
-BefungeStack stack_befunge_init()
+BefungeStack *stack_befunge_create()
 {
-    BefungeStack stack =
-    {
-        .max_size = 100000,
-        .alloc_size = 0,
-        .alloc_step = 1000,
-        .size = 0,
-        .number_size = sizeof(unsigned long int),
-        .memory = NULL,
-    };
-
-    stack.memory = (signed long int*) malloc(stack.alloc_step * stack.number_size);
-    if (stack.memory == NULL)
+    BefungeStack *stack = (BefungeStack*) malloc(sizeof(BefungeStack));
+    if (stack == NULL)
     {
         SDL_Log("Failed to malloc stack\n");
+        return NULL;
     }
-    else
+    stack->max_size = 100000;
+    stack->alloc_size = 0;
+    stack->alloc_step = 1000;
+    stack->size = 0;
+    stack->number_size = sizeof(unsigned long int);
+    stack->memory = NULL;
+
+    stack->memory = (signed long int*) malloc(stack->alloc_step * stack->number_size);
+    if (stack->memory == NULL)
     {
-        stack.alloc_size = stack.alloc_step;
+        free(stack);
+        stack = NULL;
+        SDL_Log("Failed to malloc stack->memory\n");
+        return NULL;
     }
 
     return stack;
 }
 
-int stack_befunge_free(BefungeStack *stack)
+void stack_befunge_free(BefungeStack *stack)
 {
-    if (stack->memory != NULL)
+    if (stack != NULL)
     {
         free(stack->memory);
+        stack->memory = NULL;
     }
-    else
-    {
-        SDL_Log("Tried to free NULL stack memory\n");
-        return 1;
-    }
-    return 0;
+    free(stack);
+    stack = NULL;
 }
 
 int stack_befunge_push(BefungeStack *stack, signed long int v)

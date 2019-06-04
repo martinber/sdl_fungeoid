@@ -25,10 +25,20 @@ static const char WINDOW_TITLE[] = "sdl_fungeoid";
 
 static void main_loop(SDL_Renderer *renderer)
 {
-    Field field = field_create(10, 14, &WINDOW_SIZE, CELL_SIZE);
-
-    Keyboard keyb = keyb_create(WINDOW_SIZE, BUTTON_SIZE);
-    InputHandler input = input_create();
+    Field *field = field_create(10, 14, &WINDOW_SIZE, CELL_SIZE);
+    Keyboard *keyb = keyb_create(WINDOW_SIZE, BUTTON_SIZE);
+    InputHandler *input = input_create();
+    if (field == NULL || keyb == NULL || input == NULL)
+    {
+        field_free(field);
+        field = NULL;
+        keyb_free(keyb);
+        keyb = NULL;
+        input_free(input);
+        input = NULL;
+        SDL_Log("Failed to create field, keyb or InputHandler");
+        return;
+    }
 
     // Time in milliseconds since start of the game
     Uint32 time_abs_ms = SDL_GetTicks();
@@ -55,53 +65,58 @@ static void main_loop(SDL_Renderer *renderer)
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                         WINDOW_SIZE.x = event.window.data1;
                         WINDOW_SIZE.y = event.window.data2;
-                        field_resize_screen(&field, &WINDOW_SIZE, CELL_SIZE);
-                        keyb_update_geometry(&keyb, WINDOW_SIZE, BUTTON_SIZE);
+                        field_resize_screen(field, &WINDOW_SIZE, CELL_SIZE);
+                        keyb_update_geometry(keyb, WINDOW_SIZE, BUTTON_SIZE);
                         break;
                 }
             }
 
-            Input i = input_handle_event(&input, &WINDOW_SIZE, &event);
+            Input i = input_handle_event(input, &WINDOW_SIZE, &event);
             switch (i.type)
             {
                 case (INPUT_CLICK_UP):
-                    if (SDL_PointInRect(&i.point, &keyb.geometry))
+                    if (SDL_PointInRect(&i.point, &keyb->geometry))
                     {
-                        KeyboardEvent event = keyb_handle_input(&keyb, &i);
-                        field_handle_keyb(&field, &event);
+                        KeyboardEvent event = keyb_handle_input(keyb, &i);
+                        field_handle_keyb(field, &event);
                     }
                     else
                     {
-                        field_handle_input(&field, &i);
+                        field_handle_input(field, &i);
                     }
                     break;
                 case (INPUT_CLICK_MOVE):
-                    if (SDL_PointInRect(&i.down_point, &keyb.geometry))
+                    if (SDL_PointInRect(&i.down_point, &keyb->geometry))
                     {
-                        KeyboardEvent event = keyb_handle_input(&keyb, &i);
-                        field_handle_keyb(&field, &event);
+                        KeyboardEvent event = keyb_handle_input(keyb, &i);
+                        field_handle_keyb(field, &event);
                     }
                     else
                     {
-                        field_handle_input(&field, &i);
+                        field_handle_input(field, &i);
                     }
                     break;
                 default:
                     break;
             }
         }
-        field_update(&field, time_abs_ms);
+        field_update(field, time_abs_ms);
 
         juan_set_render_draw_color(renderer, &COLOR_BG);
         SDL_RenderClear(renderer);
 
-        field_draw(renderer, &field);
-        keyb_draw(renderer, &keyb);
+        field_draw(renderer, field);
+        keyb_draw(renderer, keyb);
 
         SDL_RenderPresent(renderer);
     }
 
-    field_free(&field);
+    field_free(field);
+    field = NULL;
+    keyb_free(keyb);
+    keyb = NULL;
+    input_free(input);
+    input = NULL;
 }
 
 int main(int argc, char *argv[])

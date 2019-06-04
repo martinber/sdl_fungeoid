@@ -70,7 +70,14 @@ typedef struct Input
 } Input;
 
 /// Create InputHandler
-InputHandler input_create();
+/**
+ * Must be freed.
+ *
+ * On error returns NULL.
+ */
+InputHandler *input_create();
+
+void input_free(InputHandler *input);
 
 /// Handle input events
 /**

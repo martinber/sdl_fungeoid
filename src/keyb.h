@@ -64,7 +64,14 @@ typedef struct KeyboardEvent
 } KeyboardEvent;
 
 /// Create keyb
-Keyboard keyb_create(SDL_Point window_size, int button_size);
+/**
+ * Must be freed.
+ *
+ * On error returns NULL.
+ */
+Keyboard *keyb_create(SDL_Point window_size, int button_size);
+
+void keyb_free(Keyboard *keyb);
 
 /// Update size and position from window and cell size
 void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size, int button_size);

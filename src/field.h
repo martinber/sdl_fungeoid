@@ -21,7 +21,7 @@ enum FIELD_STATE
 
 typedef struct Field
 {
-    Canvas canvas;
+    Canvas *canvas;
     enum FIELD_STATE state;
 
     // Absolute time in milliseconds when last simulation step was done
@@ -31,20 +31,20 @@ typedef struct Field
     SDL_Point ip; // Instruction pointer
     SDL_Point speed; // Next relative motion of IP, e.g. (-1, 0)
     int cell_size;
-    BefungeStack stack;
+    BefungeStack *stack;
 } Field;
 
 /// Create field
 /**
  * Must be freed.
  *
- * On error TODO
+ * On error returns NULL.
  */
-Field field_create(int width, int height, SDL_Point *screen_size, int cell_size);
+Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size);
+
+void field_free(Field *field);
 
 void field_resize_screen(Field *field, SDL_Point *screen_size, int cell_size);
-
-int field_free(Field *field);
 
 /// Update interpreter if running
 void field_update(Field *field, Uint32 time_abs_ms);

@@ -1,15 +1,27 @@
 #include "input.h"
 
-InputHandler input_create()
+InputHandler *input_create()
 {
-    struct InputHandler handler =
+    InputHandler *handler = (InputHandler*) malloc(sizeof(InputHandler));
+    if (handler == NULL)
     {
-        .click_candidate = INPUT_NONE,
-        .last_touch_id = 0,
-        .down_point = { 0, 0 },
-        .sq_threshold = 40*40,
-    };
+        SDL_Log("Failed to malloc InputHandler");
+        return NULL;
+    }
+
+    handler->click_candidate = INPUT_NONE;
+    handler->last_touch_id = 0;
+    handler->down_point.x = 0;
+    handler->down_point.y = 0;
+    handler->sq_threshold = 40*40;
+
     return handler;
+}
+
+void input_free(InputHandler *handler)
+{
+    free(handler);
+    handler = NULL;
 }
 
 Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Event *event)
