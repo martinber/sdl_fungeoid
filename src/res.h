@@ -12,6 +12,12 @@
  * Keeps track of textures, sounds, etc.
  */
 
+enum RES_FONT_ID
+{
+    RES_FONT_STACK,
+    RES_FONT_ID_TOTAL,
+};
+
 /// Load all resources.
 /**
  * Returns 0 on success.
@@ -33,5 +39,7 @@ void res_free_all();
  * Returns NULL on invalid IDs, e.g. INSTR_NULL or INSTR_SPACE.
  */
 SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id);
+
+TTF_Font *res_get_font(enum RES_FONT_ID font);
 
 #endif

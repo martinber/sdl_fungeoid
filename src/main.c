@@ -8,6 +8,7 @@
 #include "res.h"
 #include "canvas.h"
 #include "keyb.h"
+#include "hud.h"
 #include "input.h"
 #include "field.h"
 
@@ -27,13 +28,16 @@ static void main_loop(SDL_Renderer *renderer)
 {
     Field *field = field_create(10, 14, &WINDOW_SIZE, CELL_SIZE);
     Keyboard *keyb = keyb_create(WINDOW_SIZE, BUTTON_SIZE);
+    Hud *hud = hud_create(WINDOW_SIZE, 32);
     InputHandler *input = input_create();
-    if (field == NULL || keyb == NULL || input == NULL)
+    if (field == NULL || keyb == NULL || hud == NULL || input == NULL)
     {
         field_free(field);
         field = NULL;
         keyb_free(keyb);
         keyb = NULL;
+        hud_free(hud);
+        hud = NULL;
         input_free(input);
         input = NULL;
         SDL_Log("Failed to create field, keyb or InputHandler");
@@ -67,6 +71,7 @@ static void main_loop(SDL_Renderer *renderer)
                         WINDOW_SIZE.y = event.window.data2;
                         field_resize_screen(field, &WINDOW_SIZE, CELL_SIZE);
                         keyb_update_geometry(keyb, WINDOW_SIZE, BUTTON_SIZE);
+                        hud_update_geometry(hud, WINDOW_SIZE, 32);
                         break;
                 }
             }
@@ -75,7 +80,10 @@ static void main_loop(SDL_Renderer *renderer)
             KeyboardEvent event = keyb_handle_input(keyb, &i);
             if (event.type == KEYB_EVENT_NOT_HANDLED)
             {
-                field_handle_input(field, &i);
+                if (hud_handle_input(hud, &i) != 0)
+                {
+                    field_handle_input(field, &i);
+                }
             }
             else
             {
@@ -88,6 +96,7 @@ static void main_loop(SDL_Renderer *renderer)
         SDL_RenderClear(renderer);
 
         field_draw(renderer, field);
+        hud_draw(renderer, hud);
         keyb_draw(renderer, keyb);
 
         SDL_RenderPresent(renderer);
@@ -97,6 +106,8 @@ static void main_loop(SDL_Renderer *renderer)
     field = NULL;
     keyb_free(keyb);
     keyb = NULL;
+    hud_free(hud);
+    hud = NULL;
     input_free(input);
     input = NULL;
 }

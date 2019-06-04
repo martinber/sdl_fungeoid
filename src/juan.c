@@ -110,7 +110,6 @@ SDL_Texture *juan_text_texture(
     char *text,
     SDL_Color color
 ) {
-
     SDL_Surface* surface = TTF_RenderText_Blended(font, text, color);
     if (surface == NULL) {
         SDL_Log("Unable to create surface for text: %s\n", text);

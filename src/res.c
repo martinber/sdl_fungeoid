@@ -3,8 +3,9 @@
 #include "juan.h"
 
 static TTF_Font* font_128 = NULL;
+static TTF_Font* font_32 = NULL;
 
-/// Array of textures for every instruction for the current thene and the current resolution
+/// Array of textures for every instruction for the current theme and the current resolution
 /**
  * Pointers for INSTR_NULL and INSTR_SPACE should be NULL
  */
@@ -85,7 +86,8 @@ int res_load_all(SDL_Renderer *renderer)
     }
     */
     font_128 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 128);
-    if (font_128 == NULL)
+    font_32 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 32);
+    if (font_128 == NULL || font_32 == NULL)
     {
         res_free_all();
         return 1;
@@ -131,6 +133,11 @@ void res_free_all()
         TTF_CloseFont(font_128);
         font_128 = NULL;
     }
+    if (font_32 != NULL)
+    {
+        TTF_CloseFont(font_32);
+        font_32 = NULL;
+    }
 }
 
 SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id)
@@ -141,4 +148,18 @@ SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id)
         return NULL;
     }
     return INSTR_TEXTURES[id];
+}
+
+TTF_Font *res_get_font(enum RES_FONT_ID font)
+{
+    switch (font)
+    {
+        case RES_FONT_STACK:
+            return font_32;
+            break;
+        default:
+            SDL_Log("Tried to get font with ID %d\n", font);
+            return NULL;
+            break;
+    }
 }
