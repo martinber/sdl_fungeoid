@@ -1,6 +1,8 @@
 #include "canvas.h"
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 
 Canvas *canvas_create(int width, int height)
 {
@@ -84,4 +86,38 @@ int canvas_set_instr(Canvas *canvas, int x, int y, enum INSTR_ID id)
     int memory_position = y * canvas->width + x;
     canvas->matrix[memory_position] = id;
     return 0;
+}
+
+int canvas_save(Canvas *canvas, char *filename)
+{
+    if (filename == NULL)
+    {
+        SDL_Log("Error opening NULL filename");
+        return 1;
+    }
+
+    FILE *f = NULL;
+    errno = 0;
+    f = fopen(filename, "w");
+    if (f == NULL)
+    {
+        SDL_Log("Error opening file %s: %s", filename, strerror(errno));
+        return 1;
+    }
+
+    // TODO
+
+
+
+    errno = 0;
+    if (fclose(f) == EOF)
+    {
+        SDL_Log("Error closing file %s: %s", filename, strerror(errno));
+    }
+
+}
+
+int canvas_load(Canvas *canvas, char *filename)
+{
+
 }

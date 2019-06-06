@@ -48,5 +48,8 @@ enum INSTR_ID canvas_get_instr(Canvas *canvas, int x, int y);
  */
 int canvas_set_instr(Canvas *canvas, int x, int y, enum INSTR_ID id);
 
+int canvas_save(Canvas *canvas, char *filename);
+
+int canvas_load(Canvas *canvas, char *filename);
 
 #endif
