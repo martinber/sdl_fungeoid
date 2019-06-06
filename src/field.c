@@ -68,6 +68,23 @@ static void field_step(Field *field)
 
     switch (instr)
     {
+        case INSTR_0: stack_push(stack, 0); break;
+        case INSTR_1: stack_push(stack, 1); break;
+        case INSTR_2: stack_push(stack, 2); break;
+        case INSTR_3: stack_push(stack, 3); break;
+        case INSTR_4: stack_push(stack, 4); break;
+        case INSTR_5: stack_push(stack, 5); break;
+        case INSTR_6: stack_push(stack, 6); break;
+        case INSTR_7: stack_push(stack, 7); break;
+        case INSTR_8: stack_push(stack, 8); break;
+        case INSTR_9: stack_push(stack, 9); break;
+        case INSTR_A: stack_push(stack, 10); break;
+        case INSTR_B: stack_push(stack, 11); break;
+        case INSTR_C: stack_push(stack, 12); break;
+        case INSTR_D: stack_push(stack, 13); break;
+        case INSTR_E: stack_push(stack, 14); break;
+        case INSTR_F: stack_push(stack, 15); break;
+
         case INSTR_UP:
             speed->x = 0;
             speed->y = -1;
@@ -88,23 +105,32 @@ static void field_step(Field *field)
             ip->x += speed->x;
             ip->y += speed->y;
             break;
-
-        case INSTR_0: stack_push(stack, 0); break;
-        case INSTR_1: stack_push(stack, 1); break;
-        case INSTR_2: stack_push(stack, 2); break;
-        case INSTR_3: stack_push(stack, 3); break;
-        case INSTR_4: stack_push(stack, 4); break;
-        case INSTR_5: stack_push(stack, 5); break;
-        case INSTR_6: stack_push(stack, 6); break;
-        case INSTR_7: stack_push(stack, 7); break;
-        case INSTR_8: stack_push(stack, 8); break;
-        case INSTR_9: stack_push(stack, 9); break;
-        case INSTR_A: stack_push(stack, 10); break;
-        case INSTR_B: stack_push(stack, 11); break;
-        case INSTR_C: stack_push(stack, 12); break;
-        case INSTR_D: stack_push(stack, 13); break;
-        case INSTR_E: stack_push(stack, 14); break;
-        case INSTR_F: stack_push(stack, 15); break;
+        case INSTR_RND:
+            // Number between 0 and 3, not perfectry uniform but almost
+            switch (rand() % 4)
+            {
+                case 0:
+                    speed->x = 0;
+                    speed->y = -1;
+                    break;
+                case 1:
+                    speed->x = 0;
+                    speed->y = +1;
+                    break;
+                case 2:
+                    speed->x = -1;
+                    speed->y = 0;
+                    break;
+                case 3:
+                    speed->x = +1;
+                    speed->y = 0;
+                    break;
+            }
+            break;
+        case INSTR_STOP:
+            speed->x = 0;
+            speed->y = 0;
+            break;
 
         case INSTR_ADD:
             {
@@ -150,6 +176,69 @@ static void field_step(Field *field)
                 }
             }
             break;
+        case INSTR_MOD:
+            {
+                signed long int a;
+                signed long int b;
+                if (stack_pop(stack, &a) == 0
+                        && stack_pop(stack, &b) == 0)
+                {
+                    stack_push(stack, b % a);
+                }
+            }
+            break;
+        case INSTR_NOT:
+            {
+                signed long int a;
+                if (stack_pop(stack, &a) == 0)
+                {
+                    if (a == 0)
+                    {
+                        stack_push(stack, 1);
+                    }
+                    else
+                    {
+                        stack_push(stack, 0);
+                    }
+                }
+            }
+            break;
+        case INSTR_GT:
+            {
+                signed long int a;
+                signed long int b;
+                if (stack_pop(stack, &a) == 0
+                        && stack_pop(stack, &b) == 0)
+                {
+                    if (b > a)
+                    {
+                        stack_push(stack, 1);
+                    }
+                    else
+                    {
+                        stack_push(stack, 0);
+                    }
+                }
+            }
+            break;
+        case INSTR_LT:
+            {
+                signed long int a;
+                signed long int b;
+                if (stack_pop(stack, &a) == 0
+                        && stack_pop(stack, &b) == 0)
+                {
+                    if (b < a)
+                    {
+                        stack_push(stack, 1);
+                    }
+                    else
+                    {
+                        stack_push(stack, 0);
+                    }
+                }
+            }
+            break;
 
         case INSTR_DUP:
             {
@@ -179,7 +268,55 @@ static void field_step(Field *field)
                 stack_pop(stack, &v);
             }
             break;
+        case INSTR_HIF:
+            {
+                signed long int a;
+                if (stack_pop(stack, &a) == 0)
+                {
+                    if (a == 0)
+                    {
+                        speed->x = +1;
+                        speed->y = 0;
+                    }
+                    else
+                    {
+                        speed->x = -1;
+                        speed->y = 0;
+                    }
+                }
+            }
+            break;
+        case INSTR_VIF:
+            {
+                signed long int a;
+                if (stack_pop(stack, &a) == 0)
+                {
+                    if (a == 0)
+                    {
+                        speed->x = 0;
+                        speed->y = +1;
+                    }
+                    else
+                    {
+                        speed->x = 0;
+                        speed->y = -1;
+                    }
+                }
+            }
+            break;
+        case INSTR_STR:
+            // TODO
+            break;
+        case INSTR_ITER:
+            // TODO
+            break;
 
+        case INSTR_INTIN:
+            // TODO
+            break;
+        case INSTR_CHARIN:
+            // TODO
+            break;
         case INSTR_INTOUT:
             {
                 signed long int v;
@@ -198,6 +335,19 @@ static void field_step(Field *field)
                     // TODO is printing hex instead of char
                 }
             }
+            break;
+
+        case INSTR_GET:
+            // TODO
+            break;
+        case INSTR_PUT:
+            // TODO
+            break;
+        case INSTR_FETCH:
+            // TODO
+            break;
+        case INSTR_STORE:
+            // TODO
             break;
 
         default:

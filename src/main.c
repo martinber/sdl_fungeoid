@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "const.h"
 #include "juan.h"
@@ -17,7 +18,7 @@ static int CELL_SIZE = 64;
 static int BUTTON_SIZE = 128;
 #else
 static int CELL_SIZE = 32;
-static int BUTTON_SIZE = 64;
+static int BUTTON_SIZE = 48;
 #endif
 // Window dimensions, initial values are used for desktop, when on Android or
 // resizing these values will be updated
@@ -125,6 +126,9 @@ int main(int argc, char *argv[])
         printf("Error creating window or renderer\n");
         return 1;
     }
+
+    // Init RNG
+    srand((unsigned int) time(NULL));
 
     if (res_load_all(renderer) == 0)
     {
