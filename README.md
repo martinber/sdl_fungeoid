@@ -176,7 +176,6 @@ INTDIV: / (93)
 MOD: %
 NOT: ! (93)
 GT: ` (93) ( (fish)
-LT: , (FUN!geoid) ) (fish)
 
 Stack
 -----
@@ -242,7 +241,7 @@ Movement and IO
 
 Operations and conditionals
 ```
-+ - * / % ! ` ,
++ - * / % ! `
 : \ $ _ | " k
 ```
 

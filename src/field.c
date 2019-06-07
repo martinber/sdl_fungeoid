@@ -32,6 +32,7 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
         SDL_Log("Error creating field->canvas or field->stack");
         return NULL;
     }
+    canvas_load(field->canvas, "./program.bf");
 
     return field;
 }
@@ -40,6 +41,10 @@ void field_free(Field *field)
 {
     if (field != NULL)
     {
+        if (field->canvas != NULL)
+        {
+            canvas_save(field->canvas, "./program.bf");
+        }
         canvas_free(field->canvas);
         field->canvas = NULL;
         stack_free(field->stack);

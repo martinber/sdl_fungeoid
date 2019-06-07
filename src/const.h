@@ -98,4 +98,10 @@ enum INSTR_THEME
  */
 char const_befunge_char(enum INSTR_ID id);
 
+/// Return INSTR_ID from a char representing a befunge instruction
+/*
+ * Return INSTR_NULL if invalid ID.
+ */
+enum INSTR_ID const_befunge_id(char c);
+
 #endif

@@ -72,3 +72,65 @@ char const_befunge_char(enum INSTR_ID id)
                  return 0;
     }
 }
+
+enum INSTR_ID const_befunge_id(char c)
+{
+    switch (c)
+    {
+        case ' ': return INSTR_SPACE;
+
+        case '0': return INSTR_0;
+        case '1': return INSTR_1;
+        case '2': return INSTR_2;
+        case '3': return INSTR_3;
+        case '4': return INSTR_4;
+        case '5': return INSTR_5;
+        case '6': return INSTR_6;
+        case '7': return INSTR_7;
+        case '8': return INSTR_8;
+        case '9': return INSTR_9;
+        case 'a': return INSTR_A;
+        case 'b': return INSTR_B;
+        case 'c': return INSTR_C;
+        case 'd': return INSTR_D;
+        case 'e': return INSTR_E;
+        case 'f': return INSTR_F;
+
+        case '^': return INSTR_UP;
+        case 'v': return INSTR_DOWN;
+        case '<': return INSTR_LEFT;
+        case '>': return INSTR_RIGHT;
+        case '#': return INSTR_BRIDGE;
+        case '?': return INSTR_RND;
+        case '@': return INSTR_STOP;
+
+        case '+': return INSTR_ADD;
+        case '-': return INSTR_SUB;
+        case '*': return INSTR_MUL;
+        case '/': return INSTR_INTDIV;
+        case '%': return INSTR_MOD;
+        case '!': return INSTR_NOT;
+        case '`': return INSTR_GT;
+
+        case ':': return INSTR_DUP;
+        case '\\': return INSTR_SWP;
+        case '$': return INSTR_POP;
+        case '_': return INSTR_HIF;
+        case '|': return INSTR_VIF;
+        case '"': return INSTR_STR;
+        case 'k': return INSTR_ITER;
+
+        case '&': return INSTR_INTIN;
+        case '~': return INSTR_CHARIN;
+        case '.': return INSTR_INTOUT;
+        case ',': return INSTR_CHAROUT;
+
+        case 'g': return INSTR_GET;
+        case 'p': return INSTR_PUT;
+        case '\'': return INSTR_FETCH;
+        case 's': return INSTR_STORE;
+
+        default: SDL_Log("Invalid instruction character \"%c\"", c);
+                 return INSTR_NULL;
+    }
+}
