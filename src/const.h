@@ -102,6 +102,13 @@ char const_befunge_char(enum INSTR_ID id);
 /*
  * Return INSTR_NULL if invalid ID.
  */
-enum INSTR_ID const_befunge_id(char c);
+enum INSTR_ID const_befunge_from_char(char c);
+
+/// Return save file path from filename
+/**
+ * For example if filename is "program.bf", the function will return
+ * "~/.config/sdl_fungeoid/saves/program.bf" or similar
+ */
+//char *const_get_save_path(char *filename);
 
 #endif

@@ -73,7 +73,7 @@ char const_befunge_char(enum INSTR_ID id)
     }
 }
 
-enum INSTR_ID const_befunge_id(char c)
+enum INSTR_ID const_befunge_from_char(char c)
 {
     switch (c)
     {
@@ -134,3 +134,24 @@ enum INSTR_ID const_befunge_id(char c)
                  return INSTR_NULL;
     }
 }
+
+/*
+char *const_get_save_path(char *filename)
+{
+#ifdef __ANDROID__
+    // TODO: Android
+#else
+    char *prefix = NULL;
+    prefix = SDL_GetPrefPath("mbernardi", "sdl_fungeoid");
+    if (prefix == NULL)
+    {
+        SDL_Log("Could not SDL_GetPrefPath");
+        return NULL
+    }
+
+
+
+#endif
+
+}
+*/

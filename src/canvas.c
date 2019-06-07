@@ -210,7 +210,7 @@ int canvas_load(Canvas *canvas, char *filename)
                 SDL_Log("File too tall to fit on canvas");
                 break; // File too tall
             }
-            int id = const_befunge_id(c);
+            int id = const_befunge_from_char(c);
             if (id == INSTR_NULL)
             {
                 SDL_Log("Ignoring NULL instruction at (%d, %d)", x, y);

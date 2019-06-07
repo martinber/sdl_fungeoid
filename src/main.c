@@ -52,6 +52,7 @@ static void main_loop(SDL_Renderer *renderer)
 
     bool running = true;
     SDL_Event event;
+    SDL_StartTextInput(); // So we get events of type SDL_TextInputEvent
     while (running)
     {
         time_rel_ms = SDL_GetTicks() - time_abs_ms;

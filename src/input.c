@@ -143,6 +143,12 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
                 input.diff.y = event->motion.yrel;
             }
             break;
+
+        case SDL_TEXTINPUT:
+            input.type = INPUT_TEXT;
+            strncpy(input.text, event->text.text, 32);
+            input.text[31] = '\0'; // Just in case
+            break;
     }
 
     return input;

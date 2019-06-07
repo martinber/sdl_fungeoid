@@ -11,6 +11,7 @@ enum INPUT_TYPE
     INPUT_CLICK_UP,
     INPUT_KEY_DOWN,
     INPUT_KEY_UP,
+    INPUT_TEXT,
     INPUT_TYPE_TOTAL,
 };
 
@@ -67,6 +68,10 @@ typedef struct Input
 
     // for INPUT_KEY_DOWN and INPUT_KEY_UP
     SDL_Keycode key;
+
+    // for INPUT_TEXT
+    // Length needed is 32 according to SDL_TextInputEvent documentation
+    char text[32];
 } Input;
 
 /// Create InputHandler

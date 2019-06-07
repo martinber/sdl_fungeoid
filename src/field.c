@@ -388,6 +388,52 @@ void field_handle_input(Field *field, Input *input)
         {
 
         }
+        else if (input->type == INPUT_TEXT)
+        {
+            // input->text should be the text given by SDL_TextInputEvent,
+            // most of the time contains only a character that represents the
+            // letter
+            if (strlen(input->text) == 1)
+            {
+                enum INSTR_ID id = const_befunge_from_char(input->text[0]);
+                if (id != INSTR_NULL)
+                {
+                    canvas_set_instr(
+                            field->canvas,
+                            field->ip.x,
+                            field->ip.y,
+                            id);
+                }
+            }
+        }
+        else if (input->type == INPUT_KEY_DOWN)
+        {
+            switch (input->key)
+            {
+                case SDLK_UP:
+                    field->ip.y -= 1;
+                    break;
+                case SDLK_DOWN:
+                    field->ip.y += 1;
+                    break;
+                case SDLK_LEFT:
+                    field->ip.x -= 1;
+                    break;
+                case SDLK_RIGHT:
+                    field->ip.x += 1;
+                    break;
+                case SDLK_BACKSPACE:
+                    canvas_set_instr(
+                            field->canvas,
+                            field->ip.x,
+                            field->ip.y,
+                            INSTR_SPACE);
+                    break;
+
+                default:
+                    break;
+            }
+        }
     }
 }
 
