@@ -78,7 +78,7 @@ int juan_init(
     }
 
     // Antialiasing for scaling
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 
     return 0;
 }

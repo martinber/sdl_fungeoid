@@ -313,7 +313,7 @@ static void field_step(Field *field)
             // TODO
             break;
         case INSTR_ITER:
-            // TODO
+            // TODO show on screen some indicator of the action being made
             break;
 
         case INSTR_INTIN:
@@ -372,6 +372,13 @@ void field_update(Field *field, Uint32 time_abs_ms)
             field->last_step_ms = time_abs_ms;
             field_step(field);
         }
+        /*
+        field->last_step_ms = time_abs_ms;
+        for (int i = 0; i < 100000; i++)
+        {
+            field_step(field);
+        }
+        */
     }
 }
 
@@ -527,6 +534,31 @@ void field_draw(SDL_Renderer *renderer, Field *field)
                     cell_size
                 };
                 SDL_RenderCopy(renderer, tex, NULL, &r);
+
+                // Draw ascii value
+                char str_buf[4];
+                snprintf(str_buf, 4, "%d", const_befunge_char(id));
+                str_buf[3] = '\0';
+                tex = juan_text_texture (
+                    renderer,
+                    res_get_font(RES_FONT_STACK),
+                    str_buf,
+                    COLOR_WHITE
+                );
+                if (tex == NULL)
+                {
+                    SDL_Log("Error rendering text for stack value: %d", const_befunge_char(id));
+                    return;
+                }
+                SDL_Rect rect;
+                SDL_QueryTexture(tex, NULL, NULL, &rect.w, &rect.h);
+                rect.x = x * cell_size;
+                rect.y = y * cell_size;
+                double factor = (cell_size / 2) / (float) rect.h;
+                rect.h *= factor;
+                rect.w *= factor;
+                SDL_RenderCopy(renderer, tex, NULL, &rect);
+                SDL_DestroyTexture(tex);
             }
         }
     }
