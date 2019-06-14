@@ -64,6 +64,13 @@ static void main_loop(SDL_Renderer *renderer)
             {
                 running = false;
             }
+            if (event.type == SDL_KEYUP)
+            {
+                if (event.key.keysym.sym == SDLK_AC_BACK)
+                {
+                    running = false;
+                }
+            }
             else if (event.type == SDL_WINDOWEVENT)
             {
                 switch (event.window.event)

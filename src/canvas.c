@@ -184,7 +184,7 @@ int canvas_load(Canvas *canvas, char *filename)
     int y = 0;
     while (1)
     {
-        char c = fgetc(f);
+        int c = fgetc(f);
         if (c == EOF)
         {
             if (ferror(f))
