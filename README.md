@@ -221,7 +221,7 @@ FETCH: ' (98)
 STORE: s (98)
 ```
 
-### Keyboard groups
+### Keyboard
 
 Values:
 
@@ -240,10 +240,23 @@ Movement and IO
 ```
 
 Operations and conditionals
+
 ```
 + - * / % ! `
 : \ $ _ | " k
 ```
+
+### Special keys
+
+- Shift 1
+- Shift 2
+
+- Paint Select
+- Rectangle Select
+- Copy
+- Move
+- Paste
+- Comment
 
 ### Original commands
 

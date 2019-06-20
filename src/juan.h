@@ -16,6 +16,8 @@
  *
  * On GNU/Linux tries to open a resizable window with the given size, on Android
  * the size will be ignored and the screen size will be used instead.
+ *
+ * Check the actual screen size with SDL_GetRendererOutputSize() afterwards.
  */
 int juan_init(
     SDL_Window **window,
@@ -102,5 +104,11 @@ void juan_draw_v_line_cap
     int length,
     int width
 );
+
+/// Minimum of two ints
+int juan_min(int a, int b);
+
+/// Maximum of two ints
+int juan_max(int a, int b);
 
 #endif

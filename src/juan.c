@@ -32,21 +32,6 @@ int juan_init(
         return 1;
     }
 
-#ifdef __ANDROID__
-    // Get phone screen size
-    SDL_DisplayMode display_mode;
-    if(SDL_GetCurrentDisplayMode(0, &display_mode) != 0)
-    {
-        SDL_Log("SDL_GetCurrentDisplayMode Error: %s\n", SDL_GetError());
-        TTF_Quit();
-        IMG_Quit();
-        SDL_Quit();
-        return 1;
-    }
-    width = display_mode.w;
-    height = display_mode.h;
-#endif
-
     *window = SDL_CreateWindow
     (
         title,
@@ -62,6 +47,16 @@ int juan_init(
         SDL_Quit();
         return 1;
     }
+
+    /* if (SDL_SetWindowFullscreen(*window, SDL_WINDOW_FULLSCREEN) != 0) */
+    /* { */
+        /* SDL_Log("SDL_SetWindowFullscreen Error: %s\n", SDL_GetError()); */
+        /* TTF_Quit(); */
+        /* IMG_Quit(); */
+        /* SDL_Quit(); */
+        /* return 1; */
+    /* } */
+
 
     *renderer = SDL_CreateRenderer
     (
@@ -234,4 +229,24 @@ void juan_draw_v_line_cap
         length + width,
     };
     SDL_RenderFillRect(renderer, &rect);
+}
+
+int juan_min(int a, int b)
+{
+    if (a > b)
+    {
+        return b;
+    }
+    else
+        return a;
+}
+
+int juan_max(int a, int b)
+{
+    if (a > b)
+    {
+        return a;
+    }
+    else
+        return b;
 }

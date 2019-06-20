@@ -13,13 +13,9 @@
 #include "input.h"
 #include "field.h"
 
-#ifdef __ANDROID__
-static int CELL_SIZE = 64;
-static int BUTTON_SIZE = 128;
-#else
-static int CELL_SIZE = 32;
-static int BUTTON_SIZE = 48;
-#endif
+static int CELL_SIZE = 0;
+static int BUTTON_SIZE = 0;
+
 // Window dimensions, initial values are used for desktop, when on Android or
 // resizing these values will be updated
 static SDL_Point WINDOW_SIZE = { 64 * 10, 64 * 14 };
@@ -27,6 +23,10 @@ static const char WINDOW_TITLE[] = "sdl_fungeoid";
 
 static void main_loop(SDL_Renderer *renderer)
 {
+    BUTTON_SIZE = juan_min(WINDOW_SIZE.x / 9, WINDOW_SIZE.y / 10);
+    CELL_SIZE = juan_min(WINDOW_SIZE.x / 15, WINDOW_SIZE.y / 15);
+
+
     Field *field = field_create(10, 14, &WINDOW_SIZE, CELL_SIZE);
     Keyboard *keyb = keyb_create(WINDOW_SIZE, BUTTON_SIZE);
     Hud *hud = hud_create(WINDOW_SIZE, 32, field_get_stack(field));
@@ -81,6 +81,9 @@ static void main_loop(SDL_Renderer *renderer)
                         field_resize_screen(field, &WINDOW_SIZE, CELL_SIZE);
                         keyb_update_geometry(keyb, WINDOW_SIZE, BUTTON_SIZE);
                         hud_update_geometry(hud, WINDOW_SIZE, 32);
+
+                        BUTTON_SIZE = juan_min(WINDOW_SIZE.x / 9, WINDOW_SIZE.y / 10);
+                        CELL_SIZE = juan_min(WINDOW_SIZE.x / 15, WINDOW_SIZE.y / 15);
                         break;
                 }
             }
@@ -133,6 +136,12 @@ int main(int argc, char *argv[])
     if (juan_init(&window, &renderer, WINDOW_TITLE, WINDOW_SIZE.x, WINDOW_SIZE.y) != 0) {
         printf("Error creating window or renderer\n");
         return 1;
+    }
+
+    // Check the screen size actually used
+    if (SDL_GetRendererOutputSize(renderer, &WINDOW_SIZE.x, &WINDOW_SIZE.y) != 0)
+    {
+        SDL_Log("SDL_GetRendererOutputSize Error: %s\n", SDL_GetError());
     }
 
     // Init RNG
