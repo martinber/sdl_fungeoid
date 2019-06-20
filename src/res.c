@@ -12,10 +12,10 @@ static TTF_Font* font_32 = NULL;
 static SDL_Texture *INSTR_TEXTURES[INSTR_ID_TOTAL] = { NULL };
 
 /// Array of textures for every keyboard icon for the current theme and the current resolution
-/**
- * Pointers for INSTR_NULL and INSTR_SPACE should be NULL
- */
 static SDL_Texture *KEYB_ICON_TEXTURES[RES_KEYB_ICON_ID_TOTAL] = { NULL };
+
+/// Array of textures for every keyboard tab text for the current theme and the current resolution
+static SDL_Texture *KEYB_TAB_TEXTURES[RES_KEYB_TAB_ID_TOTAL] = { NULL };
 
 /// Resolution of instruction textures (128x128)
 static const int INSTR_TEXTURES_RES = 128;
@@ -101,19 +101,36 @@ int res_load_all(SDL_Renderer *renderer)
 
     // Load every instruction texture from characters
 
-    SDL_Color color = { 255, 255, 255, 255 };
     for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
     {
         if (i != INSTR_NULL && i != INSTR_SPACE)
         {
             INSTR_TEXTURES[i] = instr_tex_from_char(
-                    renderer, font_128, const_befunge_char(i), color);
+                    renderer, font_128, const_befunge_char(i), COLOR_WHITE);
             if (INSTR_TEXTURES[i] == NULL)
             {
                 SDL_Log("Error creating instruction texture for ID %d\n", i);
                 res_free_all();
                 return 1;
             }
+        }
+    }
+
+    // Load every tab texture from characters
+    char *tab_text[RES_KEYB_TAB_ID_TOTAL] =
+    {
+        "run", "123", "<>io", "+*/", "char",
+    };
+
+    for (enum RES_KEYB_TAB_ID i = 0; i < RES_KEYB_TAB_ID_TOTAL; i++)
+    {
+        KEYB_TAB_TEXTURES[i] = juan_text_texture(
+                renderer, font_128, tab_text[i], COLOR_WHITE);
+        if (KEYB_TAB_TEXTURES[i] == NULL)
+        {
+            SDL_Log("Error creating tab texture for ID %d\n", i);
+            res_free_all();
+            return 1;
         }
     }
 
@@ -163,7 +180,8 @@ int res_load_all(SDL_Renderer *renderer)
                 return 1;
 
         }
-        if (KEYB_ICON_TEXTURES[i] == NULL) {
+        if (KEYB_ICON_TEXTURES[i] == NULL)
+        {
             SDL_Log("Error loading keyb_icon texture for ID %d\n", i);
             res_free_all();
             return 1;
@@ -184,6 +202,24 @@ void res_free_all()
         {
             SDL_DestroyTexture(INSTR_TEXTURES[i]);
             INSTR_TEXTURES[i] = NULL;
+        }
+    }
+
+    for (enum RES_KEYB_ICON_ID i = 0; i < RES_KEYB_ICON_ID_TOTAL; i++)
+    {
+        if (KEYB_ICON_TEXTURES[i] != NULL)
+        {
+            SDL_DestroyTexture(KEYB_ICON_TEXTURES[i]);
+            KEYB_ICON_TEXTURES[i] = NULL;
+        }
+    }
+
+    for (enum RES_KEYB_TAB_ID i = 0; i < RES_KEYB_TAB_ID_TOTAL; i++)
+    {
+        if (KEYB_TAB_TEXTURES[i] != NULL)
+        {
+            SDL_DestroyTexture(KEYB_TAB_TEXTURES[i]);
+            KEYB_TAB_TEXTURES[i] = NULL;
         }
     }
 
@@ -213,6 +249,12 @@ SDL_Texture *res_get_keyb_icon_tex(enum INSTR_THEME theme, enum RES_KEYB_ICON_ID
 {
     UNUSED(theme);
     return KEYB_ICON_TEXTURES[id];
+}
+
+SDL_Texture *res_get_keyb_tab_tex(enum INSTR_THEME theme, enum RES_KEYB_TAB_ID id)
+{
+    UNUSED(theme);
+    return KEYB_TAB_TEXTURES[id];
 }
 
 TTF_Font *res_get_font(enum RES_FONT_ID font)

@@ -27,6 +27,8 @@ static const enum INSTR_ID KEYB_OPER_INSTR_ID[KEYB_OPER_BUTTONS_TOTAL] =
     INSTR_ITER,
 };
 
+static const int TAB_NUMBER = 5;
+
 Keyboard *keyb_create(SDL_Point window_size)
 {
     Keyboard *keyb = (Keyboard*) malloc(sizeof(Keyboard));
@@ -36,7 +38,8 @@ Keyboard *keyb_create(SDL_Point window_size)
         return NULL;
     }
     keyb->geometry = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->button_size = 0;
+    keyb->tabs_geometry = (SDL_Rect) { 0, 0, 0, 0 };
+    keyb->active_tab = 0;
     keyb->shift_state = KEYB_SHIFT_NONE;
     keyb->but_up = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->but_down = (SDL_Rect) { 0, 0, 0, 0 };
@@ -51,12 +54,9 @@ Keyboard *keyb_create(SDL_Point window_size)
     keyb->but_paste = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->but_comment = (SDL_Rect) { 0, 0, 0, 0 };
 
-    // WARNING: Probably in the future I'll have to change the limits of this
-    // loop
-    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+    for (enum KEYB_TAB_ID i = 0; i < KEYB_TAB_ID_TOTAL; i++)
     {
-        InstrButton but = { .geometry = { 0, 0, 0, 0 }, .id = i };
-        keyb->instr_buttons[i] = but;
+        keyb->tab_geometry[i] = (SDL_Rect) { 0, 0, 0, 0 };
     }
 
     for (int i = 0; i < KEYB_VALUES_BUTTONS_TOTAL; i++)
@@ -114,7 +114,8 @@ void keyb_free(Keyboard *keyb)
 static void grid_position
 (
     SDL_Rect *rect,
-    int cell_size,
+    int cell_w,
+    int cell_h,
     int cell_spacing,
     int origin_x,
     int origin_y,
@@ -122,10 +123,10 @@ static void grid_position
     int pos_index_y
 ) {
 
-    rect->x = origin_x + pos_index_x * cell_size;
-    rect->y = origin_y + pos_index_y * cell_size;
-    rect->w = cell_size;
-    rect->h = cell_size;
+    rect->x = origin_x + pos_index_x * cell_w;
+    rect->y = origin_y + pos_index_y * cell_h;
+    rect->w = cell_w;
+    rect->h = cell_h;
 
     if (pos_index_x >= 1)
     {
@@ -149,103 +150,209 @@ static void grid_position
 
 void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size) {
 
-    int button_size = juan_min(window_size.x / 9, window_size.y / 10);
+    int button_size = juan_min(window_size.x / 9, window_size.y / 12);
+    int tab_height = button_size * 0.7;
+    int tab_width = button_size * 1.7;
 
     // Set keyboard size
-    keyb->button_size = button_size;
     keyb->geometry.w = window_size.x;
     keyb->geometry.h = button_size * 5.2;
     keyb->geometry.x = 0;
     keyb->geometry.y = window_size.y - keyb->geometry.h;
 
-    int margin = keyb->button_size / 2;
-    int spacing = keyb->button_size / 8;
+    int margin = button_size / 2;
+    int spacing = button_size / 8;
     int keyb_x = keyb->geometry.x;
     int keyb_y = keyb->geometry.y;
     int keyb_w = keyb->geometry.w;
     int keyb_h = keyb->geometry.h;
 
-    // Set buttons positions and sizes
-    // WARNING: Probably in the future I'll have to change the limits of this
-    // loop
-    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+    // Tabs
+    for (enum KEYB_TAB_ID i = 0; i < KEYB_TAB_ID_TOTAL; i++)
     {
-        keyb->instr_buttons[i].geometry.w = button_size;
-        keyb->instr_buttons[i].geometry.h = button_size;
-
-        keyb->instr_buttons[i].geometry.x = keyb_x +
-            margin + button_size * i + spacing * (i - 1);
-        keyb->instr_buttons[i].geometry.y = keyb_y + margin;
+        int origin_x = keyb_x;
+        int origin_y = keyb_y - tab_height;
+        grid_position(&keyb->tab_geometry[i], tab_width, tab_height, 0,
+                origin_x, origin_y, i, 0);
     }
 
-    keyb->but_up.x = keyb_x + keyb_w - margin - 2 * button_size - spacing;
-    keyb->but_up.y = keyb_y + keyb_h - margin - 2 * button_size - spacing;
-    keyb->but_up.w = button_size;
-    keyb->but_up.h = button_size;
+    keyb->tabs_geometry.w = keyb->tab_geometry[KEYB_TAB_ID_TOTAL - 1].x
+            - keyb->tab_geometry[0].x + tab_width;
+    keyb->tabs_geometry.h = tab_height;
+    keyb->tabs_geometry.x = keyb->tab_geometry[0].x;
+    keyb->tabs_geometry.y = keyb->tab_geometry[0].y;
 
-    keyb->but_down.x = keyb_x + keyb_w - margin - 2 * button_size - spacing;
-    keyb->but_down.y = keyb_y + keyb_h - margin - button_size;
-    keyb->but_down.w = button_size;
-    keyb->but_down.h = button_size;
-
-    keyb->but_left.x = keyb_x + keyb_w - margin - 3 * button_size - 2 * spacing;
-    keyb->but_left.y = keyb_y + keyb_h - margin - button_size;
-    keyb->but_left.w = button_size;
-    keyb->but_left.h = button_size;
-
-    keyb->but_right.x = keyb_x + keyb_w - margin - button_size;
-    keyb->but_right.y = keyb_y + keyb_h - margin - button_size;
-    keyb->but_right.w = button_size;
-    keyb->but_right.h = button_size;
+    // Arrow keys
+    {
+        int origin_x = keyb_x + keyb_w - margin - button_size;
+        int origin_y = keyb_y + keyb_h - margin - button_size;
+        grid_position(&keyb->but_right, button_size, button_size, spacing,
+                origin_x, origin_y, 0, 0);
+        grid_position(&keyb->but_down, button_size, button_size, spacing,
+                origin_x, origin_y, -1, 0);
+        grid_position(&keyb->but_left, button_size, button_size, spacing,
+                origin_x, origin_y, -2, 0);
+        grid_position(&keyb->but_up, button_size, button_size, spacing,
+                origin_x, origin_y, -1, -1);
+    }
 
     // Shift and special buttons
     {
         int origin_x = keyb_x + margin;
         int origin_y = keyb_y + keyb_h - margin - button_size;
-        grid_position(&keyb->but_shift_1, button_size, spacing,
+        grid_position(&keyb->but_shift_1, button_size, button_size, spacing,
                 origin_x, origin_y, 0, -1);
-        grid_position(&keyb->but_shift_2, button_size, spacing,
+        grid_position(&keyb->but_shift_2, button_size, button_size, spacing,
                 origin_x, origin_y, 0, 0);
-        grid_position(&keyb->but_select_rect, button_size, spacing,
+        grid_position(&keyb->but_select_rect, button_size, button_size, spacing,
                 origin_x, origin_y, 1, -1);
-        grid_position(&keyb->but_select_paint, button_size, spacing,
+        grid_position(&keyb->but_select_paint, button_size, button_size, spacing,
                 origin_x, origin_y, 1, 0);
-        grid_position(&keyb->but_copy, button_size, spacing,
+        grid_position(&keyb->but_copy, button_size, button_size, spacing,
                 origin_x, origin_y, 2, -1);
-        grid_position(&keyb->but_cut, button_size, spacing,
+        grid_position(&keyb->but_cut, button_size, button_size, spacing,
                 origin_x, origin_y, 2, 0);
-        grid_position(&keyb->but_paste, button_size, spacing,
+        grid_position(&keyb->but_paste, button_size, button_size, spacing,
                 origin_x, origin_y, 3, -1);
-        grid_position(&keyb->but_comment, button_size, spacing,
+        grid_position(&keyb->but_comment, button_size, button_size, spacing,
                 origin_x, origin_y, 3, 0);
     }
 
+    // Buttons
     for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
     {
         int origin_x = keyb_x + spacing;
         int origin_y = keyb_y + spacing;
         if (i < 8)
         {
-            grid_position(&keyb->movio_buttons[i].geometry, button_size, spacing,
+            grid_position(&keyb->movio_buttons[i].geometry,
+                    button_size, button_size, spacing,
                     origin_x, origin_y, i, 0);
         }
         else
         {
-            grid_position(&keyb->movio_buttons[i].geometry, button_size, spacing,
+            grid_position(&keyb->movio_buttons[i].geometry,
+                    button_size, button_size, spacing,
                     origin_x, origin_y, i - 8, 1);
         }
-
+    }
+    for (int i = 0; i < KEYB_OPER_BUTTONS_TOTAL; i++)
+    {
+        int origin_x = keyb_x + spacing;
+        int origin_y = keyb_y + spacing;
+        if (i < 7)
+        {
+            grid_position(&keyb->oper_buttons[i].geometry,
+                    button_size, button_size, spacing,
+                    origin_x, origin_y, i, 0);
+        }
+        else
+        {
+            grid_position(&keyb->oper_buttons[i].geometry,
+                    button_size, button_size, spacing,
+                    origin_x, origin_y, i - 7, 1);
+        }
+    }
+    for (int i = 0; i < KEYB_VALUES_BUTTONS_TOTAL; i++)
+    {
+        int origin_x = keyb_x + margin + button_size + spacing * 2;
+        int origin_y = keyb_y + spacing;
+        grid_position(&keyb->values_buttons[7].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 0, 0);
+        grid_position(&keyb->values_buttons[8].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 1, 0);
+        grid_position(&keyb->values_buttons[9].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 2, 0);
+        grid_position(&keyb->values_buttons[4].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 0, 1);
+        grid_position(&keyb->values_buttons[5].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 1, 1);
+        grid_position(&keyb->values_buttons[6].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 2, 1);
+        grid_position(&keyb->values_buttons[1].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 0, 2);
+        grid_position(&keyb->values_buttons[2].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 1, 2);
+        grid_position(&keyb->values_buttons[3].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 2, 2);
+        grid_position(&keyb->values_buttons[0].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 1, 3);
+        grid_position(&keyb->values_buttons[10].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 3, 0);
+        grid_position(&keyb->values_buttons[11].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 4, 0);
+        grid_position(&keyb->values_buttons[12].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 5, 0);
+        grid_position(&keyb->values_buttons[13].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 3, 1);
+        grid_position(&keyb->values_buttons[14].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 4, 1);
+        grid_position(&keyb->values_buttons[15].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 5, 1);
     }
 }
 
 void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
 {
+    juan_set_render_draw_color(renderer, &COLOR_PANE_BG);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_RenderFillRect(renderer, &keyb->geometry);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+
+    // Draw tabs
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    for (enum KEYB_TAB_ID i = 0; i < KEYB_TAB_ID_TOTAL; i++)
     {
-        juan_set_render_draw_color(renderer, &COLOR_PANE_BG);
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-        SDL_RenderFillRect(renderer, &keyb->geometry);
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+        if (i == keyb->active_tab)
+        {
+            juan_set_render_draw_color(renderer, &COLOR_PANE_BG);
+            SDL_RenderFillRect(renderer, &keyb->tab_geometry[i]);
+            juan_set_render_draw_color(renderer, &COLOR_SELECT_1);
+            SDL_Rect tab_marker =
+            {
+                .x = keyb->tab_geometry[i].x,
+                .y = keyb->tab_geometry[i].y - keyb->tab_geometry[i].h / 10,
+                .w = keyb->tab_geometry[i].w,
+                .h = keyb->tab_geometry[i].h / 10,
+            };
+            SDL_RenderFillRect(renderer, &tab_marker);
+        }
+        else
+        {
+            juan_set_render_draw_color(renderer, &COLOR_PANE_BG_2);
+            SDL_RenderFillRect(renderer, &keyb->tab_geometry[i]);
+        }
+        SDL_Texture *tex = res_get_keyb_tab_tex(INSTR_THEME_BEFUNGE_CHAR,
+                (enum RES_KEYB_TAB_ID) i);
+        SDL_Rect rect = { 0, 0, 0, 0 };
+        SDL_QueryTexture(tex, NULL, NULL, &rect.w, &rect.h);
+        int text_height = keyb->tab_geometry[i].h * 0.8;
+        rect.w *= (float) text_height / rect.h;
+        rect.h = text_height;
+        rect.x = keyb->tab_geometry[i].x +
+                keyb->tab_geometry[i].w / 2 - rect.w / 2;
+        rect.y = keyb->tab_geometry[i].y +
+                keyb->tab_geometry[i].h / 2 - rect.h / 2;
+        SDL_RenderCopy(renderer, tex, NULL, &rect);
     }
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 
     // Draw arrows
 
@@ -284,60 +391,98 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SHIFT),
             NULL, &keyb->but_shift_2);
 
-    juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
+    if (keyb->active_tab != KEYB_TAB_VALUES)
+    {
+        juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
 
-    SDL_RenderFillRect(renderer, &keyb->but_select_rect);
-    SDL_RenderCopy(renderer,
-            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_RECT),
-            NULL, &keyb->but_select_rect);
-    SDL_RenderFillRect(renderer, &keyb->but_select_paint);
-    SDL_RenderCopy(renderer,
-            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_PAINT),
-            NULL, &keyb->but_select_paint);
-    SDL_RenderFillRect(renderer, &keyb->but_copy);
-    SDL_RenderCopy(renderer,
-            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COPY),
-            NULL, &keyb->but_copy);
-    SDL_RenderFillRect(renderer, &keyb->but_cut);
-    SDL_RenderCopy(renderer,
-            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CUT),
-            NULL, &keyb->but_cut);
-    SDL_RenderFillRect(renderer, &keyb->but_paste);
-    SDL_RenderCopy(renderer,
-            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_PASTE),
-            NULL, &keyb->but_paste);
-    SDL_RenderFillRect(renderer, &keyb->but_comment);
-    SDL_RenderCopy(renderer,
-            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COMMENT),
-            NULL, &keyb->but_comment);
+        SDL_RenderFillRect(renderer, &keyb->but_select_rect);
+        SDL_RenderCopy(renderer,
+                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_RECT),
+                NULL, &keyb->but_select_rect);
+        SDL_RenderFillRect(renderer, &keyb->but_select_paint);
+        SDL_RenderCopy(renderer,
+                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_PAINT),
+                NULL, &keyb->but_select_paint);
+        SDL_RenderFillRect(renderer, &keyb->but_copy);
+        SDL_RenderCopy(renderer,
+                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COPY),
+                NULL, &keyb->but_copy);
+        SDL_RenderFillRect(renderer, &keyb->but_cut);
+        SDL_RenderCopy(renderer,
+                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CUT),
+                NULL, &keyb->but_cut);
+        SDL_RenderFillRect(renderer, &keyb->but_paste);
+        SDL_RenderCopy(renderer,
+                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_PASTE),
+                NULL, &keyb->but_paste);
+        SDL_RenderFillRect(renderer, &keyb->but_comment);
+        SDL_RenderCopy(renderer,
+                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COMMENT),
+                NULL, &keyb->but_comment);
+    }
 
     // Draw buttons
-    // WARNING: Probably in the future I'll have to change the limits of this
-    // loop
+
     juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
-    /*
-    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
-    {
-        SDL_RenderFillRect(renderer, &keyb->instr_buttons[i].geometry);
 
-        if (keyb->instr_buttons[i].id != INSTR_NULL && keyb->instr_buttons[i].id != INSTR_SPACE)
-        {
-            SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR,
-                keyb->instr_buttons[i].id);
-            SDL_RenderCopy(renderer, tex, NULL, &keyb->instr_buttons[i].geometry);
-        }
-    }
-    */
-    for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
+    switch (keyb->active_tab)
     {
-        SDL_RenderFillRect(renderer, &keyb->movio_buttons[i].geometry);
 
-        if (keyb->movio_buttons[i].id != INSTR_NULL && keyb->movio_buttons[i].id != INSTR_SPACE)
-        {
-            SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR,
-                keyb->movio_buttons[i].id);
-            SDL_RenderCopy(renderer, tex, NULL, &keyb->movio_buttons[i].geometry);
-        }
+        case KEYB_TAB_RUN:
+            break;
+
+        case KEYB_TAB_VALUES:
+            for (int i = 0; i < KEYB_VALUES_BUTTONS_TOTAL; i++)
+            {
+                SDL_RenderFillRect(renderer, &keyb->values_buttons[i].geometry);
+
+                if (keyb->values_buttons[i].id != INSTR_NULL
+                        && keyb->values_buttons[i].id != INSTR_SPACE)
+                {
+                    SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR,
+                        keyb->values_buttons[i].id);
+                    SDL_RenderCopy(renderer, tex, NULL, &keyb->values_buttons[i].geometry);
+                }
+            }
+            break;
+
+
+        case KEYB_TAB_MOVIO:
+            for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
+            {
+                SDL_RenderFillRect(renderer, &keyb->movio_buttons[i].geometry);
+
+                if (keyb->movio_buttons[i].id != INSTR_NULL
+                        && keyb->movio_buttons[i].id != INSTR_SPACE)
+                {
+                    SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR,
+                        keyb->movio_buttons[i].id);
+                    SDL_RenderCopy(renderer, tex, NULL, &keyb->movio_buttons[i].geometry);
+                }
+            }
+            break;
+
+        case KEYB_TAB_OPER:
+            for (int i = 0; i < KEYB_OPER_BUTTONS_TOTAL; i++)
+            {
+                SDL_RenderFillRect(renderer, &keyb->oper_buttons[i].geometry);
+
+                if (keyb->oper_buttons[i].id != INSTR_NULL
+                        && keyb->oper_buttons[i].id != INSTR_SPACE)
+                {
+                    SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR,
+                        keyb->oper_buttons[i].id);
+                    SDL_RenderCopy(renderer, tex, NULL, &keyb->oper_buttons[i].geometry);
+                }
+            }
+            break;
+
+        case KEYB_TAB_CHAR:
+            break;
+
+        default:
+            SDL_Log("Error rendering invalid tab %d\n", keyb->active_tab);
+            break;
     }
 }
 
@@ -357,14 +502,16 @@ KeyboardEvent keyb_handle_input
     switch (input->type)
     {
         case (INPUT_CLICK_UP):
-            if (!SDL_PointInRect(&input->point, &keyb->geometry))
+            if (!SDL_PointInRect(&input->point, &keyb->geometry)
+                    && !SDL_PointInRect(&input->point, &keyb->tabs_geometry))
             {
                 return event; // KEYB_EVENT_NOT_HANDLED
             }
             break;
         case (INPUT_CLICK_MOVE):
         case (INPUT_CLICK_MOVE_UP):
-            if (!SDL_PointInRect(&input->down_point, &keyb->geometry))
+            if (!SDL_PointInRect(&input->down_point, &keyb->geometry)
+                    && !SDL_PointInRect(&input->down_point, &keyb->tabs_geometry))
             {
                 return event; // KEYB_EVENT_NOT_HANDLED
             }
@@ -396,6 +543,7 @@ KeyboardEvent keyb_handle_input
         {
             event.type = KEYB_EVENT_MOVE_RIGHT;
         }
+
         // Check shift buttons
 
         else if (SDL_PointInRect(&input->point, &keyb->but_shift_1))
@@ -406,10 +554,106 @@ KeyboardEvent keyb_handle_input
         {
             event.type = KEYB_EVENT_STOP;
         }
+        if (keyb->active_tab != KEYB_TAB_VALUES)
+        {
 
+
+        }
+
+        // Check buttons
+        switch (keyb->active_tab)
+        {
+
+            case KEYB_TAB_RUN:
+                break;
+
+            case KEYB_TAB_VALUES:
+                for (int i = 0; i < KEYB_VALUES_BUTTONS_TOTAL; i++)
+                {
+                    if (SDL_PointInRect(&input->point, &keyb->values_buttons[i].geometry))
+                    {
+                        if (
+                            keyb->values_buttons[i].id != INSTR_NULL
+                            && keyb->values_buttons[i].id != INSTR_SPACE
+                        ) {
+                            event.type = KEYB_EVENT_ADD_INSTR;
+                            event.instr_id = keyb->values_buttons[i].id;
+                        }
+                        else
+                        {
+                            event.type = KEYB_EVENT_RM_INSTR;
+                            event.instr_id = keyb->values_buttons[i].id;
+                        }
+                        break;
+                    }
+                }
+                break;
+
+            case KEYB_TAB_MOVIO:
+                for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
+                {
+                    if (SDL_PointInRect(&input->point, &keyb->movio_buttons[i].geometry))
+                    {
+                        if (
+                            keyb->movio_buttons[i].id != INSTR_NULL
+                            && keyb->movio_buttons[i].id != INSTR_SPACE
+                        ) {
+                            event.type = KEYB_EVENT_ADD_INSTR;
+                            event.instr_id = keyb->movio_buttons[i].id;
+                        }
+                        else
+                        {
+                            event.type = KEYB_EVENT_RM_INSTR;
+                            event.instr_id = keyb->movio_buttons[i].id;
+                        }
+                        break;
+                    }
+                }
+                break;
+
+            case KEYB_TAB_OPER:
+                for (int i = 0; i < KEYB_OPER_BUTTONS_TOTAL; i++)
+                {
+                    if (SDL_PointInRect(&input->point, &keyb->oper_buttons[i].geometry))
+                    {
+                        if (
+                            keyb->oper_buttons[i].id != INSTR_NULL
+                            && keyb->oper_buttons[i].id != INSTR_SPACE
+                        ) {
+                            event.type = KEYB_EVENT_ADD_INSTR;
+                            event.instr_id = keyb->oper_buttons[i].id;
+                        }
+                        else
+                        {
+                            event.type = KEYB_EVENT_RM_INSTR;
+                            event.instr_id = keyb->oper_buttons[i].id;
+                        }
+                        break;
+                    }
+                }
+                break;
+
+            case KEYB_TAB_CHAR:
+                break;
+
+            default:
+                SDL_Log("Error rendering invalid tab %d\n", keyb->active_tab);
+                break;
+        }
+
+        // Check tabs
+
+        for (enum KEYB_TAB_ID i = 0; i < KEYB_TAB_ID_TOTAL; i++)
+        {
+            if (SDL_PointInRect(&input->point, &keyb->tab_geometry[i]))
+            {
+                keyb->active_tab = i;
+            }
+        }
         // Check instruction buttons
         // WARNING: Probably in the future I'll have to change the limits of this
         // loop
+        /*
         for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
         {
             if (SDL_PointInRect(&input->point, &keyb->instr_buttons[i].geometry))
@@ -429,6 +673,7 @@ KeyboardEvent keyb_handle_input
                 break;
             }
         }
+        */
     }
     else if (input->type == INPUT_CLICK_MOVE)
     {
@@ -436,7 +681,7 @@ KeyboardEvent keyb_handle_input
         // loop
         for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
         {
-            keyb->instr_buttons[i].geometry.x += input->diff.x;
+            //keyb->instr_buttons[i].geometry.x += input->diff.x;
         }
     }
     return event;

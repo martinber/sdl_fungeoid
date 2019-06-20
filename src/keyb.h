@@ -23,16 +23,25 @@ enum KEYB_SHIFT_STATE
     KEYB_SHIFT_STATE_TOTAL,
 };
 
+// IMPORTANT: Keep in sync with res.c:RES_KEYB_TAB_ID
+enum KEYB_TAB_ID
+{
+    KEYB_TAB_RUN,
+    KEYB_TAB_VALUES,
+    KEYB_TAB_MOVIO,
+    KEYB_TAB_OPER,
+    KEYB_TAB_CHAR,
+    KEYB_TAB_ID_TOTAL,
+};
+
 typedef struct Keyboard
 {
-    SDL_Rect geometry;
-    int button_size;
+    // Both rectangles determine the size of the keyboard for touch/click
+    // purposes
+    SDL_Rect geometry; // Excluding tabs
+    SDL_Rect tabs_geometry; // Contains every tab
 
     enum KEYB_SHIFT_STATE shift_state;
-
-    // One button per instruction ignoring the fact that INSTR_NULL wont be
-    // used
-    InstrButton instr_buttons[INSTR_ID_TOTAL];
 
     // Buttons for each tab
 #define KEYB_VALUES_BUTTONS_TOTAL 16
@@ -41,6 +50,10 @@ typedef struct Keyboard
     InstrButton movio_buttons[KEYB_MOVIO_BUTTONS_TOTAL];
 #define KEYB_OPER_BUTTONS_TOTAL 14
     InstrButton oper_buttons[KEYB_OPER_BUTTONS_TOTAL];
+
+    // Tabs
+    SDL_Rect tab_geometry[KEYB_TAB_ID_TOTAL];
+    enum KEYB_TAB_ID active_tab;
 
     // Remaining buttons
     SDL_Rect but_up;

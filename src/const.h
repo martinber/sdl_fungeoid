@@ -19,6 +19,7 @@ extern const SDL_Color COLOR_SELECT_1;
 extern const SDL_Color COLOR_SELECT_2;
 extern const SDL_Color COLOR_WHITE;
 extern const SDL_Color COLOR_PANE_BG;
+extern const SDL_Color COLOR_PANE_BG_2;
 extern const SDL_Color COLOR_BUTTON_1;
 extern const SDL_Color COLOR_BUTTON_2;
 extern const SDL_Color COLOR_BUTTON_3;

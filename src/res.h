@@ -30,6 +30,17 @@ enum RES_KEYB_ICON_ID
     RES_KEYB_ICON_ID_TOTAL,
 };
 
+// IMPORTANT: Keep in sync with keyb.c:KEYB_TAB_ID
+enum RES_KEYB_TAB_ID
+{
+    RES_KEYB_TAB_RUN,
+    RES_KEYB_TAB_VALUES,
+    RES_KEYB_TAB_MOVIO,
+    RES_KEYB_TAB_OPER,
+    RES_KEYB_TAB_CHAR,
+    RES_KEYB_TAB_ID_TOTAL,
+};
+
 /// Load all resources.
 /**
  * Returns 0 on success.
@@ -53,6 +64,8 @@ void res_free_all();
 SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id);
 
 SDL_Texture *res_get_keyb_icon_tex(enum INSTR_THEME theme, enum RES_KEYB_ICON_ID id);
+
+SDL_Texture *res_get_keyb_tab_tex(enum INSTR_THEME theme, enum RES_KEYB_TAB_ID id);
 
 TTF_Font *res_get_font(enum RES_FONT_ID font);
 
