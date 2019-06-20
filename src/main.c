@@ -14,7 +14,6 @@
 #include "field.h"
 
 static int CELL_SIZE = 0;
-static int BUTTON_SIZE = 0;
 
 // Window dimensions, initial values are used for desktop, when on Android or
 // resizing these values will be updated
@@ -23,12 +22,11 @@ static const char WINDOW_TITLE[] = "sdl_fungeoid";
 
 static void main_loop(SDL_Renderer *renderer)
 {
-    BUTTON_SIZE = juan_min(WINDOW_SIZE.x / 9, WINDOW_SIZE.y / 10);
     CELL_SIZE = juan_min(WINDOW_SIZE.x / 15, WINDOW_SIZE.y / 15);
 
 
     Field *field = field_create(10, 14, &WINDOW_SIZE, CELL_SIZE);
-    Keyboard *keyb = keyb_create(WINDOW_SIZE, BUTTON_SIZE);
+    Keyboard *keyb = keyb_create(WINDOW_SIZE);
     Hud *hud = hud_create(WINDOW_SIZE, 32, field_get_stack(field));
     InputHandler *input = input_create();
     if (field == NULL || keyb == NULL || hud == NULL || input == NULL)
@@ -79,10 +77,9 @@ static void main_loop(SDL_Renderer *renderer)
                         WINDOW_SIZE.x = event.window.data1;
                         WINDOW_SIZE.y = event.window.data2;
                         field_resize_screen(field, &WINDOW_SIZE, CELL_SIZE);
-                        keyb_update_geometry(keyb, WINDOW_SIZE, BUTTON_SIZE);
+                        keyb_update_geometry(keyb, WINDOW_SIZE);
                         hud_update_geometry(hud, WINDOW_SIZE, 32);
 
-                        BUTTON_SIZE = juan_min(WINDOW_SIZE.x / 9, WINDOW_SIZE.y / 10);
                         CELL_SIZE = juan_min(WINDOW_SIZE.x / 15, WINDOW_SIZE.y / 15);
                         break;
                 }

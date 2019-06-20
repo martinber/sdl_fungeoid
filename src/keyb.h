@@ -34,6 +34,14 @@ typedef struct Keyboard
     // used
     InstrButton instr_buttons[INSTR_ID_TOTAL];
 
+    // Buttons for each tab
+#define KEYB_VALUES_BUTTONS_TOTAL 16
+    InstrButton values_buttons[KEYB_VALUES_BUTTONS_TOTAL];
+#define KEYB_MOVIO_BUTTONS_TOTAL 16
+    InstrButton movio_buttons[KEYB_MOVIO_BUTTONS_TOTAL];
+#define KEYB_OPER_BUTTONS_TOTAL 14
+    InstrButton oper_buttons[KEYB_OPER_BUTTONS_TOTAL];
+
     // Remaining buttons
     SDL_Rect but_up;
     SDL_Rect but_down;
@@ -41,6 +49,12 @@ typedef struct Keyboard
     SDL_Rect but_right;
     SDL_Rect but_shift_1;
     SDL_Rect but_shift_2;
+    SDL_Rect but_select_rect;
+    SDL_Rect but_select_paint;
+    SDL_Rect but_copy;
+    SDL_Rect but_cut;
+    SDL_Rect but_paste;
+    SDL_Rect but_comment;
 } Keyboard;
 
 enum KEYB_EVENT_TYPE
@@ -70,12 +84,12 @@ typedef struct KeyboardEvent
  *
  * On error returns NULL.
  */
-Keyboard *keyb_create(SDL_Point window_size, int button_size);
+Keyboard *keyb_create(SDL_Point window_size);
 
 void keyb_free(Keyboard *keyb);
 
 /// Update size and position from window and cell size
-void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size, int button_size);
+void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size);
 
 /// Draw keyboard
 void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb);

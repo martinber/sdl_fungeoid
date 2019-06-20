@@ -11,6 +11,12 @@ static TTF_Font* font_32 = NULL;
  */
 static SDL_Texture *INSTR_TEXTURES[INSTR_ID_TOTAL] = { NULL };
 
+/// Array of textures for every keyboard icon for the current theme and the current resolution
+/**
+ * Pointers for INSTR_NULL and INSTR_SPACE should be NULL
+ */
+static SDL_Texture *KEYB_ICON_TEXTURES[RES_KEYB_ICON_ID_TOTAL] = { NULL };
+
 /// Resolution of instruction textures (128x128)
 static const int INSTR_TEXTURES_RES = 128;
 
@@ -111,6 +117,59 @@ int res_load_all(SDL_Renderer *renderer)
         }
     }
 
+    // Load every keyboard icon texture
+    for (enum RES_KEYB_ICON_ID i = 0; i < RES_KEYB_ICON_ID_TOTAL; i++)
+    {
+        switch (i)
+        {
+            case RES_KEYB_ICON_SHIFT:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/shift.png");
+                break;
+
+            case RES_KEYB_ICON_SELECT_RECT:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/select_rect.png");
+                break;
+
+            case RES_KEYB_ICON_SELECT_PAINT:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/select_paint.png");
+                break;
+
+            case RES_KEYB_ICON_COPY:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/copy.png");
+                break;
+
+            case RES_KEYB_ICON_CUT:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/cut.png");
+                break;
+
+            case RES_KEYB_ICON_PASTE:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/paste.png");
+                break;
+
+            case RES_KEYB_ICON_COMMENT:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/comment.png");
+                break;
+
+            default:
+                SDL_Log("Tried to load unknown keyb_icon texture ID %d\n", i);
+                res_free_all();
+                return 1;
+
+        }
+        if (KEYB_ICON_TEXTURES[i] == NULL) {
+            SDL_Log("Error loading keyb_icon texture for ID %d\n", i);
+            res_free_all();
+            return 1;
+        }
+    }
+
     return 0;
 }
 
@@ -148,6 +207,12 @@ SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id)
         return NULL;
     }
     return INSTR_TEXTURES[id];
+}
+
+SDL_Texture *res_get_keyb_icon_tex(enum INSTR_THEME theme, enum RES_KEYB_ICON_ID id)
+{
+    UNUSED(theme);
+    return KEYB_ICON_TEXTURES[id];
 }
 
 TTF_Font *res_get_font(enum RES_FONT_ID font)

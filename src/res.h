@@ -18,6 +18,18 @@ enum RES_FONT_ID
     RES_FONT_ID_TOTAL,
 };
 
+enum RES_KEYB_ICON_ID
+{
+    RES_KEYB_ICON_SHIFT,
+    RES_KEYB_ICON_SELECT_RECT,
+    RES_KEYB_ICON_SELECT_PAINT,
+    RES_KEYB_ICON_COPY,
+    RES_KEYB_ICON_CUT,
+    RES_KEYB_ICON_PASTE,
+    RES_KEYB_ICON_COMMENT,
+    RES_KEYB_ICON_ID_TOTAL,
+};
+
 /// Load all resources.
 /**
  * Returns 0 on success.
@@ -39,6 +51,8 @@ void res_free_all();
  * Returns NULL on invalid IDs, e.g. INSTR_NULL or INSTR_SPACE.
  */
 SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id);
+
+SDL_Texture *res_get_keyb_icon_tex(enum INSTR_THEME theme, enum RES_KEYB_ICON_ID id);
 
 TTF_Font *res_get_font(enum RES_FONT_ID font);
 

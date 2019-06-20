@@ -223,7 +223,7 @@ STORE: s (98)
 
 ### Keyboard
 
-Values:
+Values (values):
 
 ```
 9 8 7 a b c
@@ -232,14 +232,14 @@ Values:
   0
 ```
 
-Movement and IO
+Movement and IO (movio):
 
 ```
-< v ^ > # ? @
+< v ^ > # ? @ "
 & ~ . , g p ' s
 ```
 
-Operations and conditionals
+Operations and conditionals (oper):
 
 ```
 + - * / % ! `
