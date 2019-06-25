@@ -139,6 +139,11 @@ int res_load_all(SDL_Renderer *renderer)
     {
         switch (i)
         {
+            case RES_KEYB_ICON_DELETE:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/delete.png");
+                break;
+
             case RES_KEYB_ICON_SHIFT:
                 KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
                         "res/keyb_icons/shift.png");

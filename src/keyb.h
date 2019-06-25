@@ -60,8 +60,8 @@ typedef struct Keyboard
     SDL_Rect but_down;
     SDL_Rect but_left;
     SDL_Rect but_right;
-    SDL_Rect but_shift_1;
-    SDL_Rect but_shift_2;
+    SDL_Rect but_delete;
+    SDL_Rect but_shift;
     SDL_Rect but_select_rect;
     SDL_Rect but_select_paint;
     SDL_Rect but_copy;

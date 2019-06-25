@@ -45,8 +45,8 @@ Keyboard *keyb_create(SDL_Point window_size)
     keyb->but_down = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->but_left = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->but_right = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_shift_1 = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_shift_2 = (SDL_Rect) { 0, 0, 0, 0 };
+    keyb->but_delete = (SDL_Rect) { 0, 0, 0, 0 };
+    keyb->but_shift = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->but_select_rect = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->but_select_paint = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->but_copy = (SDL_Rect) { 0, 0, 0, 0 };
@@ -200,9 +200,9 @@ void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size) {
     {
         int origin_x = keyb_x + margin;
         int origin_y = keyb_y + keyb_h - margin - button_size;
-        grid_position(&keyb->but_shift_1, button_size, button_size, spacing,
+        grid_position(&keyb->but_delete, button_size, button_size, spacing,
                 origin_x, origin_y, 0, -1);
-        grid_position(&keyb->but_shift_2, button_size, button_size, spacing,
+        grid_position(&keyb->but_shift, button_size, button_size, spacing,
                 origin_x, origin_y, 0, 0);
         grid_position(&keyb->but_select_rect, button_size, button_size, spacing,
                 origin_x, origin_y, 1, -1);
@@ -377,19 +377,19 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
 
     // Draw shift and special buttons
 
-    juan_set_render_draw_color(renderer, &COLOR_BUTTON_2);
-
-    SDL_RenderFillRect(renderer, &keyb->but_shift_1);
-    SDL_RenderCopy(renderer,
-            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SHIFT),
-            NULL, &keyb->but_shift_1);
-
     juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
 
-    SDL_RenderFillRect(renderer, &keyb->but_shift_2);
+    SDL_RenderFillRect(renderer, &keyb->but_delete);
+    SDL_RenderCopy(renderer,
+            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_DELETE),
+            NULL, &keyb->but_delete);
+
+    juan_set_render_draw_color(renderer, &COLOR_BUTTON_2);
+
+    SDL_RenderFillRect(renderer, &keyb->but_shift);
     SDL_RenderCopy(renderer,
             res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SHIFT),
-            NULL, &keyb->but_shift_2);
+            NULL, &keyb->but_shift);
 
     if (keyb->active_tab != KEYB_TAB_VALUES)
     {
@@ -546,11 +546,11 @@ KeyboardEvent keyb_handle_input
 
         // Check shift buttons
 
-        else if (SDL_PointInRect(&input->point, &keyb->but_shift_1))
+        else if (SDL_PointInRect(&input->point, &keyb->but_delete))
         {
             event.type = KEYB_EVENT_START;
         }
-        else if (SDL_PointInRect(&input->point, &keyb->but_shift_2))
+        else if (SDL_PointInRect(&input->point, &keyb->but_shift))
         {
             event.type = KEYB_EVENT_STOP;
         }
