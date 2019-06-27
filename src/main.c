@@ -13,6 +13,8 @@
 #include "input.h"
 #include "field.h"
 
+#include "os.h"
+
 static int CELL_SIZE = 0;
 
 // Window dimensions, initial values are used for desktop, when on Android or
@@ -143,6 +145,10 @@ int main(int argc, char *argv[])
 
     // Init RNG
     srand((unsigned int) time(NULL));
+
+#ifdef __ANDROID__
+    os_android_test();
+#endif
 
     if (res_load_all(renderer) == 0)
     {
