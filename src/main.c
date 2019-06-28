@@ -7,21 +7,17 @@
 #include "const.h"
 #include "juan.h"
 #include "res.h"
-#include "canvas.h"
-#include "keyb.h"
-#include "hud.h"
-#include "input.h"
-#include "field.h"
+#include "screens.h"
 
 #include "os.h"
 
 static int CELL_SIZE = 0;
 
-// Window dimensions, initial values are used for desktop, when on Android or
-// resizing these values will be updated
-static SDL_Point WINDOW_SIZE = { 64 * 10, 64 * 14 };
+// Initial window dimensions used for desktop
+static SDL_Point INITIAL_WINDOW_SIZE = { 64 * 10, 64 * 14 };
 static const char WINDOW_TITLE[] = "sdl_fungeoid";
 
+/*
 static void main_loop(SDL_Renderer *renderer)
 {
     CELL_SIZE = juan_min(WINDOW_SIZE.x / 15, WINDOW_SIZE.y / 15);
@@ -122,6 +118,7 @@ static void main_loop(SDL_Renderer *renderer)
     input_free(input);
     input = NULL;
 }
+*/
 
 int main(int argc, char *argv[])
 {
@@ -132,13 +129,20 @@ int main(int argc, char *argv[])
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
 
-    if (juan_init(&window, &renderer, WINDOW_TITLE, WINDOW_SIZE.x, WINDOW_SIZE.y) != 0) {
+    if
+    (
+        juan_init(
+                &window, &renderer, WINDOW_TITLE,
+                INITIAL_WINDOW_SIZE.x, INITIAL_WINDOW_SIZE.y
+                ) != 0
+    ) {
         printf("Error creating window or renderer\n");
         return 1;
     }
 
     // Check the screen size actually used
-    if (SDL_GetRendererOutputSize(renderer, &WINDOW_SIZE.x, &WINDOW_SIZE.y) != 0)
+    SDL_Point window_size = { 0, 0 };
+    if (SDL_GetRendererOutputSize(renderer, &window_size.x, &window_size.y) != 0)
     {
         SDL_Log("SDL_GetRendererOutputSize Error: %s\n", SDL_GetError());
     }
@@ -152,7 +156,12 @@ int main(int argc, char *argv[])
 
     if (res_load_all(renderer) == 0)
     {
-        main_loop(renderer);
+        ScreensHandler *screens = screens_init(window_size);
+        if (screens != NULL)
+        {
+            screens_loop(screens, renderer);
+            screens_free(screens);
+        }
         res_free_all();
     }
 
