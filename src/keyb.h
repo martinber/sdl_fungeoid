@@ -4,16 +4,11 @@
 #include "juan.h"
 #include "const.h"
 #include "input.h"
+#include "button.h"
 
 /**
  * On-screen keyboard
  */
-
-typedef struct InstrButton
-{
-    SDL_Rect geometry;
-    enum INSTR_ID id;
-} InstrButton;
 
 enum KEYB_SHIFT_STATE
 {
@@ -21,6 +16,28 @@ enum KEYB_SHIFT_STATE
     KEYB_SHIFT_1,
     KEYB_SHIFT_2,
     KEYB_SHIFT_STATE_TOTAL,
+};
+
+enum KEYB_ARROW_BUTTON_ID
+{
+    KEYB_ARROW_UP,
+    KEYB_ARROW_DOWN,
+    KEYB_ARROW_LEFT,
+    KEYB_ARROW_RIGHT,
+    KEYB_ARROW_BUTTON_ID_TOTAL,
+};
+
+enum KEYB_ACTION_BUTTON_ID
+{
+    KEYB_ACTION_DELETE,
+    KEYB_ACTION_SHIFT,
+    KEYB_ACTION_SELECT_RECT,
+    KEYB_ACTION_SELECT_PAINT,
+    KEYB_ACTION_COPY,
+    KEYB_ACTION_CUT,
+    KEYB_ACTION_PASTE,
+    KEYB_ACTION_COMMENT,
+    KEYB_ACTION_BUTTON_ID_TOTAL,
 };
 
 // IMPORTANT: Keep in sync with res.c:RES_KEYB_TAB_ID
@@ -45,29 +62,23 @@ typedef struct Keyboard
 
     // Buttons for each tab
 #define KEYB_VALUES_BUTTONS_TOTAL 16
-    InstrButton values_buttons[KEYB_VALUES_BUTTONS_TOTAL];
+    Button values_buttons[KEYB_VALUES_BUTTONS_TOTAL];
 #define KEYB_MOVIO_BUTTONS_TOTAL 16
-    InstrButton movio_buttons[KEYB_MOVIO_BUTTONS_TOTAL];
+    Button movio_buttons[KEYB_MOVIO_BUTTONS_TOTAL];
 #define KEYB_OPER_BUTTONS_TOTAL 14
-    InstrButton oper_buttons[KEYB_OPER_BUTTONS_TOTAL];
+    Button oper_buttons[KEYB_OPER_BUTTONS_TOTAL];
+// #define KEYB_RUN_BUTTONS_TOTAL 6
+    // Button run_buttons[KEYB_RUN_BUTTONS_TOTAL];
+
+    // Remaining buttons available on most tabs
+    Button arrow_buttons[KEYB_ARROW_BUTTON_ID_TOTAL];
+    // Remaining buttons available on most tabs
+    Button action_buttons[KEYB_ACTION_BUTTON_ID_TOTAL];
 
     // Tabs
     SDL_Rect tab_geometry[KEYB_TAB_ID_TOTAL];
     enum KEYB_TAB_ID active_tab;
 
-    // Remaining buttons
-    SDL_Rect but_up;
-    SDL_Rect but_down;
-    SDL_Rect but_left;
-    SDL_Rect but_right;
-    SDL_Rect but_delete;
-    SDL_Rect but_shift;
-    SDL_Rect but_select_rect;
-    SDL_Rect but_select_paint;
-    SDL_Rect but_copy;
-    SDL_Rect but_cut;
-    SDL_Rect but_paste;
-    SDL_Rect but_comment;
 } Keyboard;
 
 enum KEYB_EVENT_TYPE

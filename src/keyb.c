@@ -41,47 +41,45 @@ Keyboard *keyb_create(SDL_Point window_size)
     keyb->tabs_geometry = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->active_tab = 0;
     keyb->shift_state = KEYB_SHIFT_NONE;
-    keyb->but_up = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_down = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_left = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_right = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_delete = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_shift = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_select_rect = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_select_paint = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_copy = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_cut = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_paste = (SDL_Rect) { 0, 0, 0, 0 };
-    keyb->but_comment = (SDL_Rect) { 0, 0, 0, 0 };
 
     for (enum KEYB_TAB_ID i = 0; i < KEYB_TAB_ID_TOTAL; i++)
     {
         keyb->tab_geometry[i] = (SDL_Rect) { 0, 0, 0, 0 };
     }
 
+    // Initialize button arrays IDs. The geometries are set to (0,0,0,0)
+
     for (int i = 0; i < KEYB_VALUES_BUTTONS_TOTAL; i++)
     {
-        keyb->values_buttons[i] = (InstrButton)
-        {
-            .geometry = { 0, 0, 0, 0 },
-            .id = KEYB_VALUES_INSTR_ID[i]
-        };
+        button_init
+        (
+            &keyb->values_buttons[i],
+            BUTTON_KEYB_INSTR, KEYB_VALUES_INSTR_ID[i]
+        );
     }
     for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
     {
-        keyb->movio_buttons[i] = (InstrButton)
-        {
-            .geometry = { 0, 0, 0, 0 },
-            .id = KEYB_MOVIO_INSTR_ID[i]
-        };
+        button_init
+        (
+            &keyb->movio_buttons[i],
+            BUTTON_KEYB_INSTR, KEYB_MOVIO_INSTR_ID[i]
+        );
     }
     for (int i = 0; i < KEYB_OPER_BUTTONS_TOTAL; i++)
     {
-        keyb->oper_buttons[i] = (InstrButton)
-        {
-            .geometry = { 0, 0, 0, 0 },
-            .id = KEYB_OPER_INSTR_ID[i]
-        };
+        button_init
+        (
+            &keyb->oper_buttons[i],
+            BUTTON_KEYB_INSTR, KEYB_OPER_INSTR_ID[i]
+        );
+    }
+    for (int i = 0; i < KEYB_ARROW_BUTTON_ID_TOTAL; i++)
+    {
+        button_init(&keyb->arrow_buttons[i], BUTTON_KEYB_ARROW, i);
+    }
+    for (int i = 0; i < KEYB_ACTION_BUTTON_ID_TOTAL; i++)
+    {
+        button_init(&keyb->action_buttons[i], BUTTON_KEYB_ACTION, i);
     }
 
     keyb_update_geometry(keyb, window_size);
@@ -186,13 +184,17 @@ void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size) {
     {
         int origin_x = keyb_x + keyb_w - margin - button_size;
         int origin_y = keyb_y + keyb_h - margin - button_size;
-        grid_position(&keyb->but_right, button_size, button_size, spacing,
+        grid_position(&keyb->arrow_buttons[KEYB_ARROW_RIGHT].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, 0, 0);
-        grid_position(&keyb->but_down, button_size, button_size, spacing,
+        grid_position(&keyb->arrow_buttons[KEYB_ARROW_DOWN].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, -1, 0);
-        grid_position(&keyb->but_left, button_size, button_size, spacing,
+        grid_position(&keyb->arrow_buttons[KEYB_ARROW_LEFT].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, -2, 0);
-        grid_position(&keyb->but_up, button_size, button_size, spacing,
+        grid_position(&keyb->arrow_buttons[KEYB_ARROW_UP].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, -1, -1);
     }
 
@@ -200,21 +202,29 @@ void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size) {
     {
         int origin_x = keyb_x + margin;
         int origin_y = keyb_y + keyb_h - margin - button_size;
-        grid_position(&keyb->but_delete, button_size, button_size, spacing,
+        grid_position(&keyb->action_buttons[KEYB_ACTION_DELETE].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, 0, -1);
-        grid_position(&keyb->but_shift, button_size, button_size, spacing,
+        grid_position(&keyb->action_buttons[KEYB_ACTION_SHIFT].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, 0, 0);
-        grid_position(&keyb->but_select_rect, button_size, button_size, spacing,
+        grid_position(&keyb->action_buttons[KEYB_ACTION_SELECT_RECT].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, 1, -1);
-        grid_position(&keyb->but_select_paint, button_size, button_size, spacing,
+        grid_position(&keyb->action_buttons[KEYB_ACTION_SELECT_PAINT].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, 1, 0);
-        grid_position(&keyb->but_copy, button_size, button_size, spacing,
+        grid_position(&keyb->action_buttons[KEYB_ACTION_COPY].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, 2, -1);
-        grid_position(&keyb->but_cut, button_size, button_size, spacing,
+        grid_position(&keyb->action_buttons[KEYB_ACTION_CUT].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, 2, 0);
-        grid_position(&keyb->but_paste, button_size, button_size, spacing,
+        grid_position(&keyb->action_buttons[KEYB_ACTION_PASTE].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, 3, -1);
-        grid_position(&keyb->but_comment, button_size, button_size, spacing,
+        grid_position(&keyb->action_buttons[KEYB_ACTION_COMMENT].geometry,
+                button_size, button_size, spacing,
                 origin_x, origin_y, 3, 0);
     }
 
@@ -358,67 +368,68 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
 
     SDL_Texture* tex = NULL;
     juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
+    tex = res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_ARROW_UP);
 
-    SDL_RenderFillRect(renderer, &keyb->but_up);
-    tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_UP);
-    SDL_RenderCopy(renderer, tex, NULL, &keyb->but_up);
+    SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_UP].geometry);
+    SDL_RenderCopyEx(renderer, tex, NULL,
+            &keyb->arrow_buttons[KEYB_ARROW_UP].geometry, 0, NULL, SDL_FLIP_NONE);
 
-    SDL_RenderFillRect(renderer, &keyb->but_down);
-    tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_DOWN);
-    SDL_RenderCopy(renderer, tex, NULL, &keyb->but_down);
+    SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_DOWN].geometry);
+    SDL_RenderCopyEx(renderer, tex, NULL,
+            &keyb->arrow_buttons[KEYB_ARROW_DOWN].geometry, 180, NULL, SDL_FLIP_NONE);
 
-    SDL_RenderFillRect(renderer, &keyb->but_left);
-    tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_LEFT);
-    SDL_RenderCopy(renderer, tex, NULL, &keyb->but_left);
+    SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_LEFT].geometry);
+    SDL_RenderCopyEx(renderer, tex, NULL,
+            &keyb->arrow_buttons[KEYB_ARROW_LEFT].geometry, 270, NULL, SDL_FLIP_NONE);
 
-    SDL_RenderFillRect(renderer, &keyb->but_right);
-    tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, INSTR_RIGHT);
-    SDL_RenderCopy(renderer, tex, NULL, &keyb->but_right);
+    SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_RIGHT].geometry);
+    SDL_RenderCopyEx(renderer, tex, NULL,
+            &keyb->arrow_buttons[KEYB_ARROW_RIGHT].geometry, 90, NULL, SDL_FLIP_NONE);
 
     // Draw shift and special buttons
 
     juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
 
-    SDL_RenderFillRect(renderer, &keyb->but_delete);
+    SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_DELETE].geometry);
     SDL_RenderCopy(renderer,
             res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_DELETE),
-            NULL, &keyb->but_delete);
+            NULL, &keyb->action_buttons[KEYB_ACTION_DELETE].geometry);
 
     juan_set_render_draw_color(renderer, &COLOR_BUTTON_2);
 
-    SDL_RenderFillRect(renderer, &keyb->but_shift);
+    SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_SHIFT].geometry);
     SDL_RenderCopy(renderer,
             res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SHIFT),
-            NULL, &keyb->but_shift);
+            NULL, &keyb->action_buttons[KEYB_ACTION_SHIFT].geometry);
 
     if (keyb->active_tab != KEYB_TAB_VALUES)
     {
         juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
 
-        SDL_RenderFillRect(renderer, &keyb->but_select_rect);
+        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_SELECT_RECT].geometry);
         SDL_RenderCopy(renderer,
                 res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_RECT),
-                NULL, &keyb->but_select_rect);
-        SDL_RenderFillRect(renderer, &keyb->but_select_paint);
+                NULL, &keyb->action_buttons[KEYB_ACTION_SELECT_RECT].geometry);
+        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_SELECT_PAINT].geometry);
         SDL_RenderCopy(renderer,
                 res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_PAINT),
-                NULL, &keyb->but_select_paint);
-        SDL_RenderFillRect(renderer, &keyb->but_copy);
+                NULL, &keyb->action_buttons[KEYB_ACTION_SELECT_PAINT].geometry);
+        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_COPY].geometry);
         SDL_RenderCopy(renderer,
                 res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COPY),
-                NULL, &keyb->but_copy);
-        SDL_RenderFillRect(renderer, &keyb->but_cut);
+                NULL, &keyb->action_buttons[KEYB_ACTION_COPY].geometry);
+        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_CUT].geometry);
         SDL_RenderCopy(renderer,
                 res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CUT),
-                NULL, &keyb->but_cut);
-        SDL_RenderFillRect(renderer, &keyb->but_paste);
+                NULL, &keyb->action_buttons[KEYB_ACTION_CUT].geometry);
+        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_PASTE].geometry);
         SDL_RenderCopy(renderer,
                 res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_PASTE),
-                NULL, &keyb->but_paste);
-        SDL_RenderFillRect(renderer, &keyb->but_comment);
+                NULL, &keyb->action_buttons[KEYB_ACTION_PASTE].geometry);
+        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_COMMENT].geometry);
         SDL_RenderCopy(renderer,
                 res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COMMENT),
-                NULL, &keyb->but_comment);
+                NULL, &keyb->action_buttons[KEYB_ACTION_COMMENT].geometry);
     }
 
     // Draw buttons
@@ -527,30 +538,30 @@ KeyboardEvent keyb_handle_input
     {
         // Check arrows
 
-        if (SDL_PointInRect(&input->point, &keyb->but_up))
+        if (SDL_PointInRect(&input->point, &keyb->arrow_buttons[KEYB_ARROW_UP].geometry))
         {
             event.type = KEYB_EVENT_MOVE_UP;
         }
-        else if (SDL_PointInRect(&input->point, &keyb->but_down))
+        if (SDL_PointInRect(&input->point, &keyb->arrow_buttons[KEYB_ARROW_DOWN].geometry))
         {
             event.type = KEYB_EVENT_MOVE_DOWN;
         }
-        else if (SDL_PointInRect(&input->point, &keyb->but_left))
+        if (SDL_PointInRect(&input->point, &keyb->arrow_buttons[KEYB_ARROW_LEFT].geometry))
         {
             event.type = KEYB_EVENT_MOVE_LEFT;
         }
-        else if (SDL_PointInRect(&input->point, &keyb->but_right))
+        if (SDL_PointInRect(&input->point, &keyb->arrow_buttons[KEYB_ARROW_RIGHT].geometry))
         {
             event.type = KEYB_EVENT_MOVE_RIGHT;
         }
 
         // Check shift buttons
 
-        else if (SDL_PointInRect(&input->point, &keyb->but_delete))
+        else if (SDL_PointInRect(&input->point, &keyb->action_buttons[KEYB_ACTION_DELETE].geometry))
         {
             event.type = KEYB_EVENT_START;
         }
-        else if (SDL_PointInRect(&input->point, &keyb->but_shift))
+        else if (SDL_PointInRect(&input->point, &keyb->action_buttons[KEYB_ACTION_SHIFT].geometry))
         {
             event.type = KEYB_EVENT_STOP;
         }
@@ -650,39 +661,11 @@ KeyboardEvent keyb_handle_input
                 keyb->active_tab = i;
             }
         }
-        // Check instruction buttons
-        // WARNING: Probably in the future I'll have to change the limits of this
-        // loop
-        /*
-        for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
-        {
-            if (SDL_PointInRect(&input->point, &keyb->instr_buttons[i].geometry))
-            {
-                if (
-                    keyb->instr_buttons[i].id != INSTR_NULL
-                    && keyb->instr_buttons[i].id != INSTR_SPACE
-                ) {
-                    event.type = KEYB_EVENT_ADD_INSTR;
-                    event.instr_id = keyb->instr_buttons[i].id;
-                }
-                else
-                {
-                    event.type = KEYB_EVENT_RM_INSTR;
-                    event.instr_id = keyb->instr_buttons[i].id;
-                }
-                break;
-            }
-        }
-        */
     }
     else if (input->type == INPUT_CLICK_MOVE)
     {
-        // WARNING: Probably in the future I'll have to change the limits of this
-        // loop
-        for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
-        {
-            //keyb->instr_buttons[i].geometry.x += input->diff.x;
-        }
+        // TODO: Move tabs?
+
     }
     return event;
 }

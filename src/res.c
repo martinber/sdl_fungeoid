@@ -179,6 +179,31 @@ int res_load_all(SDL_Renderer *renderer)
                         "res/keyb_icons/comment.png");
                 break;
 
+            case RES_KEYB_ICON_TIME_FASTER:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/time_faster.png");
+                break;
+
+            case RES_KEYB_ICON_TIME_SLOWER:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/time_slower.png");
+                break;
+
+            case RES_KEYB_ICON_ZOOM_MORE:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/zoom_more.png");
+                break;
+
+            case RES_KEYB_ICON_ZOOM_LESS:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/zoom_less.png");
+                break;
+
+            case RES_KEYB_ICON_ARROW_UP:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/arrow_up.png");
+                break;
+
             default:
                 SDL_Log("Tried to load unknown keyb_icon texture ID %d\n", i);
                 res_free_all();
