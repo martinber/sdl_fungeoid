@@ -3,6 +3,7 @@
 #include "juan.h"
 
 static TTF_Font* font_128 = NULL;
+static TTF_Font* font_90 = NULL;
 static TTF_Font* font_32 = NULL;
 
 /// Array of textures for every instruction for the current theme and the current resolution
@@ -20,10 +21,17 @@ static SDL_Texture *KEYB_TAB_TEXTURES[RES_KEYB_TAB_ID_TOTAL] = { NULL };
 /// Resolution of instruction textures (128x128)
 static const int INSTR_TEXTURES_RES = 128;
 
-static SDL_Texture *instr_tex_from_char(
+/// Draw centered text into a fixed size texture
+/**
+ * Make sure that the text fits into the given rectangle, the size of the text
+ * is determined by the font.
+ */
+static SDL_Texture *tex_from_centered_text(
     SDL_Renderer *renderer,
     TTF_Font *font,
-    char character,
+    int width,
+    int height,
+    char* text,
     SDL_Color color
 ) {
     // Create a empty square surface and draw a letter in the center of it
@@ -33,30 +41,29 @@ static SDL_Texture *instr_tex_from_char(
     SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat
     (
         0,
-        INSTR_TEXTURES_RES, INSTR_TEXTURES_RES,
+        width, height,
         32, SDL_PIXELFORMAT_ARGB32
     );
     if (surface == NULL)
     {
-        SDL_Log("Unable to create empty surface for char: %c\n", character);
+        SDL_Log("Unable to create empty surface for text: %s\n", text);
         SDL_Log("SDL_CreateRGBSurfaceWithFormat Error: %s\n", SDL_GetError());
         return NULL;
     }
 
-    char string[2] = { character, '\0' };
-    SDL_Surface* text_surface = TTF_RenderText_Blended(font, string, color);
+    SDL_Surface* text_surface = TTF_RenderText_Blended(font, text, color);
     if (text_surface == NULL)
     {
         SDL_FreeSurface(surface);
-        SDL_Log("Unable to create surface for text: %s\n", string);
+        SDL_Log("Unable to create surface for text: %s\n", text);
         SDL_Log("TTF_RenderText_Blended Error: %s\n", SDL_GetError());
         return NULL;
     }
 
     SDL_Rect dst_rect =
     {
-        INSTR_TEXTURES_RES / 2 - text_surface->w / 2,
-        0,
+        width / 2 - text_surface->w / 2,
+        height / 2 - text_surface->h / 2,
         0, // width ignored
         0, // height ignored
     };
@@ -65,7 +72,7 @@ static SDL_Texture *instr_tex_from_char(
     if (blit_result != 0)
     {
         SDL_FreeSurface(surface);
-        SDL_Log("Unable to blit surface for char: %c\n", character);
+        SDL_Log("Unable to blit surface for text: %s\n", text);
         SDL_Log("SDL_BlitSurface Error: %s\n", SDL_GetError());
         return NULL;
     }
@@ -74,12 +81,22 @@ static SDL_Texture *instr_tex_from_char(
     SDL_FreeSurface(surface);
     if (texture == NULL)
     {
-        SDL_Log("Unable to create texture for char: %c\n", character);
+        SDL_Log("Unable to create texture for text: %s\n", text);
         SDL_Log("SDL_CreateTextureFromSurface Error: %s\n", SDL_GetError());
         return NULL;
     }
 
     return texture;
+}
+static SDL_Texture *instr_tex_from_char(
+    SDL_Renderer *renderer,
+    TTF_Font *font,
+    char character,
+    SDL_Color color
+) {
+    char text[2] = { character, '\0' };
+    return tex_from_centered_text(renderer, font,
+            INSTR_TEXTURES_RES, INSTR_TEXTURES_RES, text, color);
 }
 
 int res_load_all(SDL_Renderer *renderer)
@@ -92,8 +109,9 @@ int res_load_all(SDL_Renderer *renderer)
     }
     */
     font_128 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 128);
+    font_90 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 90);
     font_32 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 32);
-    if (font_128 == NULL || font_32 == NULL)
+    if (font_128 == NULL || font_90 == NULL || font_32 == NULL)
     {
         res_free_all();
         return 1;
@@ -177,6 +195,34 @@ int res_load_all(SDL_Renderer *renderer)
             case RES_KEYB_ICON_COMMENT:
                 KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
                         "res/keyb_icons/comment.png");
+                break;
+
+            case RES_KEYB_ICON_START:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "start", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_STOP:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "stop", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_STEP:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "step", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_PAUSE:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "pause", COLOR_WHITE);
                 break;
 
             case RES_KEYB_ICON_TIME_FASTER:

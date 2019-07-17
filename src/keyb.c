@@ -467,6 +467,22 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
     {
 
         case KEYB_TAB_RUN:
+            SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_START].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_START),
+                    NULL, &keyb->run_buttons[KEYB_RUN_START].geometry);
+            SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_STOP].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_STOP),
+                    NULL, &keyb->run_buttons[KEYB_RUN_STOP].geometry);
+            SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_STEP].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_STEP),
+                    NULL, &keyb->run_buttons[KEYB_RUN_STEP].geometry);
+            SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_PAUSE].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_PAUSE),
+                    NULL, &keyb->run_buttons[KEYB_RUN_PAUSE].geometry);
             SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_FASTER].geometry);
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_TIME_FASTER),
