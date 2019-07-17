@@ -40,6 +40,17 @@ enum KEYB_ACTION_BUTTON_ID
     KEYB_ACTION_BUTTON_ID_TOTAL,
 };
 
+enum KEYB_RUN_BUTTON_ID
+{
+    KEYB_RUN_START,
+    KEYB_RUN_STOP,
+    KEYB_RUN_STEP,
+    KEYB_RUN_PAUSE,
+    KEYB_RUN_FASTER,
+    KEYB_RUN_SLOWER,
+    KEYB_RUN_BUTTON_ID_TOTAL,
+};
+
 // IMPORTANT: Keep in sync with res.c:RES_KEYB_TAB_ID
 enum KEYB_TAB_ID
 {
@@ -67,8 +78,8 @@ typedef struct Keyboard
     Button movio_buttons[KEYB_MOVIO_BUTTONS_TOTAL];
 #define KEYB_OPER_BUTTONS_TOTAL 14
     Button oper_buttons[KEYB_OPER_BUTTONS_TOTAL];
-// #define KEYB_RUN_BUTTONS_TOTAL 6
-    // Button run_buttons[KEYB_RUN_BUTTONS_TOTAL];
+
+    Button run_buttons[KEYB_RUN_BUTTON_ID_TOTAL];
 
     // Remaining buttons available on most tabs
     Button arrow_buttons[KEYB_ARROW_BUTTON_ID_TOTAL];

@@ -73,6 +73,10 @@ Keyboard *keyb_create(SDL_Point window_size)
             BUTTON_KEYB_INSTR, KEYB_OPER_INSTR_ID[i]
         );
     }
+    for (int i = 0; i < KEYB_RUN_BUTTON_ID_TOTAL; i++)
+    {
+        button_init(&keyb->run_buttons[i], BUTTON_KEYB_INSTR, i);
+    }
     for (int i = 0; i < KEYB_ARROW_BUTTON_ID_TOTAL; i++)
     {
         button_init(&keyb->arrow_buttons[i], BUTTON_KEYB_ARROW, i);
@@ -316,6 +320,29 @@ void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size) {
                 button_size, button_size, spacing,
                 origin_x, origin_y, 5, 1);
     }
+    for (int i = 0; i < KEYB_RUN_BUTTON_ID_TOTAL; i++)
+    {
+        int origin_x = keyb_x + spacing;
+        int origin_y = keyb_y + spacing;
+        grid_position(&keyb->run_buttons[KEYB_RUN_START].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 0, 0);
+        grid_position(&keyb->run_buttons[KEYB_RUN_STOP].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 0, 1);
+        grid_position(&keyb->run_buttons[KEYB_RUN_STEP].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 1, 0);
+        grid_position(&keyb->run_buttons[KEYB_RUN_PAUSE].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 1, 1);
+        grid_position(&keyb->run_buttons[KEYB_RUN_FASTER].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 4, 0); // 4 because previous buttons are larger
+        grid_position(&keyb->run_buttons[KEYB_RUN_SLOWER].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 4, 1); // 4 because previous buttons are larger
+    }
 }
 
 void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
@@ -440,6 +467,14 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
     {
 
         case KEYB_TAB_RUN:
+            SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_FASTER].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_TIME_FASTER),
+                    NULL, &keyb->run_buttons[KEYB_RUN_FASTER].geometry);
+            SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_SLOWER].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_TIME_SLOWER),
+                    NULL, &keyb->run_buttons[KEYB_RUN_SLOWER].geometry);
             break;
 
         case KEYB_TAB_VALUES:
@@ -456,7 +491,6 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
                 }
             }
             break;
-
 
         case KEYB_TAB_MOVIO:
             for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
