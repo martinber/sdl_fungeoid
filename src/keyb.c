@@ -547,6 +547,28 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
     }
 }
 
+/// Get the ID of the button over the point, used to get the pressed button
+/**
+ * Takes a SDL_Point and a list of buttons, returns the ID of the button over
+ * the point.
+ *
+ * Returns -1 if there was no button over the point.
+ */
+static int get_button_on_point(
+    SDL_Point *point,
+    Button *button_list,
+    int button_number
+) {
+    for (int i = 0; i < button_number; i++)
+    {
+        if (SDL_PointInRect(point, &button_list[i].geometry))
+        {
+            return button_list[i].id;
+        }
+    }
+    return -1;
+}
+
 KeyboardEvent keyb_handle_input
 (
     Keyboard *keyb,
@@ -581,116 +603,135 @@ KeyboardEvent keyb_handle_input
             return event; // KEYB_EVENT_NOT_HANDLED
     }
 
-    // Indicate that the input was handled
+    // Indicate that at least the input was handled
     event.type = KEYB_EVENT_NONE;
 
     if (input->type == INPUT_CLICK_UP)
     {
+        int pressed = -1;
+
         // Check arrows
 
-        if (SDL_PointInRect(&input->point, &keyb->arrow_buttons[KEYB_ARROW_UP].geometry))
+        pressed = get_button_on_point(&input->point,
+                keyb->arrow_buttons, KEYB_ARROW_BUTTON_ID_TOTAL);
+
+        switch (pressed)
         {
-            event.type = KEYB_EVENT_MOVE_UP;
-        }
-        if (SDL_PointInRect(&input->point, &keyb->arrow_buttons[KEYB_ARROW_DOWN].geometry))
-        {
-            event.type = KEYB_EVENT_MOVE_DOWN;
-        }
-        if (SDL_PointInRect(&input->point, &keyb->arrow_buttons[KEYB_ARROW_LEFT].geometry))
-        {
-            event.type = KEYB_EVENT_MOVE_LEFT;
-        }
-        if (SDL_PointInRect(&input->point, &keyb->arrow_buttons[KEYB_ARROW_RIGHT].geometry))
-        {
-            event.type = KEYB_EVENT_MOVE_RIGHT;
+            case KEYB_ARROW_UP:
+                event.type = KEYB_EVENT_MOVE_UP;
+                return event;
+                break;
+
+            case KEYB_ARROW_DOWN:
+                event.type = KEYB_EVENT_MOVE_DOWN;
+                return event;
+                break;
+
+            case KEYB_ARROW_LEFT:
+                event.type = KEYB_EVENT_MOVE_LEFT;
+                return event;
+                break;
+
+            case KEYB_ARROW_RIGHT:
+                event.type = KEYB_EVENT_MOVE_RIGHT;
+                return event;
+                break;
         }
 
-        // Check shift buttons
+        // Check always available action buttons
 
-        else if (SDL_PointInRect(&input->point, &keyb->action_buttons[KEYB_ACTION_DELETE].geometry))
+        pressed = get_button_on_point(&input->point,
+                keyb->action_buttons, 2);
+
+        switch (pressed)
         {
-            event.type = KEYB_EVENT_START;
+            case KEYB_ACTION_DELETE:
+                event.type = KEYB_EVENT_RM_INSTR;
+                return event;
+                break;
+
+            case KEYB_ACTION_SHIFT:
+                // TODO
+                return event;
+                break;
         }
-        else if (SDL_PointInRect(&input->point, &keyb->action_buttons[KEYB_ACTION_SHIFT].geometry))
-        {
-            event.type = KEYB_EVENT_STOP;
-        }
+
+        // Check sometimes hidden action buttons
+
         if (keyb->active_tab != KEYB_TAB_VALUES)
         {
 
+            pressed = get_button_on_point(&input->point,
+                    keyb->action_buttons + 2, KEYB_ACTION_BUTTON_ID_TOTAL);
+
+            switch (pressed)
+            {
+                case KEYB_ACTION_COPY:
+                    // TODO
+                    return event;
+                    break;
+            }
 
         }
 
-        // Check buttons
+        // Check buttons depending on tabs
+
         switch (keyb->active_tab)
         {
 
             case KEYB_TAB_RUN:
+
+                pressed = get_button_on_point(&input->point,
+                        keyb->run_buttons, KEYB_RUN_BUTTON_ID_TOTAL);
+
+                switch (pressed)
+                {
+                    case KEYB_RUN_START:
+                        event.type = KEYB_EVENT_START;
+                        return event;
+                        break;
+
+                    case KEYB_RUN_STOP:
+                        event.type = KEYB_EVENT_STOP;
+                        return event;
+                        break;
+                }
                 break;
 
             case KEYB_TAB_VALUES:
-                for (int i = 0; i < KEYB_VALUES_BUTTONS_TOTAL; i++)
+
+                pressed = get_button_on_point(&input->point,
+                        keyb->values_buttons, KEYB_VALUES_BUTTONS_TOTAL);
+
+                if (pressed != -1)
                 {
-                    if (SDL_PointInRect(&input->point, &keyb->values_buttons[i].geometry))
-                    {
-                        if (
-                            keyb->values_buttons[i].id != INSTR_NULL
-                            && keyb->values_buttons[i].id != INSTR_SPACE
-                        ) {
-                            event.type = KEYB_EVENT_ADD_INSTR;
-                            event.instr_id = keyb->values_buttons[i].id;
-                        }
-                        else
-                        {
-                            event.type = KEYB_EVENT_RM_INSTR;
-                            event.instr_id = keyb->values_buttons[i].id;
-                        }
-                        break;
-                    }
+                    event.type = KEYB_EVENT_ADD_INSTR;
+                    event.instr_id = pressed;
                 }
                 break;
 
             case KEYB_TAB_MOVIO:
-                for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
+
+                pressed = get_button_on_point(&input->point,
+                        keyb->movio_buttons, KEYB_MOVIO_BUTTONS_TOTAL);
+
+                if (pressed != -1)
                 {
-                    if (SDL_PointInRect(&input->point, &keyb->movio_buttons[i].geometry))
-                    {
-                        if (
-                            keyb->movio_buttons[i].id != INSTR_NULL
-                            && keyb->movio_buttons[i].id != INSTR_SPACE
-                        ) {
-                            event.type = KEYB_EVENT_ADD_INSTR;
-                            event.instr_id = keyb->movio_buttons[i].id;
-                        }
-                        else
-                        {
-                            event.type = KEYB_EVENT_RM_INSTR;
-                            event.instr_id = keyb->movio_buttons[i].id;
-                        }
-                        break;
-                    }
+                    event.type = KEYB_EVENT_ADD_INSTR;
+                    event.instr_id = pressed;
                 }
                 break;
 
             case KEYB_TAB_OPER:
-                for (int i = 0; i < KEYB_OPER_BUTTONS_TOTAL; i++)
+
+                pressed = get_button_on_point(&input->point,
+                        keyb->oper_buttons, KEYB_OPER_BUTTONS_TOTAL);
+                event.instr_id = pressed;
+
+                if (pressed != -1)
                 {
-                    if (SDL_PointInRect(&input->point, &keyb->oper_buttons[i].geometry))
-                    {
-                        if (
-                            keyb->oper_buttons[i].id != INSTR_NULL
-                            && keyb->oper_buttons[i].id != INSTR_SPACE
-                        ) {
-                            event.type = KEYB_EVENT_ADD_INSTR;
-                            event.instr_id = keyb->oper_buttons[i].id;
-                        }
-                        else
-                        {
-                            event.type = KEYB_EVENT_RM_INSTR;
-                            event.instr_id = keyb->oper_buttons[i].id;
-                        }
-                        break;
-                    }
+                    event.type = KEYB_EVENT_ADD_INSTR;
+                    event.instr_id = pressed;
                 }
                 break;
 
