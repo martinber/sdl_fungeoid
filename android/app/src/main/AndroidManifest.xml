@@ -52,7 +52,7 @@
         <meta-data android:name="SDL_ENV.SDL_ACCELEROMETER_AS_JOYSTICK" android:value="0"/>
          -->
 
-        <activity android:name="SdlFungeoid"
+        <activity android:name=".SdlFungeoid"
             android:label="@string/app_name"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             >
@@ -68,6 +68,13 @@
                 <data android:mimeType="*/*" />
             </intent-filter>
             -->
+        </activity>
+
+        <activity android:name=".OpenFileActivity"
+            android:label="@string/app_name"
+            android:parentActivityName=".SdlFungeoid"
+            android:configChanges=""
+            >
         </activity>
     </application>
 
