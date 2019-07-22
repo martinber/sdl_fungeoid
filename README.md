@@ -1,16 +1,46 @@
 # sdl_fungeoid
 
-Fungeoid (Befuge-like) game written on C and SDL2
+Fungeoid (Befunge-like) game for GNU/Linux and Android, because I wanted to
+learn C and SDL.
 
-## Dependencies
+[Fungeoids](https://esolangs.org/wiki/Fungeoid) are a family of similar
+programming languages, the most popular is
+[Befunge93](https://esolangs.org/wiki/Befunge). These languages are not useful,
+instead they are slightly fun.
 
-```
-sudo apt install build-essential libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
-```
+The interesting thing is that the language is
 
-## Code style
+- Two dimensional, there is a grid of instructions, each one represented by a
+    letter.
 
-I have to remember to:
+- The _Program Counter (PC)_ is a pointer to the current instruction that
+    moves up, down, left or right.
+
+- The memory is the grid itself because you can read and write to it,
+  self-modifying code is possible.
+
+- See the [Befunge93](https://github.com/catseye/Befunge-93/blob/master/doc/Befunge-93.markdown)
+    documentation.
+
+There are a lot of Befunge93 interpreters around but writing Befunge93 on a text
+editor is very cumbersome, *sdl_fungeoid* tries to be easy to use especially on
+Android.
+
+I added some instructions to Befunge93 to make the language more fun, so you can
+choose between two languages:
+
+- Befunge93: The most popular one.
+- VeryFunge93: Befunge93 plus some instructions.
+
+## Development
+
+### Code overview
+
+Check the first comment on every header file.
+
+### Code style
+
+I'm learning C, I have to remember to:
 
 - Return zero on success and one on error.
 
@@ -24,29 +54,48 @@ I have to remember to:
 
 - For every struct with constructor:
 
-    - Create a constructor `_create()` function that returns NULL on error.
-        Remember to free the memory allocated inside the constructor on error.
+    - Create a constructor `structname_create()` function that returns NULL on
+        error. Remember to free the memory allocated inside the constructor on
+        error.
 
-    - Create a destructor function `_free()` that returns void, do not check for
-        NULL pointer because `free()` can handle NULL pointers, but if the the
-        struct has pointers I have to free them before checking for NULL pointer.
+    - Create a destructor function `structname_free()` that returns void, do not
+        check for NULL pointer because `free()` can handle NULL pointers, but if
+        the the struct has pointers inside I have to free them after checking
+        for a NULL pointer.
 
 - Input handling:
 
-    - `main.c` handles window and quit events, then, calls
+    - `screens.c` handles window and quit events, then, calls
         `input_handle_event()` so the input handles the touch/mouse/keyboard
         events.
 
-    - `input_handle_event()` returns an `Input` struct, `main.c` passes the
+    - `input_handle_event()` returns an `Input` struct, `screens.c` passes the
         struct to the keyboard
 
-    - If the keyboard returns KEYB_EVENT_NOT_HANDLED then `main.c` should pass
+    - If the keyboard returns `KEYB_EVENT_NOT_HANDLED` then `main.c` should pass
         the input to the element below, e.g. the HUD.
 
-    - If the HUD doens not handle the input then the input is passed to the
-        field.
+    - If the HUD does not handle the input then the input is passed to the
+        keyboard, field, etc.
 
-## Android
+### SDL Notes
+
+I'm just copying and pasting the SDL sources into this repo so the Android build
+works. I should update them manually.
+
+Also I had to do modifications to `Android.mk` on `SDL_image`:
+
+- Change to `SUPPORT_WEBP ?= false`.
+
+- Delete `IMG_WIC.c       \`
+
+### GNU/Linux dependencies
+
+```
+sudo apt install build-essential libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+```
+
+### Android compilation
 
 ```
 sudo apt install openjdk-8-jdk ant android-sdk-platform-tools-common
@@ -58,29 +107,19 @@ Download `sdk-tools-linux-4333796`. Accept licenses:
 env JAVA_HOME="/android/java-se-8u40-ri" /home/mbernardi/extra/async/android/sdk-tools-linux/tools/bin/sdkmanager --licenses
 ```
 
-Install build tools, SDK and NDK for the target version. I had to use `--no_https`:
+Install build tools, SDK and NDK for the target version. I had to use
+`--no_https`:
 
 ```
 env JAVA_HOME="/home/mbernardi/extra/async/android/java-se-8u40-ri" /home/mbernardi/extra/async/android/sdk-tools-linux/tools/bin/sdkmanager --no_https "build-tools;26.0.0" "platforms;android-26"
 env JAVA_HOME="/home/mbernardi/extra/async/android/java-se-8u40-ri" /home/mbernardi/extra/async/android/sdk-tools-linux/tools/bin/sdkmanager --no_https "ndk-bundle"
 ```
 
-For compiling:
+Compiling:
 
 ```
 env ANDROID_HOME="/home/mbernardi/extra/async/android/sdk-tools-linux" JAVA_HOME="/home/mbernardi/extra/async/android/java-se-8u40-ri" ./gradlew installDebug
 ```
-
-### Notes
-
-I'm just copying and pasting the SDL sources into this repo so the Android build
-works. I should update them manually.
-
-Also I had to do modifications to `Android.mk` on `SDL_image`:
-
-- Change to `SUPPORT_WEBP ?= false`.
-
-- Delete `IMG_WIC.c       \`
 
 ## Acknowledgments
 
@@ -91,11 +130,7 @@ Inconsolata
 Copyright (c) 2011, Raph Levien (firstname.lastname@gmail.com), Copyright (c) 2012, Cyreal (cyreal.org)
 ```
 
-SDL: zlib license.
-
-- https://www.willusher.io/pages/sdl2/
-
-- http://lazyfoo.net/tutorials/SDL/index.php
+SDL: has zlib license.
 
 ## References
 
@@ -104,6 +139,12 @@ SDL: zlib license.
 - https://hg.libsdl.org/SDL/file/default/docs/README-android.md
 
 - https://github.com/tomorrowkey/storage-access-framework-sample
+
+### SDL tutorials
+
+- https://www.willusher.io/pages/sdl2/
+
+- http://lazyfoo.net/tutorials/SDL/index.php
 
 ## Other
 
@@ -141,14 +182,6 @@ SDL: zlib license.
 
 #####  Generated by Paletton.com (c) 2002-2014
 ```
-
-## Themes
-
-- Graphic
-- Befunge chars
-- Befunge integers
-- Fish chars
-- Fish integers
 
 ## Fungeoid commands
 
@@ -246,119 +279,4 @@ Operations and conditionals (oper):
 ```
 + - * / % ! `
 : \ $ _ | " k
-```
-
-### Special keys
-
-- Shift 1
-- Shift 2
-
-- Paint Select
-- Rectangle Select
-- Copy
-- Move
-- Paste
-- Comment
-
-### Original commands
-
-- https://esolangs.org/wiki/
-
-Befunge:
-
-```
-+ Addition: Pop two values a and b, then push the result of a+b
-- Subtraction: Pop two values a and b, then push the result of b-a
-* Multiplication: Pop two values a and b, then push the result of a*b
-/ Integer division: Pop two values a and b, then push the result of b/a, rounded down. According to the specifications, if a is zero, ask the user what result they want.
-% Modulo: Pop two values a and b, then push the remainder of the integer division of b/a.
-! Logical NOT: Pop a value. If the value is zero, push 1; otherwise, push zero.
-` Greater than: Pop two values a and b, then push 1 if b>a, otherwise zero.
-> PC direction right
-< PC direction left
-^ PC direction up
-v PC direction down
-? Random PC direction
-_ Horizontal IF: pop a value; set direction to right if value=0, set to left otherwise
-| Vertical IF: pop a value; set direction to down if value=0, set to up otherwise
-" Toggle stringmode (push each character's ASCII value all the way up to the next ")
-: Duplicate top stack value
-\ Swap top stack values
-$ Pop (remove) top stack value and discard
-. Pop top of stack and output as integer
-, Pop top of stack and output as ASCII character
-# Bridge: jump over next command in the current direction of the current PC
-g A "get" call (a way to retrieve data in storage). Pop two values y and x, then push the ASCII value of the character at that position in the program. If (x,y) is out of bounds, push 0
-p A "put" call (a way to store a value for later use). Pop three values y, x and v, then change the character at the position (x,y) in the program to the character with ASCII value v
-& Get integer from user and push it
-~ Get character from user and push it
-@ End program
-0 – 9 Push corresponding number onto the stack
-```
-
-Befunge98 instructions I like:
-
-```
-a Push 10
-b Push 11
-c Push 12
-d Push 13
-e Push 14
-f Push 15
-k Iterate: execute next instruction now, 0 or n+1 times (k does not skip IP unless 0)
-' Fetch: push to stack next character and bridge over it. "Q", is quivalent to 'Q,
-s Store: inverse of fetch.
-```
-
-Fish commands I like:
-
-```
-> PC direction right
-< PC direction left
-^ PC direction up
-v PC direction down
-\ Mirror
-/ Mirror
-_ Mirror
-| Mirror
-# Mirror
-x Random PC direction
-! Trampoline
-? Conditional trampoline - pop one value off the stack. The next instruction is only executed if the popped value is non-zero.
-. Jump - pop y and x off the stack, and move the IP to (x,y) in the codebox. The current direction is retained. Note that you have to jump to the cell before the instructions you want to execute, as the IP will move one position next tick before executing.
-0 – 9 Push corresponding number onto the stack
-a Push 10
-b Push 11
-c Push 12
-d Push 13
-e Push 14
-f Push 15
-+ Addition: Pop two values a and b, then push the result of a+b
-- Subtraction: Pop two values a and b, then push the result of b-a
-* Multiplication: Pop two values a and b, then push the result of a*b
-, Float division: float division (meaning 94,n; outputs 2.25 and not 2). Division by 0 raises an error.
-% Modulo: Pop two values a and b, then push the remainder of the integer division of b/a.
-= Equals. Pop x and y off the stack, and push 1 if y = x, and 0 otherwise.
-) ( Greater than and less than, respectively. Pop x and y off the stack, and push 1 if y operator x, and 0 otherwise.
-' "	Single and double quote - enable string parsing. String parsing pushes every character found to the stack until it finds a closing quote.
-l Push the length of the stack onto the stack.
-: Duplicate the top value on the stack.
-$ Swap the top two values on the stack
-@ Swap the top three values on the stack, shifting them rightwards (e.g. if your stack is 1,2,3,4, calling @ results in 1,4,2,3)
-~ Remove the top value from the stack.
-o n Pop and output as a character and a number, respectively. Output is written to stdout.
-i Read one character from stdin and push it to the stack. The character should not be shown when read from console. When no more input is available, -1 is pushed.
-& Pop the top value off the stack and put it in the register. Calling & again will take the value in the register and put it back on the stack. See The register.
-g Pop y and x off the stack, and push the value at x,y in the codebox. Empty cells are equal to 0.
-p Pop y, x, and v off the stack, and change the value at x,y to v. E.g. 123p puts 1 at 2,3 in the codebox.
-; End execution.
-```
-
-Fish commands I don't like:
-
-```
-[ Pop x off the stack and create a new stack, moving x values from the old stack onto the new one. See Stacks.
-] Remove the current stack, moving its values to the top of the underlying stack.
-} { Shift the entire stack to the right and left, respectively. (e.g. when having 1,2,3,4, calling } results in 4,1,2,3 while { results in 2,3,4,1)
-r Reverse the stack.
 ```

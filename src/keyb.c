@@ -27,8 +27,6 @@ static const enum INSTR_ID KEYB_OPER_INSTR_ID[KEYB_OPER_BUTTONS_TOTAL] =
     INSTR_ITER,
 };
 
-static const int TAB_NUMBER = 5;
-
 Keyboard *keyb_create(SDL_Point window_size)
 {
     Keyboard *keyb = (Keyboard*) malloc(sizeof(Keyboard));

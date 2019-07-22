@@ -3,6 +3,9 @@ obj/
 android/app/build
 .gradle
 
+# Befunge Programs
+*.bf
+
 # Prerequisites
 *.d
 

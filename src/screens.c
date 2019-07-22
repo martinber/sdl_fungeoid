@@ -22,10 +22,11 @@ ScreensHandler *screens_init(SDL_Point window_size)
     screens->loop_running = true;
     if (screens->input == NULL)
     {
-        free(screens);
+        screens_free(screens);
         screens = NULL;
 
         SDL_Log("Error creating screens->input");
+        return NULL;
     }
 
     // TODO remove
@@ -35,15 +36,9 @@ ScreensHandler *screens_init(SDL_Point window_size)
     Hud *hud = hud_create(window_size, 32, field_get_stack(field));
     if (field == NULL || keyb == NULL || hud == NULL)
     {
-        free(screens);
+        screens_free(screens);
         screens = NULL;
 
-        field_free(field);
-        field = NULL;
-        keyb_free(keyb);
-        keyb = NULL;
-        hud_free(hud);
-        hud = NULL;
         SDL_Log("Failed to create field, keyb or InputHandler");
         return NULL;
     }
@@ -62,6 +57,21 @@ void screens_free(ScreensHandler *screens)
         if (screens->input != NULL)
         {
             input_free(screens->input);
+            screens->input = NULL;
+        }
+        if (screens->game_screen.field != NULL)
+        {
+            field_free(screens->game_screen.field);
+            screens->input = NULL;
+        }
+        if (screens->game_screen.keyb != NULL)
+        {
+            keyb_free(screens->game_screen.keyb);
+            screens->input = NULL;
+        }
+        if (screens->game_screen.hud != NULL)
+        {
+            hud_free(screens->game_screen.hud);
             screens->input = NULL;
         }
     }

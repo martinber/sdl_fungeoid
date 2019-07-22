@@ -30,7 +30,7 @@ Hud *hud_create(SDL_Point window_size, int line_height, Stack *stack)
     hud->tab_geometry = (SDL_Rect) { 0, 0, 0, 0 };
     hud->window_size = window_size;
     hud->line_spacing = line_height;
-    hud->state = HUD_STATE_OPEN;
+    hud->state = HUD_STATE_CLOSED;
     hud->stack = stack;
 
     hud_update_geometry(hud, window_size, line_height);
