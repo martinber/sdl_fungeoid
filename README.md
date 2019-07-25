@@ -3,6 +3,8 @@
 Fungeoid (Befunge-like) game for GNU/Linux and Android, because I wanted to
 learn C and SDL.
 
+![Screenshot](./docs/screenshot.png)
+
 [Fungeoids](https://esolangs.org/wiki/Fungeoid) are a family of similar
 programming languages, the most popular is
 [Befunge93](https://esolangs.org/wiki/Befunge). These languages are not useful,
