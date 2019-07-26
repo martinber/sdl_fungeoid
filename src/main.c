@@ -45,10 +45,6 @@ int main(int argc, char *argv[])
     // Init RNG
     srand((unsigned int) time(NULL));
 
-#ifdef __ANDROID__
-    os_android_test();
-#endif
-
     if (res_load_all(renderer) == 0)
     {
         ScreensHandler *screens = screens_init(window_size);

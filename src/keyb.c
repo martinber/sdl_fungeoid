@@ -666,6 +666,10 @@ KeyboardEvent keyb_handle_input
             {
                 case KEYB_ACTION_COPY:
                     // TODO
+#ifdef __ANDROID__
+                    os_android_test();
+#endif
+
                     return event;
                     break;
             }
@@ -693,6 +697,7 @@ KeyboardEvent keyb_handle_input
                         event.type = KEYB_EVENT_STOP;
                         return event;
                         break;
+
                 }
                 break;
 

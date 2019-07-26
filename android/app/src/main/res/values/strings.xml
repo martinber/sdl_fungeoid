@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">sdl_fungeoid</string>
+    <string name="open_file_activity_name">Open file...</string>
 </resources>
