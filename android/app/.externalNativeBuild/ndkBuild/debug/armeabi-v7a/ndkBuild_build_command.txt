@@ -1,0 +1,18 @@
+Executable : /media/mbernardi/datos/Extra/async/android/sdk-tools-linux/ndk-bundle/ndk-build
+arguments : 
+NDK_PROJECT_PATH=null
+APP_BUILD_SCRIPT=/media/mbernardi/datos-ssd/Documentos/repos/c/sdl_fungeoid/android/app/jni/Android.mk
+NDK_APPLICATION_MK=/media/mbernardi/datos-ssd/Documentos/repos/c/sdl_fungeoid/android/app/jni/Application.mk
+APP_ABI=armeabi-v7a
+NDK_ALL_ABIS=armeabi-v7a
+NDK_DEBUG=1
+APP_PLATFORM=android-16
+NDK_OUT=/media/mbernardi/datos-ssd/Documentos/repos/c/sdl_fungeoid/android/app/build/intermediates/ndkBuild/debug/obj
+NDK_LIBS_OUT=/media/mbernardi/datos-ssd/Documentos/repos/c/sdl_fungeoid/android/app/build/intermediates/ndkBuild/debug/lib
+APP_PLATFORM=android-14
+APP_SHORT_COMMANDS=false
+LOCAL_SHORT_COMMANDS=false
+-B
+-n
+jvmArgs : 
+
