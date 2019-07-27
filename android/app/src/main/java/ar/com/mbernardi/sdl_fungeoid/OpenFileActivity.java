@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.widget.TextView;
+import android.widget.FrameLayout;
 import android.widget.Button;
 import android.net.Uri;
 
@@ -26,20 +27,17 @@ public class OpenFileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_openfile);
 
-        // Set up RecyclerView list of files
+        // RecyclerView that holds list of files
 
         recyclerView = (RecyclerView) findViewById(R.id.files_recycler);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
+        // Improves performance as the list is fixed
         recyclerView.setHasFixedSize(true);
 
-        // use a linear layout manager
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        // specify an adapter (see also next example)
-        openFileAdapter = new OpenFileAdapter(filenames);
+        openFileAdapter = new FilenameAdapter(filenames);
         recyclerView.setAdapter(openFileAdapter);
 
         // Set up button
@@ -57,45 +55,40 @@ public class OpenFileActivity extends AppCompatActivity {
     }
 }
 
-class OpenFileAdapter extends RecyclerView.Adapter<OpenFileAdapter.FilenameViewHolder> {
+class FilenameAdapter extends RecyclerView.Adapter<FilenameAdapter.FilenameViewHolder> {
     private String[] filenameList;
 
-    public static class FilenameViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
-        public TextView textView;
-        public FilenameViewHolder(TextView v) {
-            super(v);
-            textView = v;
-        }
-    }
-
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public OpenFileAdapter(String[] filenames) {
+    public FilenameAdapter(String[] filenames) {
         filenameList = filenames;
     }
 
-    // Create new views (invoked by the layout manager)
+    public static class FilenameViewHolder extends RecyclerView.ViewHolder {
+        public TextView textView;
+
+        public FilenameViewHolder(FrameLayout v) {
+            super(v);
+            textView = (TextView) v.findViewById(R.id.text);
+        }
+    }
+
+    // Create new views
     @Override
-    public OpenFileAdapter.FilenameViewHolder onCreateViewHolder(ViewGroup parent,
+    public FilenameAdapter.FilenameViewHolder onCreateViewHolder(ViewGroup parent,
             int viewType) {
-        // create a new view
-        TextView v = (TextView) LayoutInflater.from(parent.getContext())
+
+        FrameLayout view = (FrameLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.filename_recycler_item, parent, false);
 
-        FilenameViewHolder vh = new FilenameViewHolder(v);
+        FilenameViewHolder vh = new FilenameViewHolder(view);
         return vh;
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    // Replace view text
     @Override
     public void onBindViewHolder(FilenameViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
         holder.textView.setText(filenameList[position]);
-
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return filenameList.length;
