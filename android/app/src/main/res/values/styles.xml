@@ -4,7 +4,10 @@
     <style name="AppTheme" parent="Theme.AppCompat">
     </style>
 
-    <style name="FileChooserTheme" parent="Theme.AppCompat.Dialog">
+    <!-- <style name="FileChooserTheme" parent="Theme.AppCompat.Dialog"> -->
+    <!-- </style> -->
+
+    <style name="FileChooserTheme" parent="Theme.AppCompat">
     </style>
 
 </resources>

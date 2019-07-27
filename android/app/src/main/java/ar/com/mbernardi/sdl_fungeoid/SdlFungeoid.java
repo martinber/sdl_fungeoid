@@ -56,6 +56,7 @@ public class SdlFungeoid extends SDLActivity {
             if (resultData != null) {
                 uri = resultData.getData();
                 Log.i("qwerty", "Uri: " + uri.toString());
+                Toast.makeText(getApplicationContext(), uri.toString(), Toast.LENGTH_SHORT).show();
             }
         }
 

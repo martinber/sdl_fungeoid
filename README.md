@@ -1,7 +1,9 @@
 # sdl_fungeoid
 
-Fungeoid (Befunge-like) game for GNU/Linux and Android, because I wanted to
-learn C and SDL.
+Fungeoid (Befunge-like) game for GNU/Linux and Android
+
+Made because I wanted to learn C and SDL, I also had to write a bit of Java to
+make a file chooser dialog.
 
 [Fungeoids](https://esolangs.org/wiki/Fungeoid) are a family of similar
 programming languages, the most popular is
@@ -139,6 +141,8 @@ SDL: has zlib license.
 - https://hg.libsdl.org/SDL/file/default/docs/README-android.md
 
 - https://github.com/tomorrowkey/storage-access-framework-sample
+
+- https://guides.codepath.com/android/using-the-recyclerview#handling-touch-events
 
 ### SDL tutorials
 
