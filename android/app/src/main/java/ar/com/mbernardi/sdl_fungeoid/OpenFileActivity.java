@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.widget.TextView;
@@ -30,6 +32,9 @@ public class OpenFileActivity extends AppCompatActivity implements ClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_openfile);
 
+        // So the back button on the ActionBar works
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         // Get list of files
 
         fileList = getFileList();
@@ -46,19 +51,6 @@ public class OpenFileActivity extends AppCompatActivity implements ClickListener
 
         openFileAdapter = new FilenameAdapter(this, fileList);
         recyclerView.setAdapter(openFileAdapter);
-
-        // Set up button
-
-        final Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener()  {
-            public void onClick(View v) {
-                Intent data = new Intent();
-                String text = "Result...";
-                data.setData(Uri.parse(text));
-                setResult(RESULT_OK, data);
-                finish();
-            }
-        });
     }
 
     ArrayList<File> getFileList() {
@@ -84,11 +76,27 @@ public class OpenFileActivity extends AppCompatActivity implements ClickListener
         }
     }
 
+    // So the back button on the ActionBar works
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Called when a file is selected
+     */
     public void itemClicked(File file) {
         Intent data = new Intent();
         data.setData(Uri.parse(file.getAbsolutePath()));
         setResult(RESULT_OK, data);
         finish();
+
     }
 }
 

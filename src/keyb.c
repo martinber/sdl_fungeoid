@@ -667,7 +667,8 @@ KeyboardEvent keyb_handle_input
                 case KEYB_ACTION_COPY:
                     // TODO
 #ifdef __ANDROID__
-                    os_android_test();
+                    os_android_open_file_chooser();
+                    /* os_android_clipboard_test(); */
 #endif
 
                     return event;

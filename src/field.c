@@ -32,31 +32,11 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
         SDL_Log("Error creating field->canvas or field->stack");
         return NULL;
     }
-#ifdef __ANDROID__
-    char buf[256] = "\0";
-    int storage_state = SDL_AndroidGetExternalStorageState();
-    SDL_Log("ExternalStoragePath: %s", SDL_AndroidGetExternalStoragePath());
-    SDL_Log("ExternalStorageState: %x, read: %x, write: %x",
-            storage_state,
-            SDL_ANDROID_EXTERNAL_STORAGE_READ, SDL_ANDROID_EXTERNAL_STORAGE_WRITE);
-    if (storage_state
-            & SDL_ANDROID_EXTERNAL_STORAGE_READ
-            & SDL_ANDROID_EXTERNAL_STORAGE_WRITE
-            != 0
-    ) {
-        strcat(buf, SDL_AndroidGetExternalStoragePath());
-        strcat(buf, "/program.bf");
-        canvas_load(field->canvas, buf);
-    }
-    else
-    {
-        SDL_Log("No external storage Read/Write permissions");
-    }
-#else
-    canvas_load(field->canvas, "./program.bf");
-#endif
-
     return field;
+}
+
+void field_load_file(Field *field, char *filename) {
+    canvas_load(field->canvas, filename);
 }
 
 void field_free(Field *field)

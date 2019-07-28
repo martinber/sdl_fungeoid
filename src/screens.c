@@ -6,6 +6,7 @@
 #include "field.h"
 #include "keyb.h"
 #include "hud.h"
+#include "os.h"
 
 ScreensHandler *screens_init(SDL_Point window_size)
 {
@@ -46,6 +47,12 @@ ScreensHandler *screens_init(SDL_Point window_size)
     screens->game_screen.field = field;
     screens->game_screen.keyb = keyb;
     screens->game_screen.hud = hud;
+
+    char buf[256] = "\0";
+    if (os_get_default_program_path(buf) == 0)
+    {
+        field_load_file(field, buf);
+    }
 
     return screens;
 }
@@ -89,6 +96,10 @@ static void game_screen_handle_event(ScreensHandler *screens, SDL_Event *event)
                 screens->loop_running = false;
             }
             break;
+
+        case SDL_DROPFILE:
+            field_load_file(screens->game_screen.field, event->drop.file);
+            SDL_Log("Dropped: %s", event->drop.file);
 
         case SDL_WINDOWEVENT:
             if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)

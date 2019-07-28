@@ -91,6 +91,39 @@ Also I had to do modifications to `Android.mk` on `SDL_image`:
 
 - Delete `IMG_WIC.c       \`
 
+### SDL and Android notes
+
+The Android part of this game is quite hacky and horrible. I'm not even sure
+what I'm doing as I have no experience on Android, JNI and Java in general.
+
+I wanted a file chooser so you can open and save files, looks like SDL is not
+designed for my use case.
+
+How I'm doing it:
+
+- When the open button is pressed, my code on C calls some function on `os.h`.
+
+- The functions I've written on `os.c` are based on source code from SDL, I
+     think I got it from `Android_JNI_GetClipboardText()` located on
+    `SDL_android.h`.
+
+- On the Java side I did extend `SDLActivity` as explained on SDL's
+    `README-android.md`. So my main Activity is on `SDLFungeoid.java`.
+
+- So from `os.c` I call a function on `SDLFungeoid.java`. From there everything
+    is standard Android code: Via an Intent I open another Activity where the
+    user selects a file, that filename goes back to my `SdlFungeoid` activity
+    via a `Result`.
+
+- Now I don't know how to give the filename to my C code, but I was lucky
+    because I found that SDL has an event called `SDL_DropEvent` meant to
+    support drag-and-drop. So from Java I just call the function
+    `onNativeDropFile(String)` located on `SDLActivity.java`, then SDL sends the
+    `SDL_DropEvent` to my C code and I get the filename there. As far my code on
+    C is concerned, it's like someone fragged and dropped a file.
+
+- Finally on C I just capture the event and load the file.
+
 ### GNU/Linux dependencies
 
 ```

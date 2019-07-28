@@ -20,7 +20,6 @@ public class SdlFungeoid extends SDLActivity {
             @Override
             public void run() {
                 Toast.makeText(getApplicationContext(), "hola", Toast.LENGTH_SHORT).show();
-				open_file();
             }
         });
     }
@@ -57,6 +56,7 @@ public class SdlFungeoid extends SDLActivity {
                 uri = resultData.getData();
                 Log.i("qwerty", "Uri: " + uri.toString());
                 Toast.makeText(getApplicationContext(), uri.toString(), Toast.LENGTH_SHORT).show();
+                onNativeDropFile(uri.toString());
             }
         }
 

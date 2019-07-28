@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include <errno.h>
 
+static void canvas_clear(Canvas *canvas)
+{
+    for (int i = 0; i < canvas->width * canvas->height; i++)
+    {
+        canvas->matrix[i] = INSTR_SPACE;
+    }
+}
+
 Canvas *canvas_create(int width, int height)
 {
     Canvas *canvas = (Canvas*) malloc(sizeof(Canvas));
@@ -24,11 +32,8 @@ Canvas *canvas_create(int width, int height)
         SDL_Log("Failed to malloc canvas->matrix\n");
         return NULL;
     }
+    canvas_clear(canvas);
 
-    for (int i = 0; i < canvas->width * canvas->height; i++)
-    {
-        canvas->matrix[i] = INSTR_SPACE;
-    }
     return canvas;
 }
 
@@ -166,6 +171,8 @@ int canvas_load(Canvas *canvas, char *filename)
         SDL_Log("Error opening NULL filename");
         return 1;
     }
+
+    canvas_clear(canvas);
 
     // Open file
 
