@@ -48,6 +48,12 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
  */
 void field_load_file(Field *field, char *filename);
 
+/// Save the current program to a file
+/**
+ * The filename should be a string ready to be used by fopen()
+ */
+void field_save_file(Field *field, char *filename);
+
 void field_free(Field *field);
 
 void field_resize_screen(Field *field, SDL_Point *screen_size, int cell_size);

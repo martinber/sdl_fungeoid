@@ -1,5 +1,7 @@
 #include "field.h"
 
+#include "os.h"
+
 Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size)
 {
     Field *field = (Field*) malloc(sizeof(Field));
@@ -32,43 +34,30 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
         SDL_Log("Error creating field->canvas or field->stack");
         return NULL;
     }
-    return field;
-}
 
-void field_load_file(Field *field, char *filename) {
-    canvas_load(field->canvas, filename);
+    char buf[256] = "\0";
+    if (os_get_default_program_path(buf) == 0)
+    {
+        field_load_file(field, buf);
+    } else {
+        SDL_Log("Failed to get default program path");
+    }
+
+    return field;
 }
 
 void field_free(Field *field)
 {
     if (field != NULL)
     {
-        if (field->canvas != NULL)
+        char buf[256] = "\0";
+        if (os_get_default_program_path(buf) == 0)
         {
-#ifdef __ANDROID__
-            char buf[256] = "\0";
-            int storage_state = SDL_AndroidGetExternalStorageState();
-            SDL_Log("ExternalStoragePath: %s", SDL_AndroidGetExternalStoragePath());
-            SDL_Log("ExternalStorageState: %x, read: %x, write: %x",
-                    storage_state,
-                    SDL_ANDROID_EXTERNAL_STORAGE_READ, SDL_ANDROID_EXTERNAL_STORAGE_WRITE);
-            if (storage_state
-                    & SDL_ANDROID_EXTERNAL_STORAGE_READ
-                    & SDL_ANDROID_EXTERNAL_STORAGE_WRITE
-                    != 0
-            ) {
-                strcat(buf, SDL_AndroidGetExternalStoragePath());
-                strcat(buf, "/program.bf");
-                canvas_save(field->canvas, buf);
-            }
-            else
-            {
-                SDL_Log("No external storage Read/Write permissions");
-            }
-#else
-            canvas_save(field->canvas, "./program.bf");
-#endif
+            field_save_file(field, buf);
+        } else {
+            SDL_Log("Failed to get default program path");
         }
+
         canvas_free(field->canvas);
         field->canvas = NULL;
         stack_free(field->stack);
@@ -77,6 +66,25 @@ void field_free(Field *field)
     free(field);
     field = NULL;
 }
+
+void field_load_file(Field *field, char *filename) {
+    if (field->canvas != NULL)
+    {
+        canvas_load(field->canvas, filename);
+    } else {
+        SDL_Log("Tried to load file when canvas was NULL");
+    }
+}
+
+void field_save_file(Field *field, char *filename) {
+    if (field->canvas != NULL)
+    {
+        canvas_save(field->canvas, filename);
+    } else {
+        SDL_Log("Tried to load file when canvas was NULL");
+    }
+}
+
 
 void field_resize_screen(Field *field, SDL_Point *screen_size, int cell_size)
 {

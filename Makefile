@@ -6,8 +6,10 @@ LINKER   = gcc
 # #include <SDL2/SDL.h>. Because on the Android version I don't have the headers
 # inside a SDL2/ directory.
 CFLAGS = -g -Wall -Wextra -pedantic -std=c11 -isystem /usr/include/SDL2/
+GTKCFLAGS = $(shell pkg-config --cflags gtk+-3.0)
 
 LFLAGS   = -Wall -lm -lSDL2 -lSDL2_image -lSDL2_ttf
+GTKLIBS = $(shell pkg-config --libs gtk+-3.0)
 
 # Directories
 SRCDIR   = src
@@ -21,11 +23,11 @@ rm       = rm -f
 
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
-	@$(LINKER) $(OBJECTS) $(LFLAGS) -o $@
+	@$(LINKER) $(OBJECTS) $(LFLAGS) $(GTKLIBS) -o $@
 	@echo "Linking complete!"
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) $(GTKCFLAGS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 
 .PHONY: clean

@@ -1,9 +1,12 @@
 #include "os.h"
 
-#ifdef __ANDROID__
-#include <jni.h>
+#include <string.h>
 
 #include "juan.h"
+
+#ifdef __ANDROID__
+
+#include <jni.h>
 
 void os_android_clipboard_test()
 {
@@ -50,9 +53,48 @@ void os_android_open_file_chooser()
     (*env)->DeleteLocalRef(env, class);
 }
 
+#else
+
+#include <gtk/gtk.h>
+
+void os_linux_open_file_chooser(char *buf)
+{
+    gtk_init(NULL, NULL);
+
+    GtkWidget *dialog;
+    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+    gint result;
+
+    dialog = gtk_file_chooser_dialog_new("Open File", NULL, action,
+            "_Cancel", GTK_RESPONSE_CANCEL,
+            "_Open", GTK_RESPONSE_ACCEPT,
+            NULL
+        );
+
+    result = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (result == GTK_RESPONSE_ACCEPT)
+    {
+        char *filename;
+        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+        filename = gtk_file_chooser_get_filename(chooser);
+        strcpy(buf, filename);
+        g_free(filename);
+    }
+
+    gtk_widget_destroy(dialog);
+
+    // Otherwise the window freezes there
+    while(gtk_events_pending())
+    {
+        gtk_main_iteration();
+    }
+}
+
 #endif
 
 int os_get_default_program_path(char* buf) {
+
+    char filename[] = "_autosaved.bf";
 
 #ifdef __ANDROID__
     int storage_state = SDL_AndroidGetExternalStorageState();
@@ -66,7 +108,8 @@ int os_get_default_program_path(char* buf) {
             != 0
     ) {
         strcpy(buf, SDL_AndroidGetExternalStoragePath());
-        strcat(buf, "/program.bf");
+        strcat(buf, "/");
+        strcat(buf, filename);
     }
     else
     {
@@ -74,7 +117,8 @@ int os_get_default_program_path(char* buf) {
         return 1;
     }
 #else
-    strcpy(buf, "./program.bf");
+    strcpy(buf, "./");
+    strcat(buf, filename);
 #endif
     return 0;
 }

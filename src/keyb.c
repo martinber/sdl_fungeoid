@@ -1,6 +1,7 @@
 #include "keyb.h"
 
 #include "res.h"
+#include "os.h"
 
 // List of buttons for each tab
 
@@ -665,13 +666,18 @@ KeyboardEvent keyb_handle_input
             switch (pressed)
             {
                 case KEYB_ACTION_COPY:
-                    // TODO
+                    {
+                        // TODO
 #ifdef __ANDROID__
-                    os_android_open_file_chooser();
-                    /* os_android_clipboard_test(); */
+                        os_android_open_file_chooser();
+#else
+                        char buf[256] = "\0";
+                        os_linux_open_file_chooser(buf);
+                        SDL_Log("Selected: %s", buf);
 #endif
 
-                    return event;
+                        return event;
+                    }
                     break;
             }
 

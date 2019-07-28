@@ -186,6 +186,8 @@ SDL: has zlib license.
 
 - https://guides.codepath.com/android/using-the-recyclerview#handling-touch-events
 
+- https://stackoverflow.com/questions/30751178/gtk3-file-chooser-in-a-non-gtk-application
+
 ### SDL tutorials
 
 - https://www.willusher.io/pages/sdl2/
