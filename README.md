@@ -2,15 +2,17 @@
 
 Fungeoid (Befunge-like) game for GNU/Linux and Android
 
-Made because I wanted to learn C and SDL, I also had to write a bit of Java to
-make a file chooser dialog.
+Made because I wanted to learn C and SDL, I also had to write a bit of Android
+code to make a file chooser dialog.
+
+![Screenshot](./docs/screenshot.png)
 
 [Fungeoids](https://esolangs.org/wiki/Fungeoid) are a family of similar
 programming languages, the most popular is
 [Befunge93](https://esolangs.org/wiki/Befunge). These languages are not useful,
 instead they are slightly fun.
 
-The interesting thing is that the language is
+The interesting thing is that the language is:
 
 - Two dimensional, there is a grid of instructions, each one represented by a
     letter.
@@ -19,7 +21,7 @@ The interesting thing is that the language is
     moves up, down, left or right.
 
 - The memory is the grid itself because you can read and write to it,
-  self-modifying code is possible.
+    self-modifying code is possible.
 
 - See the [Befunge93](https://github.com/catseye/Befunge-93/blob/master/doc/Befunge-93.markdown)
     documentation.
@@ -40,31 +42,6 @@ choose between two languages:
 
 Check the first comment on every header file.
 
-### Code style
-
-I'm learning C, I have to remember to:
-
-- Return zero on success and one on error.
-
-- Set variables to some value on declaration, pointers to NULL.
-
-- Set pointers to NULL when freeing memory.
-
-- Use `static` for global variables and private functions.
-
-- Can't define global variables on header files, see `COLOR_XX` for example
-
-- For every struct with constructor:
-
-    - Create a constructor `structname_create()` function that returns NULL on
-        error. Remember to free the memory allocated inside the constructor on
-        error.
-
-    - Create a destructor function `structname_free()` that returns void, do not
-        check for NULL pointer because `free()` can handle NULL pointers, but if
-        the the struct has pointers inside I have to free them after checking
-        for a NULL pointer.
-
 - Input handling:
 
     - `screens.c` handles window and quit events, then, calls
@@ -79,6 +56,36 @@ I'm learning C, I have to remember to:
 
     - If the HUD does not handle the input then the input is passed to the
         keyboard, field, etc.
+
+### Code style
+
+I'm learning C, I have to remember to:
+
+- Return zero on success and one on error.
+
+- Set variables to some value on declaration, pointers to NULL.
+
+- Set pointers to NULL when freeing memory.
+
+- Use `static` for global variables and private functions.
+
+- Can't define global variables on header files, see `COLOR_XX` for example.
+
+- For every struct with a constructor:
+
+    - Create a constructor `structname_create()` function that returns NULL on
+        error. Remember to free the memory allocated inside the constructor on
+        error.
+
+    - Create a destructor function `structname_free()` that returns void, do not
+        check for NULL pointer because `free()` can handle NULL pointers, but if
+        the struct has pointers inside I have to free them after checking
+        for a NULL pointer.
+
+### Things to do
+
+- Fix that the game looks fullscreen on Android and is drawn below the
+    notification bar.
 
 ### SDL Notes
 
@@ -131,6 +138,8 @@ sudo apt install build-essential libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
 ```
 
 ### Android compilation
+
+I refuse to use Android Studio, so I do it manually.
 
 ```
 sudo apt install openjdk-8-jdk ant android-sdk-platform-tools-common

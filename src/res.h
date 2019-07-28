@@ -4,9 +4,8 @@
 #include "const.h"
 #include "juan.h"
 
+/// Resources management
 /**
- * Resources manager.
- *
  * TODO: Make this a struct just like the other modules
  *
  * Keeps track of textures, sounds, etc.

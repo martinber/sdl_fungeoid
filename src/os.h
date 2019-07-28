@@ -1,7 +1,15 @@
 #ifndef OS_H
 #define OS_H
 
+/// OS-dependent functions
+
 void os_android_clipboard_test();
+
+/// Open a file chooser activity
+/**
+ * The function does not return anything. When the user selects a file, a
+ * SDL_DropEvent is raised with the filename on it
+ */
 void os_android_open_file_chooser();
 
 /// Get path to the default program file

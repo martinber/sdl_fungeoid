@@ -1,14 +1,11 @@
 #ifndef CONST_H
 #define CONST_H
 
-#include "juan.h"
-/// Can't include anything else to avoid circular dependencies!
+/// This module keeps track of global constants, hardcoded values, etc.
 
-/**
- * Constants manager.
- *
- * Keeps track of global constants, hardcoded values.
- */
+#include "juan.h"
+// I can't include anything else to avoid circular dependencies! because this
+// header is included basically everywhere
 
 // So I can ignore unused arguments
 #define UNUSED(x) ((x)=(x))

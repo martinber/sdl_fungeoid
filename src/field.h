@@ -8,10 +8,6 @@
 #include "keyb.h"
 #include "res.h"
 
-/**
- * Contains a canvas with instructions, keeps track of program execution, etc.
- */
-
 enum FIELD_STATE
 {
     FIELD_EDITING,
@@ -19,6 +15,10 @@ enum FIELD_STATE
     FIELD_STATE_TOTAL,
 };
 
+/// This is the main game struct
+/**
+ * Contains a canvas with instructions, keeps track of program execution, etc.
+ */
 typedef struct Field
 {
     Canvas *canvas;

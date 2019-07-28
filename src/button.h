@@ -13,6 +13,7 @@ enum BUTTON_TYPE
     BUTTON_KEYB_ACTION,
 };
 
+/// Contains geometry, state and ID of a button.
 typedef struct Button
 {
     SDL_Rect geometry;

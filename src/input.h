@@ -20,7 +20,7 @@ enum INPUT_TYPE
  * Consider the members as private.
  *
  * For example remembers if the mouse was pressed to detect dragging. Only
- * detect first finger and left click, ignore the rest of fingers and buttons.
+ * detects first finger and left click, ignores the rest of fingers and buttons.
  *
  * Supported touch/mouse interactions:
  *

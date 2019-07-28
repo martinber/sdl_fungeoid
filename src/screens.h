@@ -8,13 +8,6 @@
 #include "input.h"
 #include "field.h"
 
-/// Contains the main loop of every screen.
-/**
- * There are so few screens, so each one is handled differently depending on
- * what I need. For example the GameScreen stays in memory when the FileScreen
- * is opened.
- */
-
 enum SCREEN_ID
 {
     SCREEN_TITLE,
@@ -24,6 +17,7 @@ enum SCREEN_ID
     SCREEN_TOTAL,
 };
 
+/// Game screen
 typedef struct GameScreen
 {
     Field *field;
@@ -31,6 +25,12 @@ typedef struct GameScreen
     Hud *hud;
 } GameScreen;
 
+/// Contains the main loop of every screen.
+/**
+ * There are so few screens, so each one is handled differently depending on
+ * what I need. For example the GameScreen stays in memory when the FileScreen
+ * is opened.
+ */
 typedef struct ScreensHandler
 {
     enum SCREEN_ID current_screen;

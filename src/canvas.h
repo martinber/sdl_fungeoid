@@ -3,11 +3,8 @@
 
 #include "const.h"
 
+/// Array of instructions
 /**
- * Canvas.
- *
- * Manages the canvas, containing the array of instructions, etc.
- *
  * The canvas has integer coordinates, x increases left to right and y increases
  * top to bottom.
  */

@@ -1,14 +1,13 @@
 #ifndef JUAN_H
 #define JUAN_H
 
+/// Helper functions for SDL.
+
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
-/// Can't include anything else to avoid circular dependencies!
-
-/**
- * Helper functions for SDL.
- */
+// I can't include anything else to avoid circular dependencies! because this
+// header is included basically everywhere
 
 /// Start SDL and open the window.
 /**

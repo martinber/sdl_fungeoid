@@ -12,6 +12,7 @@ enum HUD_STATE
     HUD_STATE_TOTAL,
 };
 
+/// Shows the state of the stack on screen
 typedef struct Hud
 {
     SDL_Rect geometry;
