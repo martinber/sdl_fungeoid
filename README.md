@@ -2,8 +2,10 @@
 
 Fungeoid (Befunge-like) game for GNU/Linux and Android
 
-Made because I wanted to learn C and SDL, I also had to write a bit of Android
-code to make a file chooser dialog.
+Made it because I wanted to learn C and SDL. I also had to write a bit of
+platform-dependent code to create the file chooser dialogs: for Android I made
+a simple Activity using Java and for GNU/Linux I'm using a GTK3 file chooser
+dialog.
 
 ![Screenshot](./docs/screenshot.png)
 
@@ -131,10 +133,14 @@ How I'm doing it:
 
 - Finally on C I just capture the event and load the file.
 
+### GNU/Linux notes
+
+For the file chooser dialog I'm using GTK+3.
+
 ### GNU/Linux dependencies
 
 ```
-sudo apt install build-essential libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+sudo apt install build-essential libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libgtk-3-dev
 ```
 
 ### Android compilation
@@ -144,6 +150,9 @@ I refuse to use Android Studio, so I do it manually.
 ```
 sudo apt install openjdk-8-jdk ant android-sdk-platform-tools-common
 ```
+
+As `openjdk-8-jdk` is not available on Debian Buster I downloaded the SDK
+manually so I set the `JAVA_HOME` variable on each command.
 
 Download `sdk-tools-linux-4333796`. Accept licenses:
 

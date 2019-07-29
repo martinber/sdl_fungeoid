@@ -36,7 +36,7 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
     }
 
     char buf[256] = "\0";
-    if (os_get_default_program_path(buf) == 0)
+    if (os_get_autosave_file_path(buf) == 0)
     {
         field_load_file(field, buf);
     } else {
@@ -51,7 +51,7 @@ void field_free(Field *field)
     if (field != NULL)
     {
         char buf[256] = "\0";
-        if (os_get_default_program_path(buf) == 0)
+        if (os_get_autosave_file_path(buf) == 0)
         {
             field_save_file(field, buf);
         } else {

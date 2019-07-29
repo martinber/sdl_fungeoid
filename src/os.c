@@ -56,6 +56,7 @@ void os_android_open_file_chooser()
 #else
 
 #include <gtk/gtk.h>
+#include <stdio.h>
 
 void os_linux_open_file_chooser(char *buf)
 {
@@ -92,9 +93,7 @@ void os_linux_open_file_chooser(char *buf)
 
 #endif
 
-int os_get_default_program_path(char* buf) {
-
-    char filename[] = "_autosaved.bf";
+int os_get_save_dir_path(char* buf) {
 
 #ifdef __ANDROID__
     int storage_state = SDL_AndroidGetExternalStorageState();
@@ -109,7 +108,6 @@ int os_get_default_program_path(char* buf) {
     ) {
         strcpy(buf, SDL_AndroidGetExternalStoragePath());
         strcat(buf, "/");
-        strcat(buf, filename);
     }
     else
     {
@@ -117,8 +115,35 @@ int os_get_default_program_path(char* buf) {
         return 1;
     }
 #else
-    strcpy(buf, "./");
-    strcat(buf, filename);
+    // Get the documents folder path
+    FILE *process = popen("xdg-user-dir DOCUMENTS 2>/dev/null", "r");
+
+    // Read stdout until a newline or end of FILE is found.
+    fgets(buf, 256, process);
+
+    // Remove last character because the process appends a newline at the end of
+    // the path.
+    buf[strlen(buf) - 1] = '\0';
+
+    // Append folder to path
+    strcat(buf, "/sdl_fungeoid/");
+
+    SDL_Log("Path: %s", buf);
+
 #endif
     return 0;
+}
+
+int os_get_autosave_file_path(char* buf) {
+
+    char filename[] = "_autosaved.bf";
+
+    if (os_get_save_dir_path(buf) != 0)
+    {
+        strcat(buf, filename);
+        SDL_Log("Filename: %s", buf);
+        return 0;
+    } else {
+        return 1;
+    }
 }

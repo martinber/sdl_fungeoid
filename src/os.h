@@ -19,11 +19,19 @@ void os_android_open_file_chooser();
  */
 void os_linux_open_file_chooser(char *buf);
 
+/// Get path to where the programs are saved
+/**
+ * Needs a big enough buffer, expects a buffer of size 256.
+ * Returns 0 on success.
+ * The path returned ends on /
+ */
+int os_get_save_dir_path(char* buf);
+
 /// Get path to the default program file
 /**
- * Needs a big enough buffer, just use 256.
+ * Needs a big enough buffer, expects a buffer of size 256.
  * Returns 0 on success.
  */
-int os_get_default_program_path(char* buf);
+int os_get_autosave_file_path(char* buf);
 
 #endif
