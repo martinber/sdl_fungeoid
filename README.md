@@ -89,6 +89,10 @@ I'm learning C, I have to remember to:
 - Fix that the game looks fullscreen on Android and is drawn below the
     notification bar.
 
+- Fix that while the load file GTK dialog is open, the game is frozen and inputs
+    are buffered until the dialog is closed, where they are received together at
+    the same time.
+
 ### SDL Notes
 
 I'm just copying and pasting the SDL sources into this repo so the Android build

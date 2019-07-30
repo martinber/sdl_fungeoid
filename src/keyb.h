@@ -6,10 +6,7 @@
 #include "input.h"
 #include "button.h"
 
-/**
- * On-screen keyboard
- */
-
+// TODO remove and replace with a boolean?
 enum KEYB_SHIFT_STATE
 {
     KEYB_SHIFT_NONE,
@@ -17,6 +14,8 @@ enum KEYB_SHIFT_STATE
     KEYB_SHIFT_2,
     KEYB_SHIFT_STATE_TOTAL,
 };
+
+// Button IDs
 
 enum KEYB_ARROW_BUTTON_ID
 {
@@ -51,6 +50,18 @@ enum KEYB_RUN_BUTTON_ID
     KEYB_RUN_BUTTON_ID_TOTAL,
 };
 
+enum KEYB_MISC_BUTTON_ID
+{
+    KEYB_MISC_LOAD,
+    KEYB_MISC_SAVE,
+    KEYB_MISC_T_HELP, // Toggle help
+    KEYB_MISC_T_VALUES, // Toggle values
+    KEYB_MISC_ZOOM_IN,
+    KEYB_MISC_ZOOM_OUT,
+    KEYB_MISC_QUIT,
+    KEYB_MISC_BUTTON_ID_TOTAL,
+};
+
 // IMPORTANT: Keep in sync with res.c:RES_KEYB_TAB_ID
 enum KEYB_TAB_ID
 {
@@ -58,10 +69,12 @@ enum KEYB_TAB_ID
     KEYB_TAB_VALUES,
     KEYB_TAB_MOVIO,
     KEYB_TAB_OPER,
+    KEYB_TAB_MISC,
     KEYB_TAB_CHAR,
     KEYB_TAB_ID_TOTAL,
 };
 
+/// On-screen keyboard
 typedef struct Keyboard
 {
     // Both rectangles determine the size of the keyboard for touch/click
@@ -73,17 +86,16 @@ typedef struct Keyboard
 
     // Buttons for each tab
 #define KEYB_VALUES_BUTTONS_TOTAL 16
-    Button values_buttons[KEYB_VALUES_BUTTONS_TOTAL];
 #define KEYB_MOVIO_BUTTONS_TOTAL 16
-    Button movio_buttons[KEYB_MOVIO_BUTTONS_TOTAL];
 #define KEYB_OPER_BUTTONS_TOTAL 14
+    Button values_buttons[KEYB_VALUES_BUTTONS_TOTAL];
+    Button movio_buttons[KEYB_MOVIO_BUTTONS_TOTAL];
     Button oper_buttons[KEYB_OPER_BUTTONS_TOTAL];
-
     Button run_buttons[KEYB_RUN_BUTTON_ID_TOTAL];
+    Button misc_buttons[KEYB_MISC_BUTTON_ID_TOTAL];
 
     // Remaining buttons available on most tabs
     Button arrow_buttons[KEYB_ARROW_BUTTON_ID_TOTAL];
-    // Remaining buttons available on most tabs
     Button action_buttons[KEYB_ACTION_BUTTON_ID_TOTAL];
 
     // Tabs
@@ -104,13 +116,22 @@ enum KEYB_EVENT_TYPE
     KEYB_EVENT_MOVE_RIGHT,
     KEYB_EVENT_START,
     KEYB_EVENT_STOP,
+    KEYB_EVENT_LOAD,
+    KEYB_EVENT_SAVE,
+    KEYB_EVENT_ZOOM_IN,
+    KEYB_EVENT_ZOOM_OUT,
+    KEYB_EVENT_QUIT,
     KEYB_EVENT_TYPE_TOTAL,
 };
 
+/// Keyboard event
+/**
+ * Used by keyb to send information to the input handler and then to the field.
+ */
 typedef struct KeyboardEvent
 {
     enum KEYB_EVENT_TYPE type;
-    enum INSTR_ID instr_id;
+    enum INSTR_ID instr_id; // Used only if type is ADD_INSTR
 } KeyboardEvent;
 
 /// Create keyb

@@ -138,7 +138,7 @@ int os_get_autosave_file_path(char* buf) {
 
     char filename[] = "_autosaved.bf";
 
-    if (os_get_save_dir_path(buf) != 0)
+    if (os_get_save_dir_path(buf) == 0)
     {
         strcat(buf, filename);
         SDL_Log("Filename: %s", buf);

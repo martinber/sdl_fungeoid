@@ -137,7 +137,7 @@ int res_load_all(SDL_Renderer *renderer)
     // Load every tab texture from characters
     char *tab_text[RES_KEYB_TAB_ID_TOTAL] =
     {
-        "run", "123", "<>io", "+*/", "char",
+        "run", "123", "<>io", "+*/", "misc", "char",
     };
 
     for (enum RES_KEYB_TAB_ID i = 0; i < RES_KEYB_TAB_ID_TOTAL; i++)
@@ -152,6 +152,7 @@ int res_load_all(SDL_Renderer *renderer)
         }
     }
 
+    // TODO: Decide now whatspacing to use between buttons and update this /8
     // Load every keyboard icon texture
     for (enum RES_KEYB_ICON_ID i = 0; i < RES_KEYB_ICON_ID_TOTAL; i++)
     {
@@ -235,14 +236,49 @@ int res_load_all(SDL_Renderer *renderer)
                         "res/keyb_icons/time_slower.png");
                 break;
 
-            case RES_KEYB_ICON_ZOOM_MORE:
-                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
-                        "res/keyb_icons/zoom_more.png");
+            case RES_KEYB_ICON_LOAD:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "load", COLOR_WHITE);
                 break;
 
-            case RES_KEYB_ICON_ZOOM_LESS:
+            case RES_KEYB_ICON_SAVE:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "save", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_T_HELP:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 4 + INSTR_TEXTURES_RES * 3 / 8,
+                        INSTR_TEXTURES_RES,
+                        "toggle help", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_T_VALUES:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 4 + INSTR_TEXTURES_RES * 3 / 8,
+                        INSTR_TEXTURES_RES,
+                        "toggle values", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_QUIT:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "quit", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_ZOOM_IN:
                 KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
-                        "res/keyb_icons/zoom_less.png");
+                        "res/keyb_icons/zoom_in.png");
+                break;
+
+            case RES_KEYB_ICON_ZOOM_OUT:
+                KEYB_ICON_TEXTURES[i] = juan_load_texture(renderer,
+                        "res/keyb_icons/zoom_out.png");
                 break;
 
             case RES_KEYB_ICON_ARROW_UP:

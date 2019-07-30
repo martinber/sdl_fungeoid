@@ -76,6 +76,10 @@ Keyboard *keyb_create(SDL_Point window_size)
     {
         button_init(&keyb->run_buttons[i], BUTTON_KEYB_INSTR, i);
     }
+    for (int i = 0; i < KEYB_MISC_BUTTON_ID_TOTAL; i++)
+    {
+        button_init(&keyb->misc_buttons[i], BUTTON_KEYB_INSTR, i);
+    }
     for (int i = 0; i < KEYB_ARROW_BUTTON_ID_TOTAL; i++)
     {
         button_init(&keyb->arrow_buttons[i], BUTTON_KEYB_ARROW, i);
@@ -147,7 +151,6 @@ static void grid_position
         rect->y += pos_index_y * cell_spacing;
     }
 }
-
 
 void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size) {
 
@@ -342,6 +345,32 @@ void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size) {
                 button_size, button_size, spacing,
                 origin_x, origin_y, 4, 1); // 4 because previous buttons are larger
     }
+    for (int i = 0; i < KEYB_MISC_BUTTON_ID_TOTAL; i++)
+    {
+        int origin_x = keyb_x + spacing;
+        int origin_y = keyb_y + spacing;
+        grid_position(&keyb->misc_buttons[KEYB_MISC_LOAD].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 0, 0);
+        grid_position(&keyb->misc_buttons[KEYB_MISC_SAVE].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 0, 1);
+        grid_position(&keyb->misc_buttons[KEYB_MISC_T_HELP].geometry,
+                button_size * 4 + spacing, button_size, spacing,
+                origin_x, origin_y, 0, 2);
+        grid_position(&keyb->misc_buttons[KEYB_MISC_T_VALUES].geometry,
+                button_size * 4 + spacing, button_size, spacing,
+                origin_x, origin_y, 0, 3);
+        grid_position(&keyb->misc_buttons[KEYB_MISC_QUIT].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 3, 0);
+        grid_position(&keyb->misc_buttons[KEYB_MISC_ZOOM_IN].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 5, 0); // 5 because previous buttons are larger
+        grid_position(&keyb->misc_buttons[KEYB_MISC_ZOOM_OUT].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 5, 1); // 5 because previous buttons are larger
+    }
 }
 
 void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
@@ -392,70 +421,76 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
 
     // Draw arrows
 
-    SDL_Texture* tex = NULL;
-    juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
-    tex = res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_ARROW_UP);
+    if (keyb->active_tab != KEYB_TAB_MISC)
+    {
+        SDL_Texture* tex = NULL;
+        juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
+        tex = res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_ARROW_UP);
 
-    SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_UP].geometry);
-    SDL_RenderCopyEx(renderer, tex, NULL,
-            &keyb->arrow_buttons[KEYB_ARROW_UP].geometry, 0, NULL, SDL_FLIP_NONE);
+        SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_UP].geometry);
+        SDL_RenderCopyEx(renderer, tex, NULL,
+                &keyb->arrow_buttons[KEYB_ARROW_UP].geometry, 0, NULL, SDL_FLIP_NONE);
 
-    SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_DOWN].geometry);
-    SDL_RenderCopyEx(renderer, tex, NULL,
-            &keyb->arrow_buttons[KEYB_ARROW_DOWN].geometry, 180, NULL, SDL_FLIP_NONE);
+        SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_DOWN].geometry);
+        SDL_RenderCopyEx(renderer, tex, NULL,
+                &keyb->arrow_buttons[KEYB_ARROW_DOWN].geometry, 180, NULL, SDL_FLIP_NONE);
 
-    SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_LEFT].geometry);
-    SDL_RenderCopyEx(renderer, tex, NULL,
-            &keyb->arrow_buttons[KEYB_ARROW_LEFT].geometry, 270, NULL, SDL_FLIP_NONE);
+        SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_LEFT].geometry);
+        SDL_RenderCopyEx(renderer, tex, NULL,
+                &keyb->arrow_buttons[KEYB_ARROW_LEFT].geometry, 270, NULL, SDL_FLIP_NONE);
 
-    SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_RIGHT].geometry);
-    SDL_RenderCopyEx(renderer, tex, NULL,
-            &keyb->arrow_buttons[KEYB_ARROW_RIGHT].geometry, 90, NULL, SDL_FLIP_NONE);
+        SDL_RenderFillRect(renderer, &keyb->arrow_buttons[KEYB_ARROW_RIGHT].geometry);
+        SDL_RenderCopyEx(renderer, tex, NULL,
+                &keyb->arrow_buttons[KEYB_ARROW_RIGHT].geometry, 90, NULL, SDL_FLIP_NONE);
+    }
 
     // Draw shift and special buttons
 
-    juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
-
-    SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_DELETE].geometry);
-    SDL_RenderCopy(renderer,
-            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_DELETE),
-            NULL, &keyb->action_buttons[KEYB_ACTION_DELETE].geometry);
-
-    juan_set_render_draw_color(renderer, &COLOR_BUTTON_2);
-
-    SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_SHIFT].geometry);
-    SDL_RenderCopy(renderer,
-            res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SHIFT),
-            NULL, &keyb->action_buttons[KEYB_ACTION_SHIFT].geometry);
-
-    if (keyb->active_tab != KEYB_TAB_VALUES)
+    if (keyb->active_tab != KEYB_TAB_MISC)
     {
-        juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
+        juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
 
-        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_SELECT_RECT].geometry);
+        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_DELETE].geometry);
         SDL_RenderCopy(renderer,
-                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_RECT),
-                NULL, &keyb->action_buttons[KEYB_ACTION_SELECT_RECT].geometry);
-        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_SELECT_PAINT].geometry);
+                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_DELETE),
+                NULL, &keyb->action_buttons[KEYB_ACTION_DELETE].geometry);
+
+        juan_set_render_draw_color(renderer, &COLOR_BUTTON_2);
+
+        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_SHIFT].geometry);
         SDL_RenderCopy(renderer,
-                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_PAINT),
-                NULL, &keyb->action_buttons[KEYB_ACTION_SELECT_PAINT].geometry);
-        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_COPY].geometry);
-        SDL_RenderCopy(renderer,
-                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COPY),
-                NULL, &keyb->action_buttons[KEYB_ACTION_COPY].geometry);
-        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_CUT].geometry);
-        SDL_RenderCopy(renderer,
-                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CUT),
-                NULL, &keyb->action_buttons[KEYB_ACTION_CUT].geometry);
-        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_PASTE].geometry);
-        SDL_RenderCopy(renderer,
-                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_PASTE),
-                NULL, &keyb->action_buttons[KEYB_ACTION_PASTE].geometry);
-        SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_COMMENT].geometry);
-        SDL_RenderCopy(renderer,
-                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COMMENT),
-                NULL, &keyb->action_buttons[KEYB_ACTION_COMMENT].geometry);
+                res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SHIFT),
+                NULL, &keyb->action_buttons[KEYB_ACTION_SHIFT].geometry);
+
+        if (keyb->active_tab != KEYB_TAB_VALUES)
+        {
+            juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
+
+            SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_SELECT_RECT].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_RECT),
+                    NULL, &keyb->action_buttons[KEYB_ACTION_SELECT_RECT].geometry);
+            SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_SELECT_PAINT].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SELECT_PAINT),
+                    NULL, &keyb->action_buttons[KEYB_ACTION_SELECT_PAINT].geometry);
+            SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_COPY].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COPY),
+                    NULL, &keyb->action_buttons[KEYB_ACTION_COPY].geometry);
+            SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_CUT].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CUT),
+                    NULL, &keyb->action_buttons[KEYB_ACTION_CUT].geometry);
+            SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_PASTE].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_PASTE),
+                    NULL, &keyb->action_buttons[KEYB_ACTION_PASTE].geometry);
+            SDL_RenderFillRect(renderer, &keyb->action_buttons[KEYB_ACTION_COMMENT].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_COMMENT),
+                    NULL, &keyb->action_buttons[KEYB_ACTION_COMMENT].geometry);
+        }
     }
 
     // Draw buttons
@@ -537,6 +572,37 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             }
             break;
 
+        case KEYB_TAB_MISC:
+            SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_LOAD].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_LOAD),
+                    NULL, &keyb->misc_buttons[KEYB_MISC_LOAD].geometry);
+            SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_SAVE].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SAVE),
+                    NULL, &keyb->misc_buttons[KEYB_MISC_SAVE].geometry);
+            SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_T_HELP].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_T_HELP),
+                    NULL, &keyb->misc_buttons[KEYB_MISC_T_HELP].geometry);
+            SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_T_VALUES].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_T_VALUES),
+                    NULL, &keyb->misc_buttons[KEYB_MISC_T_VALUES].geometry);
+            SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_ZOOM_IN].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_ZOOM_IN),
+                    NULL, &keyb->misc_buttons[KEYB_MISC_ZOOM_IN].geometry);
+            SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_ZOOM_OUT].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_ZOOM_OUT),
+                    NULL, &keyb->misc_buttons[KEYB_MISC_ZOOM_OUT].geometry);
+            SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_QUIT].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_QUIT),
+                    NULL, &keyb->misc_buttons[KEYB_MISC_QUIT].geometry);
+            break;
+
         case KEYB_TAB_CHAR:
             break;
 
@@ -611,76 +677,72 @@ KeyboardEvent keyb_handle_input
 
         // Check arrows
 
-        pressed = get_button_on_point(&input->point,
-                keyb->arrow_buttons, KEYB_ARROW_BUTTON_ID_TOTAL);
-
-        switch (pressed)
+        if (keyb->active_tab != KEYB_TAB_MISC)
         {
-            case KEYB_ARROW_UP:
-                event.type = KEYB_EVENT_MOVE_UP;
-                return event;
-                break;
-
-            case KEYB_ARROW_DOWN:
-                event.type = KEYB_EVENT_MOVE_DOWN;
-                return event;
-                break;
-
-            case KEYB_ARROW_LEFT:
-                event.type = KEYB_EVENT_MOVE_LEFT;
-                return event;
-                break;
-
-            case KEYB_ARROW_RIGHT:
-                event.type = KEYB_EVENT_MOVE_RIGHT;
-                return event;
-                break;
-        }
-
-        // Check always available action buttons
-
-        pressed = get_button_on_point(&input->point,
-                keyb->action_buttons, 2);
-
-        switch (pressed)
-        {
-            case KEYB_ACTION_DELETE:
-                event.type = KEYB_EVENT_RM_INSTR;
-                return event;
-                break;
-
-            case KEYB_ACTION_SHIFT:
-                // TODO
-                return event;
-                break;
-        }
-
-        // Check sometimes hidden action buttons
-
-        if (keyb->active_tab != KEYB_TAB_VALUES)
-        {
-
             pressed = get_button_on_point(&input->point,
-                    keyb->action_buttons + 2, KEYB_ACTION_BUTTON_ID_TOTAL);
+                    keyb->arrow_buttons, KEYB_ARROW_BUTTON_ID_TOTAL);
 
             switch (pressed)
             {
-                case KEYB_ACTION_COPY:
-                    {
-                        // TODO
-#ifdef __ANDROID__
-                        os_android_open_file_chooser();
-#else
-                        char buf[256] = "\0";
-                        os_linux_open_file_chooser(buf);
-                        SDL_Log("Selected: %s", buf);
-#endif
+                case KEYB_ARROW_UP:
+                    event.type = KEYB_EVENT_MOVE_UP;
+                    return event;
+                    break;
 
-                        return event;
-                    }
+                case KEYB_ARROW_DOWN:
+                    event.type = KEYB_EVENT_MOVE_DOWN;
+                    return event;
+                    break;
+
+                case KEYB_ARROW_LEFT:
+                    event.type = KEYB_EVENT_MOVE_LEFT;
+                    return event;
+                    break;
+
+                case KEYB_ARROW_RIGHT:
+                    event.type = KEYB_EVENT_MOVE_RIGHT;
+                    return event;
+                    break;
+            }
+        }
+
+        // Check action buttons
+
+        if (keyb->active_tab != KEYB_TAB_MISC)
+        {
+            pressed = get_button_on_point(&input->point,
+                    keyb->action_buttons, 2);
+
+            switch (pressed)
+            {
+                case KEYB_ACTION_DELETE:
+                    event.type = KEYB_EVENT_RM_INSTR;
+                    return event;
+                    break;
+
+                case KEYB_ACTION_SHIFT:
+                    // TODO
+                    return event;
                     break;
             }
 
+            // Check sometimes hidden action buttons
+
+            if (keyb->active_tab != KEYB_TAB_VALUES)
+            {
+
+                pressed = get_button_on_point(&input->point,
+                        keyb->action_buttons + 2, KEYB_ACTION_BUTTON_ID_TOTAL);
+
+                switch (pressed)
+                {
+                    case KEYB_ACTION_COPY:
+                        {
+                            // TODO
+                        }
+                        break;
+                }
+            }
         }
 
         // Check buttons depending on tabs
@@ -744,6 +806,24 @@ KeyboardEvent keyb_handle_input
                     event.instr_id = pressed;
                 }
                 break;
+
+            case KEYB_TAB_MISC:
+
+                pressed = get_button_on_point(&input->point,
+                        keyb->misc_buttons, KEYB_MISC_BUTTON_ID_TOTAL);
+
+                switch (pressed)
+                {
+                    case KEYB_MISC_LOAD:
+                        event.type = KEYB_EVENT_LOAD;
+                        return event;
+                        break;
+
+                    case KEYB_MISC_SAVE:
+                        event.type = KEYB_EVENT_SAVE;
+                        return event;
+                        break;
+                }
 
             case KEYB_TAB_CHAR:
                 break;

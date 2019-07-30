@@ -501,6 +501,23 @@ void field_handle_keyb(Field *field, KeyboardEvent *event)
             case KEYB_EVENT_MOVE_RIGHT:
                 field->ip.x += 1;
                 break;
+            case KEYB_EVENT_LOAD:
+#ifdef __ANDROID__
+                // If no file is selected, nothing happens. If a file is
+                // selected, SDL will fire a SDL_DropEvent with the filename.
+
+                // This is a workaround because I don't know how to return from
+                // this function which is actually implemented on Java.
+                os_android_open_file_chooser();
+#else
+                // On GNU/Linux I receive the filename immediately
+                {
+                    char buf[256] = "\0";
+                    os_linux_open_file_chooser(buf);
+                    SDL_Log("Selected: %s", buf);
+                }
+#endif
+                break;
 
             case KEYB_EVENT_START:
                 field->state = FIELD_RUNNING;

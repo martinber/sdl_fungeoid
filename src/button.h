@@ -7,10 +7,11 @@
 
 enum BUTTON_TYPE
 {
-    BUTTON_KEYB_INSTR,
-    BUTTON_KEYB_TAB,
-    BUTTON_KEYB_ARROW,
-    BUTTON_KEYB_ACTION,
+    BUTTON_KEYB_INSTR, // Instructrions or "normal" buttons
+    BUTTON_KEYB_TAB, // Keyboard tabs
+    BUTTON_KEYB_ARROW, // Keyboard arrows
+    BUTTON_KEYB_ACTION, // Keyboard buttons available on almost every tab
+    BUTTON_TYPE_TOTAL,
 };
 
 /// Contains geometry, state and ID of a button.
@@ -25,6 +26,10 @@ typedef struct Button
     int id;
 } Button;
 
+/// Initialize button values
+/**
+ * Set a type and an ID, remaining values are set to zero.
+ */
 void button_init(Button *button, enum BUTTON_TYPE type, int id);
 
 #endif
