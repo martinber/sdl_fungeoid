@@ -11,9 +11,11 @@ import org.libsdl.app.SDLActivity;
 public class SdlFungeoid extends SDLActivity {
 
     private static final int OPEN_REQUEST_CODE = 1;
-    private static final int EXTERNAL_OPEN_REQUEST_CODE = 2;
-    private static final int EXTERNAL_CREATE_REQUEST_CODE = 3;
+    private static final int SAVE_AS_REQUEST_CODE = 2;
+    // private static final int EXTERNAL_OPEN_REQUEST_CODE = 2;
+    // private static final int EXTERNAL_CREATE_REQUEST_CODE = 3;
 
+    /*
     public void test() {
 
         runOnUiThread(new Runnable() {
@@ -23,12 +25,19 @@ public class SdlFungeoid extends SDLActivity {
             }
         });
     }
+    */
 
     public void open_file() {
         Intent intent = new Intent(this, OpenFileActivity.class);
         startActivityForResult(intent, OPEN_REQUEST_CODE);
     }
 
+    public void save_file_as() {
+        Intent intent = new Intent(this, SaveFileAsActivity.class);
+        startActivityForResult(intent, SAVE_AS_REQUEST_CODE);
+    }
+
+    /*
     public void open_external_file() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -45,6 +54,7 @@ public class SdlFungeoid extends SDLActivity {
 
         startActivityForResult(intent, EXTERNAL_CREATE_REQUEST_CODE);
     }
+    */
 
     @Override
     public void onActivityResult(int requestCode, int resultCode,
@@ -54,22 +64,18 @@ public class SdlFungeoid extends SDLActivity {
             Uri uri = null;
             if (resultData != null) {
                 uri = resultData.getData();
-                Log.i("qwerty", "Uri: " + uri.toString());
                 Toast.makeText(getApplicationContext(), uri.toString(), Toast.LENGTH_SHORT).show();
-                onNativeDropFile(uri.toString());
+                onNativeDropFile("open:" + uri.toString());
             }
         }
-
-        if (requestCode == EXTERNAL_OPEN_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            // The document selected by the user won't be returned in the intent.
-            // Instead, a URI to that document will be contained in the return intent
-            // provided to this method as a parameter.
-            // Pull that URI using resultData.getData().
+        if (requestCode == SAVE_AS_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             Uri uri = null;
             if (resultData != null) {
                 uri = resultData.getData();
-                Log.i("qwerty", "Uri: " + uri.toString());
+                Toast.makeText(getApplicationContext(), uri.toString(), Toast.LENGTH_SHORT).show();
+                onNativeDropFile("saveas:" + uri.toString());
             }
         }
+
     }
 }

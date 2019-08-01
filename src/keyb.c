@@ -349,12 +349,18 @@ void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size) {
     {
         int origin_x = keyb_x + spacing;
         int origin_y = keyb_y + spacing;
-        grid_position(&keyb->misc_buttons[KEYB_MISC_LOAD].geometry,
+        grid_position(&keyb->misc_buttons[KEYB_MISC_NEW].geometry,
                 button_size * 2 + spacing, button_size, spacing,
                 origin_x, origin_y, 0, 0);
-        grid_position(&keyb->misc_buttons[KEYB_MISC_SAVE].geometry,
+        grid_position(&keyb->misc_buttons[KEYB_MISC_LOAD].geometry,
                 button_size * 2 + spacing, button_size, spacing,
                 origin_x, origin_y, 0, 1);
+        grid_position(&keyb->misc_buttons[KEYB_MISC_SAVE].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 1, 0);
+        grid_position(&keyb->misc_buttons[KEYB_MISC_SAVE_AS].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 1, 1);
         grid_position(&keyb->misc_buttons[KEYB_MISC_T_HELP].geometry,
                 button_size * 4 + spacing, button_size, spacing,
                 origin_x, origin_y, 0, 2);
@@ -573,6 +579,10 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             break;
 
         case KEYB_TAB_MISC:
+            SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_NEW].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_NEW),
+                    NULL, &keyb->misc_buttons[KEYB_MISC_NEW].geometry);
             SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_LOAD].geometry);
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_LOAD),
@@ -581,6 +591,10 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SAVE),
                     NULL, &keyb->misc_buttons[KEYB_MISC_SAVE].geometry);
+            SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_SAVE_AS].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_SAVE_AS),
+                    NULL, &keyb->misc_buttons[KEYB_MISC_SAVE_AS].geometry);
             SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_T_HELP].geometry);
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_T_HELP),
@@ -814,6 +828,11 @@ KeyboardEvent keyb_handle_input
 
                 switch (pressed)
                 {
+                    case KEYB_MISC_NEW:
+                        event.type = KEYB_EVENT_NEW;
+                        return event;
+                        break;
+
                     case KEYB_MISC_LOAD:
                         event.type = KEYB_EVENT_LOAD;
                         return event;
@@ -821,6 +840,11 @@ KeyboardEvent keyb_handle_input
 
                     case KEYB_MISC_SAVE:
                         event.type = KEYB_EVENT_SAVE;
+                        return event;
+                        break;
+
+                    case KEYB_MISC_SAVE_AS:
+                        event.type = KEYB_EVENT_SAVE_AS;
                         return event;
                         break;
                 }

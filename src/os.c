@@ -8,34 +8,6 @@
 
 #include <jni.h>
 
-void os_android_clipboard_test()
-{
-    /* JNIEnv* env = Android_JNI_GetEnv(); */
-    JNIEnv *env = (JNIEnv*) SDL_AndroidGetJNIEnv();
-
-    jobject activity = SDL_AndroidGetActivity();
-    jclass mActivityClass = (*env)->GetObjectClass(env, activity);
-    jmethodID midClipboardGetText = (*env)->GetStaticMethodID(env, mActivityClass,
-                                "clipboardGetText", "()Ljava/lang/String;");
-
-
-    char* text = NULL;
-    jstring string;
-
-    string = (*env)->CallStaticObjectMethod(env, mActivityClass, midClipboardGetText);
-    if (string) {
-        const char* utf = (*env)->GetStringUTFChars(env, string, 0);
-        if (utf) {
-            text = SDL_strdup(utf);
-            (*env)->ReleaseStringUTFChars(env, string, utf);
-        }
-        (*env)->DeleteLocalRef(env, string);
-    }
-    SDL_Log("clipboard: %s", text);
-
-    return;
-}
-
 void os_android_open_file_chooser()
 {
 
@@ -53,20 +25,41 @@ void os_android_open_file_chooser()
     (*env)->DeleteLocalRef(env, class);
 }
 
+void os_android_save_file_as_chooser()
+{
+
+    JNIEnv *env = (JNIEnv*) SDL_AndroidGetJNIEnv();
+
+    jobject activity = (jobject) SDL_AndroidGetActivity();
+
+    jclass class = (*env)->GetObjectClass(env, activity);
+
+    jmethodID method_id = (*env)->GetMethodID(env, class, "save_file_as", "()V");
+
+    (*env)->CallVoidMethod(env, activity, method_id);
+
+    (*env)->DeleteLocalRef(env, activity);
+    (*env)->DeleteLocalRef(env, class);
+}
+
 #else
 
 #include <gtk/gtk.h>
 #include <stdio.h>
 
-void os_linux_open_file_chooser(char *buf)
-{
+static void open_gtk_file_chooser
+(
+    char *title,
+    char *button_text,
+    GtkFileChooserAction action,
+    char *buf
+) {
     gtk_init(NULL, NULL);
 
     GtkWidget *dialog;
-    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
     gint result;
 
-    dialog = gtk_file_chooser_dialog_new("Open File", NULL, action,
+    dialog = gtk_file_chooser_dialog_new(title, NULL, action,
             "_Cancel", GTK_RESPONSE_CANCEL,
             "_Open", GTK_RESPONSE_ACCEPT,
             NULL
@@ -89,6 +82,18 @@ void os_linux_open_file_chooser(char *buf)
     {
         gtk_main_iteration();
     }
+}
+
+void os_linux_open_file_chooser(char *buf)
+{
+    open_gtk_file_chooser("Open file...", "_Open",
+            GTK_FILE_CHOOSER_ACTION_OPEN, buf);
+}
+
+void os_linux_save_file_as_chooser(char *buf)
+{
+    open_gtk_file_chooser("Save file as...", "_Save",
+            GTK_FILE_CHOOSER_ACTION_SAVE, buf);
 }
 
 #endif

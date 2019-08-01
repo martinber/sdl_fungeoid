@@ -77,6 +77,14 @@
             android:configChanges=""
             >
         </activity>
+
+        <activity android:name=".SaveFileAsActivity"
+            android:label="@string/save_file_as_activity_name"
+            android:theme="@style/FileChooserTheme"
+            android:parentActivityName=".SdlFungeoid"
+            android:configChanges=""
+            >
+        </activity>
     </application>
 
 </manifest>

@@ -236,6 +236,13 @@ int res_load_all(SDL_Renderer *renderer)
                         "res/keyb_icons/time_slower.png");
                 break;
 
+            case RES_KEYB_ICON_NEW:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "new", COLOR_WHITE);
+                break;
+
             case RES_KEYB_ICON_LOAD:
                 KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
                         INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
@@ -248,6 +255,13 @@ int res_load_all(SDL_Renderer *renderer)
                         INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
                         INSTR_TEXTURES_RES,
                         "save", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_SAVE_AS:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "save as", COLOR_WHITE);
                 break;
 
             case RES_KEYB_ICON_T_HELP:

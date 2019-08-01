@@ -25,6 +25,8 @@ The interesting thing is that the language is:
 - The memory is the grid itself because you can read and write to it,
     self-modifying code is possible.
 
+- The language is really difficult to compile.
+
 - See the [Befunge93](https://github.com/catseye/Befunge-93/blob/master/doc/Befunge-93.markdown)
     documentation.
 
