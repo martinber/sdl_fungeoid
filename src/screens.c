@@ -92,7 +92,18 @@ static void game_screen_handle_event(ScreensHandler *screens, SDL_Event *event)
             break;
 
         case SDL_DROPFILE:
-            field_load_file(screens->game_screen.field, event->drop.file);
+            if (!strncmp(event->drop.file, "open:", 5))
+            {
+                field_load_filename_selected(screens->game_screen.field, event->drop.file + 5);
+            }
+            else if (!strncmp(event->drop.file, "saveas:", 7))
+            {
+                field_save_filename_selected(screens->game_screen.field, event->drop.file + 7);
+            }
+            else
+            {
+                SDL_Log("Received file drop event without prefix: %s", event->drop.file);
+            }
             break;
 
         case SDL_WINDOWEVENT:

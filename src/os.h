@@ -42,6 +42,7 @@ void os_linux_save_file_as_chooser(char *buf);
  * Needs a big enough buffer, expects a buffer of size 256.
  * Returns 0 on success.
  * The path returned ends on /
+ * The folder is created if it does not exist.
  */
 int os_get_save_dir_path(char* buf);
 

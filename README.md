@@ -95,6 +95,14 @@ I'm learning C, I have to remember to:
     are buffered until the dialog is closed, where they are received together at
     the same time.
 
+- Add delete button to Android file chooser.
+
+- Add import button.
+
+- Implement function to select and delete an area of the field.
+
+- Autosave once in a while.
+
 ### SDL Notes
 
 I'm just copying and pasting the SDL sources into this repo so the Android build
@@ -108,15 +116,16 @@ Also I had to do modifications to `Android.mk` on `SDL_image`:
 
 ### SDL and Android notes
 
-The Android part of this game is quite hacky and horrible. I'm not even sure
-what I'm doing as I have no experience on Android, JNI and Java in general.
+The Android part of this game is quite hacky and horrible. I have no experience
+on Android, JNI and Java in general.
 
 I wanted a file chooser so you can open and save files, looks like SDL is not
 designed for my use case.
 
 How I'm doing it:
 
-- When the open button is pressed, my code on C calls some function on `os.h`.
+- When the "open" or "save as" button is pressed, my code on C calls some
+    function on `os.h`.
 
 - The functions I've written on `os.c` are based on source code from SDL, I
      think I got it from `Android_JNI_GetClipboardText()` located on
@@ -127,17 +136,26 @@ How I'm doing it:
 
 - So from `os.c` I call a function on `SDLFungeoid.java`. From there everything
     is standard Android code: Via an Intent I open another Activity where the
-    user selects a file, that filename goes back to my `SdlFungeoid` activity
+    user selects a file and that filename goes back to my `SdlFungeoid` activity
     via a `Result`.
 
 - Now I don't know how to give the filename to my C code, but I was lucky
     because I found that SDL has an event called `SDL_DropEvent` meant to
     support drag-and-drop. So from Java I just call the function
     `onNativeDropFile(String)` located on `SDLActivity.java`, then SDL sends the
-    `SDL_DropEvent` to my C code and I get the filename there. As far my code on
-    C is concerned, it's like someone fragged and dropped a file.
+    `SDL_DropEvent` to my C code and I get the filename there. As far SDL is
+    concerned, it's like someone dragged and dropped a file.
 
-- Finally on C I just capture the event and load the file.
+- That works OK when I we are opening files. The "save as" file chooser dialog
+    should return the filename where we should save the file. To return the
+    filename I do the same: I return a string from the Java code via a
+    `SDL_DropEvent` but then the C code can't differentiate if the filename
+    should be used to open a file or to save to it. So the Java code sends
+    `open:/home/.../filename.bf` or `saveas:/home/.../filename.bf' as
+    filenames.
+
+- Finally on C I just capture the event, check the prefix and load/save to the
+    file.
 
 ### GNU/Linux notes
 

@@ -46,6 +46,7 @@ void os_android_save_file_as_chooser()
 
 #include <gtk/gtk.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 static void open_gtk_file_chooser
 (
@@ -61,15 +62,19 @@ static void open_gtk_file_chooser
 
     dialog = gtk_file_chooser_dialog_new(title, NULL, action,
             "_Cancel", GTK_RESPONSE_CANCEL,
-            "_Open", GTK_RESPONSE_ACCEPT,
+            button_text, GTK_RESPONSE_ACCEPT,
             NULL
         );
+    GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+
+    char folder[256] = "\0";
+    os_get_save_dir_path(folder);
+    gtk_file_chooser_set_current_folder(chooser, folder);
 
     result = gtk_dialog_run(GTK_DIALOG(dialog));
     if (result == GTK_RESPONSE_ACCEPT)
     {
         char *filename;
-        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
         filename = gtk_file_chooser_get_filename(chooser);
         strcpy(buf, filename);
         g_free(filename);
@@ -132,6 +137,10 @@ int os_get_save_dir_path(char* buf) {
 
     // Append folder to path
     strcat(buf, "/sdl_fungeoid/");
+
+    // Create folder, should be recursive but I'm never going to create more
+    // than one directory. If the folder already exists fails silently.
+    mkdir(buf, 0755);
 
     SDL_Log("Path: %s", buf);
 

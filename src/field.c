@@ -12,6 +12,7 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
     }
     field->canvas = NULL;
     field->state = FIELD_EDITING;
+    *field->filename = '\0';
     field->last_step_ms = 0;
     field->screen_size = *screen_size;
     field->ip = (SDL_Point) { 0, 0 };
@@ -35,14 +36,6 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
         return NULL;
     }
 
-    char buf[256] = "\0";
-    if (os_get_autosave_file_path(buf) == 0)
-    {
-        field_load_file(field, buf);
-    } else {
-        SDL_Log("Failed to get default program path");
-    }
-
     return field;
 }
 
@@ -50,13 +43,7 @@ void field_free(Field *field)
 {
     if (field != NULL)
     {
-        char buf[256] = "\0";
-        if (os_get_autosave_file_path(buf) == 0)
-        {
-            field_save_file(field, buf);
-        } else {
-            SDL_Log("Failed to get default program path");
-        }
+        field_autosave(field);
 
         canvas_free(field->canvas);
         field->canvas = NULL;
@@ -67,24 +54,112 @@ void field_free(Field *field)
     field = NULL;
 }
 
-void field_load_file(Field *field, char *filename) {
+void field_new_intent(Field *field)
+{
+    // TODO
+}
+
+void field_load_intent(Field *field)
+{
+#ifdef __ANDROID__
+    // If no file is selected, nothing happens. If a file is
+    // selected, SDL will fire a SDL_DropEvent with
+    // "open:/.../filename.bf"
+
+    // This is a workaround because I don't know how to return from
+    // this function which is actually implemented on Java.
+    os_android_open_file_chooser();
+#else
+    // On GNU/Linux I receive the filename immediately
+    {
+        char buf[256] = "\0";
+        os_linux_open_file_chooser(buf);
+        if (strlen(buf) > 0)
+        {
+            field_load_filename_selected(field, buf);
+        }
+    }
+#endif
+}
+
+void field_save_intent(Field *field)
+{
+    if (strlen(field->filename) != 0)
+    {
+        field_save_filename_selected(field, field->filename);
+    }
+    else
+    {
+        field_save_as_intent(field);
+    }
+}
+
+void field_save_as_intent(Field *field)
+{
+#ifdef __ANDROID__
+    // If no file is selected, nothing happens. If a file is
+    // selected, SDL will fire a SDL_DropEvent with
+    // "saveas:/.../filename.bf"
+
+    // This is a workaround because I don't know how to return from
+    // this function which is actually implemented on Java.
+    os_android_save_file_as_chooser();
+#else
+    // On GNU/Linux I receive the filename immediately, I store it
+    // on field->filename and I save to it
+    {
+        char buf[256] = "\0";
+        os_linux_save_file_as_chooser(buf);
+        if (strlen(buf) > 0)
+        {
+            field_save_filename_selected(field, buf);
+        }
+    }
+#endif
+}
+
+void field_save_filename_selected(Field *field, char *filename)
+{
     if (field->canvas != NULL)
     {
+        strcpy(field->filename, filename);
+        canvas_save(field->canvas, filename);
+    } else {
+        SDL_Log("Tried to save file when canvas was NULL");
+    }
+}
+
+void field_load_filename_selected(Field *field, char *filename)
+{
+    if (field->canvas != NULL)
+    {
+        strcpy(field->filename, filename);
         canvas_load(field->canvas, filename);
     } else {
         SDL_Log("Tried to load file when canvas was NULL");
     }
 }
 
-void field_save_file(Field *field, char *filename) {
-    if (field->canvas != NULL)
-    {
-        canvas_save(field->canvas, filename);
-    } else {
-        SDL_Log("Tried to load file when canvas was NULL");
-    }
+void field_new_user_sure(Field *field)
+{
+    // TODO
 }
 
+void field_autosave(Field *field)
+{
+    char buf[256] = "\0";
+    if (os_get_autosave_file_path(buf) == 0)
+    {
+        if (field->canvas != NULL)
+        {
+            canvas_save(field->canvas, buf);
+        } else {
+            SDL_Log("Tried to save file when canvas was NULL");
+        }
+    } else {
+        SDL_Log("Failed to get autosave path");
+    }
+}
 
 void field_resize_screen(Field *field, SDL_Point *screen_size, int cell_size)
 {
@@ -503,41 +578,15 @@ void field_handle_keyb(Field *field, KeyboardEvent *event)
                 break;
 
             case KEYB_EVENT_LOAD:
-#ifdef __ANDROID__
-                // If no file is selected, nothing happens. If a file is
-                // selected, SDL will fire a SDL_DropEvent with
-                // "open:/.../filename.bf"
+                field_load_intent(field);
+                break;
 
-                // This is a workaround because I don't know how to return from
-                // this function which is actually implemented on Java.
-                os_android_open_file_chooser();
-#else
-                // On GNU/Linux I receive the filename immediately
-                {
-                    char buf[256] = "\0";
-                    os_linux_open_file_chooser(buf);
-                    SDL_Log("Selected: %s", buf);
-                }
-#endif
+            case KEYB_EVENT_SAVE:
+                field_save_intent(field);
                 break;
 
             case KEYB_EVENT_SAVE_AS:
-#ifdef __ANDROID__
-                // If no file is selected, nothing happens. If a file is
-                // selected, SDL will fire a SDL_DropEvent with
-                // "saveas:/.../filename.bf"
-
-                // This is a workaround because I don't know how to return from
-                // this function which is actually implemented on Java.
-                os_android_save_file_as_chooser();
-#else
-                // On GNU/Linux I receive the filename immediately
-                {
-                    char buf[256] = "\0";
-                    os_linux_save_file_as_chooser(buf);
-                    SDL_Log("Selected: %s", buf);
-                }
-#endif
+                field_save_as_intent(field);
                 break;
 
             case KEYB_EVENT_START:

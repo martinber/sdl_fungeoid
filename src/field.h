@@ -24,6 +24,10 @@ typedef struct Field
     Canvas *canvas;
     enum FIELD_STATE state;
 
+    // Filename of current file, empty string if none. This filename will be
+    // used if the "save" button is pressed
+    char filename[256];
+
     // Absolute time in milliseconds when last simulation step was done
     Uint32 last_step_ms;
 
@@ -42,17 +46,63 @@ typedef struct Field
  */
 Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size);
 
-/// Load a program from a file
+/// User pressed "new"
 /**
- * The filename should be a string ready to be used by fopen()
+ * This function is called when the user presses the "new" button, but before
+ * clearing we check if the user is sure.
  */
-void field_load_file(Field *field, char *filename);
+void field_new_intent(Field *field);
 
-/// Save the current program to a file
+/// User pressed "load"
 /**
- * The filename should be a string ready to be used by fopen()
+ * This function is called when the user presses the "load" button, so a file
+ * chooser will be opened
  */
-void field_save_file(Field *field, char *filename);
+void field_load_intent(Field *field);
+
+/// User pressed "save"
+/**
+ * This function is called when the user presses the "save" button, but before
+ * saving we check if a filename was already given, otherwise this function will
+ * call field_save_as_intent().
+ */
+void field_save_intent(Field *field);
+
+/// User pressed "save as"
+/**
+ * This function is called when the user presses the "save as" button, so a file
+ * chooser will be opened.
+ */
+void field_save_as_intent(Field *field);
+
+/// User selected file where to save
+/**
+ * This function is called when the user selected a filename on a "save as"
+ * dialog.
+ * Also remembers the filename given for subsequent field_save_intent()s.
+ */
+void field_save_filename_selected(Field *field, char *filename);
+
+/// User selected file to load
+/**
+ * This function is called when the user selected a filename on a "load"
+ * dialog.
+ * Also remembers the filename given for subsequent field_save_intent()s.
+ */
+void field_load_filename_selected(Field *field, char *filename);
+
+/// User pressed "new" and then pressed "I'm sure"
+/**
+ * This function is called when the user presses the "I'm sure" after being
+ * asked if he really wanted to clear the canvas.
+ */
+void field_new_user_sure(Field *field);
+
+/// Save canvas to autosave filename
+/**
+ * This function is called once in a while.
+ */
+void field_autosave(Field *field);
 
 void field_free(Field *field);
 
