@@ -21,6 +21,18 @@ extern const SDL_Color COLOR_BUTTON_1;
 extern const SDL_Color COLOR_BUTTON_2;
 extern const SDL_Color COLOR_BUTTON_3;
 
+// Ratio between button size and button spacing. spacing = button_size * ratio
+extern const float KEYB_SPACING_RATIO;
+
+// Ratio between button size and keyb margin. margin = button_size * ratio
+extern const float KEYB_MARGIN_RATIO;
+
+// Ratio between button size and tab height. height = button_size * ratio
+extern const float KEYB_TAB_HEIGHT_RATIO;
+
+// Ratio between button size and tab width. width = button_size * ratio
+extern const float KEYB_TAB_WIDTH_RATIO;
+
 /// IDs of every instruction
 enum INSTR_ID
 {

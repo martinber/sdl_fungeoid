@@ -11,6 +11,14 @@ const SDL_Color COLOR_BUTTON_1 = { 0x2E, 0x43, 0x4e, 0xFF };
 const SDL_Color COLOR_BUTTON_2 = { 0x7A, 0x6F, 0x46, 0xFF };
 const SDL_Color COLOR_BUTTON_3 = { 0x7A, 0x46, 0x46, 0xFF };
 
+const float KEYB_SPACING_RATIO = 1.0 / 8.0;
+
+const float KEYB_MARGIN_RATIO = 0.2;
+
+const float KEYB_TAB_HEIGHT_RATIO = 0.7;
+
+const float KEYB_TAB_WIDTH_RATIO = 1.7;
+
 char const_befunge_char(enum INSTR_ID id)
 {
     switch (id)

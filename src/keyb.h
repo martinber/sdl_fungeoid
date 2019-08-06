@@ -85,6 +85,9 @@ typedef struct Keyboard
     SDL_Rect tabs_geometry; // Contains every tab
 
     enum KEYB_SHIFT_STATE shift_state;
+    int button_size;
+    int buttons_offset; // Offset in pixels used when dragging
+    int tabs_offset; // Offset in pixels used when dragging
 
     // Buttons for each tab
 #define KEYB_VALUES_BUTTONS_TOTAL 16
