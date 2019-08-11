@@ -48,6 +48,8 @@ Check the first comment on every header file.
 
 - Input handling:
 
+    - I make no distintion between touch and mouse events.
+
     - `screens.c` handles window and quit events, then, calls
         `input_handle_event()` so the input handles the touch/mouse/keyboard
         events.

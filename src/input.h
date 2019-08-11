@@ -19,6 +19,9 @@ enum INPUT_TYPE
 /**
  * Consider the members as private.
  *
+ * Keep in mind that there is no distintion between mouse vents and touch
+ * events.
+ *
  * For example remembers if the mouse was pressed to detect dragging. Only
  * detects first finger and left click, ignores the rest of fingers and buttons.
  *
