@@ -22,12 +22,15 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
 
     field->canvas = canvas_create(width, height);
     field->stack = stack_create();
-    if (field->canvas == NULL || field->stack == NULL)
+    field->canvas_drag = drag_create();
+    if (field->canvas == NULL || field->stack == NULL || field->canvas_drag == NULL)
     {
         canvas_free(field->canvas);
         field->canvas = NULL;
         stack_free(field->stack);
         field->stack = NULL;
+        drag_free(field->canvas_drag);
+        field->canvas_drag = NULL;
 
         free(field);
         field = NULL;
@@ -472,6 +475,7 @@ static void field_step(Field *field)
 
 void field_update(Field *field, Uint32 time_abs_ms)
 {
+    drag_update(field->canvas_drag, time_abs_ms);
     if (field->state == FIELD_RUNNING)
     {
         if (time_abs_ms - field->last_step_ms > 300)
@@ -500,7 +504,11 @@ void field_handle_input(Field *field, Input *input)
         }
         else if (input->type == INPUT_CLICK_MOVE)
         {
-
+            drag_move(field->canvas_drag, input);
+        }
+        else if (input->type == INPUT_CLICK_MOVE_UP)
+        {
+            drag_up(field->canvas_drag, input);
         }
         else if (input->type == INPUT_TEXT)
         {
@@ -621,6 +629,17 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     int width = field->canvas->width;
     int height = field->canvas->height;
     int cell_size = field->cell_size;
+
+    // Draw test
+    juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
+    SDL_Rect test_rect = (SDL_Rect)
+    {
+        .x = (int) field->canvas_drag->x,
+        .y = (int) field->canvas_drag->y,
+        .w = 100,
+        .h = 100
+    };
+    SDL_RenderFillRect(renderer, &test_rect);
 
     // Draw lines
     juan_set_render_draw_color(renderer, &COLOR_LINES);

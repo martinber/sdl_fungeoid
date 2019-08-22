@@ -1,5 +1,7 @@
-#ifndef KEYB_H
-#define KEYB_H
+#ifndef DRAG_H
+#define DRAG_H
+
+#include <stdbool.h>
 
 #include "juan.h"
 #include "input.h"
@@ -29,6 +31,9 @@ typedef struct DragState
     float vx;
     float vy;
 
+    /// True if the finger was released, false if the thing is being dragged
+    bool free;
+
 // Amount of previous values to remember
 #define DRAG_HISTORY 30
 
@@ -39,6 +44,9 @@ typedef struct DragState
     float x_history[DRAG_HISTORY];
     float y_history[DRAG_HISTORY];
     Uint32 t_history[DRAG_HISTORY];
+
+    // Not the time of last event. is the time of the last update
+    Uint32 last_update_time;
 
     // These should be set to FLT_MAX or FLT_MIN if not used
     float min_x;
@@ -95,7 +103,7 @@ void drag_get_point(DragState *drag, SDL_Point *point);
  * Should be called repeatedly once per frame, it doesn't matter if the user is
  * touching or not.
  */
-void drag_update(DragState *drag, Input *input);
+void drag_update(DragState *drag, Uint32 time);
 
 /// Update from a move input event
 /**

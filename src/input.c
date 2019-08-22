@@ -28,6 +28,7 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
     Input input =
     {
         .type = INPUT_NONE,
+        .timestamp = 0,
         .point = { 0, 0 },
         .down_point = { 0, 0 },
         .diff = { 0, 0 },
@@ -39,20 +40,21 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
     {
         case SDL_KEYDOWN:
             input.type = INPUT_KEY_DOWN;
+            /* input.timestamp = event->key.timestamp; */
+            input.timestamp = SDL_GetTicks();
             input.key = event->key.keysym.sym;
             break;
 
         case SDL_KEYUP:
             input.type = INPUT_KEY_UP;
+            /* input.timestamp = event->key.timestamp; */
+            input.timestamp = SDL_GetTicks();
             input.key = event->key.keysym.sym;
             break;
 
         case SDL_FINGERDOWN:
             if (handler->click_candidate == INPUT_NONE)
             {
-                input.point.x = event->tfinger.x * window_size->x;
-                input.point.y = event->tfinger.y * window_size->y;
-
                 handler->click_candidate = INPUT_CLICK_UP;
                 handler->last_touch_id = event->tfinger.fingerId;
                 handler->down_point = input.point;
@@ -62,9 +64,6 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
         case SDL_MOUSEBUTTONDOWN:
             if (handler->click_candidate == INPUT_NONE)
             {
-                input.point.x = event->button.x;
-                input.point.y = event->button.y;
-
                 handler->click_candidate = INPUT_CLICK_UP;
                 handler->last_touch_id = 0;
                 handler->down_point = input.point;
@@ -73,6 +72,8 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
 
         case SDL_FINGERUP:
             input.type = handler->click_candidate; // Can be INPUT_NONE maybe?
+            /* input.timestamp = event->key.timestamp; */
+            input.timestamp = SDL_GetTicks();
             input.point.x = event->tfinger.x * window_size->x;
             input.point.y = event->tfinger.y * window_size->y;
 
@@ -87,6 +88,8 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
 
         case SDL_MOUSEBUTTONUP:
             input.type = handler->click_candidate; // Can be INPUT_NONE maybe?
+            /* input.timestamp = event->key.timestamp; */
+            input.timestamp = SDL_GetTicks();
             input.point.x = event->button.x;
             input.point.y = event->button.y;
 
@@ -100,6 +103,8 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
             break;
 
         case SDL_FINGERMOTION:
+            /* input.timestamp = event->key.timestamp; */
+            input.timestamp = SDL_GetTicks();
             input.point.x = event->tfinger.x * window_size->x;
             input.point.y = event->tfinger.y * window_size->y;
 
@@ -123,6 +128,8 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
 
         case SDL_MOUSEMOTION:
             // Event received even if there is no pressed button
+            /* input.timestamp = event->key.timestamp; */
+            input.timestamp = SDL_GetTicks();
             input.point.x = event->button.x;
             input.point.y = event->button.y;
 
@@ -146,6 +153,8 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
 
         case SDL_TEXTINPUT:
             input.type = INPUT_TEXT;
+            /* input.timestamp = event->key.timestamp; */
+            input.timestamp = SDL_GetTicks();
             strncpy(input.text, event->text.text, 32);
             input.text[31] = '\0'; // Just in case
             break;

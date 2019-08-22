@@ -7,6 +7,7 @@
 #include "input.h"
 #include "keyb.h"
 #include "res.h"
+#include "drag.h"
 
 enum FIELD_STATE
 {
@@ -36,6 +37,9 @@ typedef struct Field
     SDL_Point speed; // Next relative motion of IP, e.g. (-1, 0)
     int cell_size;
     Stack *stack;
+
+    DragState *canvas_drag;
+
 } Field;
 
 /// Create field

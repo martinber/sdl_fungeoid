@@ -56,6 +56,8 @@ typedef struct Input
 {
     enum INPUT_TYPE type;
 
+    Uint32 timestamp;
+
     // for INPUT_CLICK_UP, INPUT_CLICK_MOVE and INPUT_MOVE_UP
     SDL_Point point;
 

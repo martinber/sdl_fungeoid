@@ -1,4 +1,4 @@
-Executable : /media/mbernardi/datos/Extra/async/android/sdk-tools-linux/ndk-bundle/ndk-build
+Executable : /media/mbernardi/datos/extra/async/android/sdk-tools-linux/ndk-bundle/ndk-build
 arguments : 
 NDK_PROJECT_PATH=null
 APP_BUILD_SCRIPT=/media/mbernardi/datos-ssd/Documentos/repos/c/sdl_fungeoid/android/app/jni/Android.mk
