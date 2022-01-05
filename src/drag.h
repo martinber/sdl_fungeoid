@@ -31,22 +31,23 @@ typedef struct DragState
     float vx;
     float vy;
 
+    // Number less than 1 indicating how much to decrease velocity
+    float friction;
+    // Number less than 1 indicating how much to follow new inputs velocity
+    float acceleration;
+
     /// True if the finger was released, false if the thing is being dragged
     bool free;
 
-// Amount of previous values to remember
-#define DRAG_HISTORY 30
-
-    // Previous touch coordinates and time
-    // If the time is set to zero, means that the sample should be ignored
-    // (because the x or y position is invalid, or because the event was from a
-    // previous swipe)
-    float x_history[DRAG_HISTORY];
-    float y_history[DRAG_HISTORY];
-    Uint32 t_history[DRAG_HISTORY];
-
-    // Not the time of last event. is the time of the last update
+    // Not the time of last event. is the time of the last update, that is the
+    // last frame
     Uint32 last_update_time;
+    // Time of last input event
+    Uint32 last_input_time;
+
+    // Position of last input
+    float last_input_x;
+    float last_input_y;
 
     // These should be set to FLT_MAX or FLT_MIN if not used
     float min_x;
@@ -69,6 +70,7 @@ typedef struct DragState
  */
 DragState *drag_create();
 
+/// Free DragState memory
 void drag_free(DragState *drag);
 
 /// Set limits to coordinates
