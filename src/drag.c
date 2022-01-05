@@ -17,7 +17,7 @@ DragState *drag_create()
     drag->vx = 0;
     drag->vy = 0;
 
-    drag->friction = 0.2;
+    drag->friction = 0.1;
     drag->input_accel = 0.2;
     drag->snap_accel = 0.005;
 
@@ -148,14 +148,14 @@ void drag_update(DragState *drag, Uint32 time)
     drag->last_update_time = time;
 }
 
-void drag_move(DragState *drag, Input *input)
+void drag_move(DragState *drag, SDL_Point point, Uint32 timestamp)
 {
-    float input_x = (float) input->point.x;
-    float input_y = (float) input->point.y;
-    Uint32 input_time = input->timestamp;
+    float input_x = (float) point.x;
+    float input_y = (float) point.y;
+    Uint32 input_time = timestamp;
 
-    drag->x = input_x;
-    drag->y = input_y;
+    drag->x += input_x - drag->last_input_x;
+    drag->y += input_y - drag->last_input_y;
 
     // Ignore if there are 2 inputs with same timestamp
     if (input_time != drag->last_input_time)
@@ -181,10 +181,8 @@ void drag_move(DragState *drag, Input *input)
     }
 }
 
-void drag_up(DragState *drag, Input *input)
+void drag_up(DragState *drag)
 {
-    drag_move(drag, input);
-
-    drag->last_input_time -= 0;
+    drag->last_input_time = 0;
     drag->free = true;
 }

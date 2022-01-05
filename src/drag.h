@@ -114,12 +114,12 @@ void drag_update(DragState *drag, Uint32 time);
  * Should be called only if the event is INPUT_CLICK_MOVE.
  * If the event is INPUT_CLICK_MOVE_UP you should call drag_up().
  */
-void drag_move(DragState *drag, Input *input);
+void drag_move(DragState *drag, SDL_Point point, Uint32 timestamp);
 
 /// Update from a finger release input event
 /**
  * Should be called only if the event is INPUT_CLICK_MOVE_UP.
  */
-void drag_up(DragState *drag, Input *input);
+void drag_up(DragState *drag);
 
 #endif

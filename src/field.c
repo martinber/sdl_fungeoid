@@ -505,11 +505,11 @@ void field_handle_input(Field *field, Input *input)
         }
         else if (input->type == INPUT_CLICK_MOVE)
         {
-            drag_move(field->canvas_drag, input);
+            drag_move(field->canvas_drag, input->point, input->timestamp);
         }
         else if (input->type == INPUT_CLICK_MOVE_UP)
         {
-            drag_up(field->canvas_drag, input);
+            drag_up(field->canvas_drag);
         }
         else if (input->type == INPUT_TEXT)
         {

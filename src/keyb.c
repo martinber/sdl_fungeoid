@@ -38,8 +38,10 @@ Keyboard *keyb_create(SDL_Point window_size)
     }
     keyb->geometry = (SDL_Rect) { 0, 0, 0, 0 };
     keyb->tabs_geometry = (SDL_Rect) { 0, 0, 0, 0 };
+
     keyb->tabs_offset = 0;
-    keyb->buttons_offset = 0;
+    keyb->tabs_min_offset = 0;
+
     keyb->active_tab = 0;
     keyb->shift_state = KEYB_SHIFT_NONE;
 
@@ -161,7 +163,6 @@ static void update_buttons(Keyboard *keyb)
     int tab_height = button_size * KEYB_TAB_HEIGHT_RATIO;
     int tab_width = button_size * KEYB_TAB_WIDTH_RATIO;
     int tabs_offset = keyb->tabs_offset;
-    int buttons_offset = keyb->buttons_offset;
 
     int margin = button_size * KEYB_MARGIN_RATIO;
     int spacing = button_size * KEYB_SPACING_RATIO;
@@ -237,8 +238,7 @@ static void update_buttons(Keyboard *keyb)
     // Buttons
     for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
     {
-        int origin_x = keyb_x + spacing
-                + buttons_offset + keyb_w * KEYB_TAB_MOVIO;
+        int origin_x = keyb_x + spacing;
         int origin_y = keyb_y + spacing;
         if (i < 8)
         {
@@ -255,8 +255,7 @@ static void update_buttons(Keyboard *keyb)
     }
     for (int i = 0; i < KEYB_OPER_BUTTONS_TOTAL; i++)
     {
-        int origin_x = keyb_x + spacing
-                + buttons_offset + keyb_w * KEYB_TAB_OPER;
+        int origin_x = keyb_x + spacing;
         int origin_y = keyb_y + spacing;
         if (i < 7)
         {
@@ -273,8 +272,7 @@ static void update_buttons(Keyboard *keyb)
     }
     for (int i = 0; i < KEYB_VALUES_BUTTONS_TOTAL; i++)
     {
-        int origin_x = keyb_x + margin + button_size + spacing * 2
-                + buttons_offset + keyb_w * KEYB_TAB_VALUES;
+        int origin_x = keyb_x + margin + button_size + spacing * 2;
         int origin_y = keyb_y + spacing;
         grid_position(&keyb->values_buttons[7].geometry,
                 button_size, button_size, spacing,
@@ -327,8 +325,7 @@ static void update_buttons(Keyboard *keyb)
     }
     for (int i = 0; i < KEYB_RUN_BUTTON_ID_TOTAL; i++)
     {
-        int origin_x = keyb_x + spacing
-                + buttons_offset + keyb_w * KEYB_TAB_RUN;
+        int origin_x = keyb_x + spacing;
         int origin_y = keyb_y + spacing;
         grid_position(&keyb->run_buttons[KEYB_RUN_START].geometry,
                 button_size * 2 + spacing, button_size, spacing,
@@ -351,8 +348,7 @@ static void update_buttons(Keyboard *keyb)
     }
     for (int i = 0; i < KEYB_MISC_BUTTON_ID_TOTAL; i++)
     {
-        int origin_x = keyb_x + spacing
-                + buttons_offset + keyb_w * KEYB_TAB_MISC;
+        int origin_x = keyb_x + spacing;
         int origin_y = keyb_y + spacing;
         grid_position(&keyb->misc_buttons[KEYB_MISC_NEW].geometry,
                 button_size * 2 + spacing, button_size, spacing,
@@ -394,6 +390,9 @@ void keyb_update_geometry(Keyboard *keyb, SDL_Point window_size)
     keyb->geometry.y = window_size.y - keyb->geometry.h;
 
     update_buttons(keyb);
+
+    keyb->tabs_offset = 0;
+    keyb->tabs_min_offset = window_size.x - keyb->tabs_geometry.w;
 }
 
 /// Draw a button if it is roughly inside the screen
@@ -538,10 +537,10 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
 
     juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
 
-    /* switch (keyb->active_tab) */
-    /* { */
-/*  */
-        /* case KEYB_TAB_RUN: */
+    switch (keyb->active_tab)
+    {
+
+        case KEYB_TAB_RUN:
             SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_START].geometry);
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_START),
@@ -566,9 +565,9 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_TIME_SLOWER),
                     NULL, &keyb->run_buttons[KEYB_RUN_SLOWER].geometry);
-            /* break; */
+            break;
 
-        /* case KEYB_TAB_VALUES: */
+        case KEYB_TAB_VALUES:
             for (int i = 0; i < KEYB_VALUES_BUTTONS_TOTAL; i++)
             {
                 SDL_RenderFillRect(renderer, &keyb->values_buttons[i].geometry);
@@ -581,9 +580,9 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
                     SDL_RenderCopy(renderer, tex, NULL, &keyb->values_buttons[i].geometry);
                 }
             }
-            /* break; */
+            break;
 
-        /* case KEYB_TAB_MOVIO: */
+        case KEYB_TAB_MOVIO:
             for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
             {
                 SDL_RenderFillRect(renderer, &keyb->movio_buttons[i].geometry);
@@ -596,9 +595,9 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
                     SDL_RenderCopy(renderer, tex, NULL, &keyb->movio_buttons[i].geometry);
                 }
             }
-            /* break; */
+            break;
 
-        /* case KEYB_TAB_OPER: */
+        case KEYB_TAB_OPER:
             for (int i = 0; i < KEYB_OPER_BUTTONS_TOTAL; i++)
             {
                 SDL_RenderFillRect(renderer, &keyb->oper_buttons[i].geometry);
@@ -611,9 +610,9 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
                     SDL_RenderCopy(renderer, tex, NULL, &keyb->oper_buttons[i].geometry);
                 }
             }
-            /* break; */
+            break;
 
-        /* case KEYB_TAB_MISC: */
+        case KEYB_TAB_MISC:
             SDL_RenderFillRect(renderer, &keyb->misc_buttons[KEYB_MISC_NEW].geometry);
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_NEW),
@@ -650,15 +649,15 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_QUIT),
                     NULL, &keyb->misc_buttons[KEYB_MISC_QUIT].geometry);
-            /* break; */
+            break;
 
-        /* case KEYB_TAB_CHAR: */
-            /* break; */
+        case KEYB_TAB_CHAR:
+            break;
 
-        /* default: */
-            /* SDL_Log("Error rendering invalid tab %d\n", keyb->active_tab); */
-            /* break; */
-    /* } */
+        default:
+            SDL_Log("Error rendering invalid tab %d\n", keyb->active_tab);
+            break;
+    }
 }
 
 /// Get the ID of the button over the point, used to get the pressed button
@@ -702,6 +701,7 @@ KeyboardEvent keyb_handle_input
             if (!SDL_PointInRect(&input->point, &keyb->geometry)
                     && !SDL_PointInRect(&input->point, &keyb->tabs_geometry))
             {
+                /* SDL_Log("up for %d", input->type); */
                 return event; // KEYB_EVENT_NOT_HANDLED
             }
             break;
@@ -710,10 +710,12 @@ KeyboardEvent keyb_handle_input
             if (!SDL_PointInRect(&input->down_point, &keyb->geometry)
                     && !SDL_PointInRect(&input->down_point, &keyb->tabs_geometry))
             {
+                /* SDL_Log("move for %d, %d", input->type, input->point.x); */
                 return event; // KEYB_EVENT_NOT_HANDLED
             }
             break;
         default:
+            /* SDL_Log("default for %d", input->type); */
             return event; // KEYB_EVENT_NOT_HANDLED
     }
 
@@ -725,14 +727,13 @@ KeyboardEvent keyb_handle_input
         if (SDL_PointInRect(&input->down_point, &keyb->tabs_geometry))
         {
             keyb->tabs_offset += input->diff.x;
+            if (keyb->tabs_offset < keyb->tabs_min_offset) {
+                keyb->tabs_offset = keyb->tabs_min_offset;
+            }
+            if (keyb->tabs_offset > 0) {
+                keyb->tabs_offset = 0;
+            }
             update_buttons(keyb);
-            SDL_Log("%d", keyb->tabs_offset);
-        }
-        else if (SDL_PointInRect(&input->down_point, &keyb->geometry))
-        {
-            keyb->buttons_offset += input->diff.x;
-            update_buttons(keyb);
-            SDL_Log("%d", keyb->buttons_offset);
         }
     }
     else if (input->type == INPUT_CLICK_UP)

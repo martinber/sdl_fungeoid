@@ -86,8 +86,9 @@ typedef struct Keyboard
 
     enum KEYB_SHIFT_STATE shift_state;
     int button_size;
-    int buttons_offset; // Offset in pixels used when dragging
+
     int tabs_offset; // Offset in pixels used when dragging
+    int tabs_min_offset;
 
     // Buttons for each tab
 #define KEYB_VALUES_BUTTONS_TOTAL 16
