@@ -154,15 +154,15 @@ void drag_move(DragState *drag, SDL_Point point, Uint32 timestamp)
     float input_y = (float) point.y;
     Uint32 input_time = timestamp;
 
-    drag->x += input_x - drag->last_input_x;
-    drag->y += input_y - drag->last_input_y;
-
     // Ignore if there are 2 inputs with same timestamp
     if (input_time != drag->last_input_time)
     {
         // Ignore first input of drag
         if (drag->last_input_time != 0)
         {
+            drag->x += input_x - drag->last_input_x;
+            drag->y += input_y - drag->last_input_y;
+
             // Velocity calculated from last two inputs
             float new_vx = (input_x - drag->last_input_x)
                 / (float) (input_time - drag->last_input_time);

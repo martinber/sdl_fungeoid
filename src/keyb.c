@@ -701,7 +701,6 @@ KeyboardEvent keyb_handle_input
             if (!SDL_PointInRect(&input->point, &keyb->geometry)
                     && !SDL_PointInRect(&input->point, &keyb->tabs_geometry))
             {
-                /* SDL_Log("up for %d", input->type); */
                 return event; // KEYB_EVENT_NOT_HANDLED
             }
             break;
@@ -710,12 +709,10 @@ KeyboardEvent keyb_handle_input
             if (!SDL_PointInRect(&input->down_point, &keyb->geometry)
                     && !SDL_PointInRect(&input->down_point, &keyb->tabs_geometry))
             {
-                /* SDL_Log("move for %d, %d", input->type, input->point.x); */
                 return event; // KEYB_EVENT_NOT_HANDLED
             }
             break;
         default:
-            /* SDL_Log("default for %d", input->type); */
             return event; // KEYB_EVENT_NOT_HANDLED
     }
 

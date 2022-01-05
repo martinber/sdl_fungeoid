@@ -63,7 +63,6 @@ Input input_handle_event(InputHandler *handler, SDL_Point *window_size, SDL_Even
             break;
 
         case SDL_MOUSEBUTTONDOWN:
-            SDL_Log("DOwn %d", input.point.x);
             if (handler->click_candidate == INPUT_NONE)
             {
                 handler->click_candidate = INPUT_CLICK_UP;
