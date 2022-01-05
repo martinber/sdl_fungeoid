@@ -1,6 +1,7 @@
 #include "drag.h"
 
 #include <float.h>
+#include <math.h>
 
 DragState *drag_create()
 {
@@ -17,7 +18,8 @@ DragState *drag_create()
     drag->vy = 0;
 
     drag->friction = 0.2;
-    drag->acceleration = 0.2;
+    drag->input_accel = 0.2;
+    drag->snap_accel = 0.005;
 
     drag->last_update_time = 0;
     drag->last_input_time = 0;
@@ -71,8 +73,63 @@ void drag_get_point(DragState *drag, SDL_Point *point)
     point->y = drag->y;
 }
 
+/// Modulo that is always positive
+/**
+ * https://stackoverflow.com/a/52529440
+ */
+float euclidean_modulo(float a, float b) {
+    float m = fmodf(a, b);
+    if (m < 0) {
+        m = (b < 0) ? m - b : m + b;
+    }
+    return m;
+}
+
+/// Update in one coordinate
+/**
+ * That is will calculate position, speed, snapping in x or y depending in
+ * arguments. It will modify arguments in place.
+ */
+static void update_coord
+(
+    float *pos, float *vel, float snap_spacing, float dt,
+    float friction, float snap_accel
+) {
+
+    // Update position according to velocity
+    *pos += (*vel) * dt;
+
+    // Add slight velocity to closest snap point
+    if (snap_spacing != 0)
+    {
+        // Always negative
+        float prev_snap_dist = - euclidean_modulo(*pos, snap_spacing);
+        // Always positive
+        float next_snap_dist = prev_snap_dist + snap_spacing;
+
+        if (fabs(prev_snap_dist) < fabs(next_snap_dist)) {
+            *vel += prev_snap_dist * snap_accel;
+        }
+        else
+        {
+            *vel += next_snap_dist * snap_accel;
+        }
+
+        if (next_snap_dist < 1 && fabs(*vel) < 0.1)
+        {
+            *pos += next_snap_dist;
+            *vel = 0;
+        }
+    }
+
+    // Decrease velocity because of friction
+    *vel *= (1.0 - friction);
+    *vel *= (1.0 - friction);
+}
+
 void drag_update(DragState *drag, Uint32 time)
 {
+    float delta_time = (float) (time - drag->last_update_time);
 
     if (drag->last_update_time == 0)
     {
@@ -82,13 +139,10 @@ void drag_update(DragState *drag, Uint32 time)
 
     if (drag->free)
     {
-        // Update x according to velocity
-        drag->x += drag->vx * (float) (time - drag->last_update_time);
-        drag->y += drag->vy * (float) (time - drag->last_update_time);
-
-        // Decrease velocity because of friction
-        drag->vx *= 1.0 - drag->friction;
-        drag->vy *= 1.0 - drag->friction;
+        update_coord(&(drag->x), &(drag->vx), drag->snap_spacing_x, delta_time,
+                drag->friction, drag->snap_accel);
+        update_coord(&(drag->y), &(drag->vy), drag->snap_spacing_y, delta_time,
+                drag->friction, drag->snap_accel);
     }
 
     drag->last_update_time = time;
@@ -116,16 +170,8 @@ void drag_move(DragState *drag, Input *input)
                 / (float) (input_time - drag->last_input_time);
 
             // Instead of setting new velocity, we merge it with the previous
-            drag->vx = drag->vx * (1.0 - drag->acceleration) + new_vx * drag->acceleration;
-            drag->vy = drag->vy * (1.0 - drag->acceleration) + new_vy * drag->acceleration;
-
-            SDL_Log("vx: %f, xy: %f, t: %d, lt: %d, %f",
-                        drag->vx,
-                        drag->vy,
-                        input_time,
-                        drag->last_input_time,
-                        (float) (input_time - drag->last_input_time)
-                    );
+            drag->vx = drag->vx * (1.0 - drag->input_accel) + new_vx * drag->input_accel;
+            drag->vy = drag->vy * (1.0 - drag->input_accel) + new_vy * drag->input_accel;
         }
 
         drag->free = false;

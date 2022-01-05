@@ -23,6 +23,7 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
     field->canvas = canvas_create(width, height);
     field->stack = stack_create();
     field->canvas_drag = drag_create();
+    drag_set_snapping(field->canvas_drag, (float) cell_size, (float) cell_size);
     if (field->canvas == NULL || field->stack == NULL || field->canvas_drag == NULL)
     {
         canvas_free(field->canvas);

@@ -10,7 +10,7 @@
 
 /// Keeps track of the movement of something you can drag or swipe
 /**
- * Consider the members as private.
+ * Consider the members as private. Designed for using pixels as units.
  *
  * Receives touch/mouse input events and calculates the movement of something
  * that was dragged, for example when scrolling the field or when dragging
@@ -34,7 +34,9 @@ typedef struct DragState
     // Number less than 1 indicating how much to decrease velocity
     float friction;
     // Number less than 1 indicating how much to follow new inputs velocity
-    float acceleration;
+    float input_accel;
+    // Number less than 1 indicating how much to follow snap guides
+    float snap_accel;
 
     /// True if the finger was released, false if the thing is being dragged
     bool free;
