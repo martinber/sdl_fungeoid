@@ -151,6 +151,7 @@ int canvas_save(Canvas *canvas, char *filename)
         fputs(line, f);
         fputc('\n', f);
     }
+    // TODO: Maube trim extra lines at the end
 
     // Close file
 

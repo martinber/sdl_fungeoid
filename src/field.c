@@ -169,6 +169,7 @@ void field_resize_screen(Field *field, SDL_Point *screen_size, int cell_size)
 {
     field->screen_size = *screen_size;
     field->cell_size = cell_size;
+    drag_set_snapping(field->canvas_drag, (float) cell_size, (float) cell_size);
 }
 
 /// Run simulation step
@@ -496,12 +497,16 @@ void field_update(Field *field, Uint32 time_abs_ms)
 
 void field_handle_input(Field *field, Input *input)
 {
+    // Offset because of scrolling
+    int x_offset = (int) field->canvas_drag->x;
+    int y_offset = (int) field->canvas_drag->y;
+
     if (field->state == FIELD_EDITING)
     {
         if (input->type == INPUT_CLICK_UP)
         {
-            field->ip.x = input->point.x / field->cell_size;
-            field->ip.y = input->point.y / field->cell_size;
+            field->ip.x = (input->point.x - x_offset) / field->cell_size;
+            field->ip.y = (input->point.y - y_offset) / field->cell_size;
         }
         else if (input->type == INPUT_CLICK_MOVE)
         {
@@ -627,20 +632,17 @@ Stack *field_get_stack(Field *field)
 
 void field_draw(SDL_Renderer *renderer, Field *field)
 {
-    int width = field->canvas->width;
-    int height = field->canvas->height;
     int cell_size = field->cell_size;
 
-    // Draw test
-    juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
-    SDL_Rect test_rect = (SDL_Rect)
-    {
-        .x = (int) field->canvas_drag->x,
-        .y = (int) field->canvas_drag->y,
-        .w = 100,
-        .h = 100
-    };
-    SDL_RenderFillRect(renderer, &test_rect);
+    // Total size of canvas
+    int width = field->canvas->width;
+    int height = field->canvas->height;
+
+    // Offset because of scrolling
+    int x_offset = (int) field->canvas_drag->x;
+    int y_offset = (int) field->canvas_drag->y;
+
+    // TODO: draw only things on screen
 
     // Draw lines
     juan_set_render_draw_color(renderer, &COLOR_LINES);
@@ -649,12 +651,12 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     for (int x = 0; x < width + 1; x++)
     {
         juan_draw_v_line_cap(renderer,
-                x * cell_size, 0, height * cell_size, line_width);
+                x * cell_size + x_offset, 0, height * cell_size, line_width);
     }
     for (int y = 0; y < height + 1; y++)
     {
         juan_draw_h_line_cap(renderer,
-                0, y * cell_size, width * cell_size, line_width);
+                0, y * cell_size + y_offset, width * cell_size, line_width);
     }
 
     // Draw instructions
@@ -667,8 +669,8 @@ void field_draw(SDL_Renderer *renderer, Field *field)
             {
                 SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, id);
                 SDL_Rect r = {
-                    x * cell_size,
-                    y * cell_size,
+                    x * cell_size + x_offset,
+                    y * cell_size + y_offset,
                     cell_size,
                     cell_size
                 };
@@ -691,8 +693,8 @@ void field_draw(SDL_Renderer *renderer, Field *field)
                 }
                 SDL_Rect rect;
                 SDL_QueryTexture(tex, NULL, NULL, &rect.w, &rect.h);
-                rect.x = x * cell_size;
-                rect.y = y * cell_size;
+                rect.x = x * cell_size + x_offset;
+                rect.y = y * cell_size + y_offset;
                 double factor = (cell_size / 2) / (float) rect.h;
                 rect.h *= factor;
                 rect.w *= factor;
@@ -706,19 +708,19 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     int ip_width = cell_size / 8;
     juan_set_render_draw_color(renderer, &COLOR_SELECT_1);
     juan_draw_h_line_cap(renderer,
-            field->ip.x * cell_size,
-            field->ip.y * cell_size,
+            field->ip.x * cell_size + x_offset,
+            field->ip.y * cell_size + y_offset,
             cell_size, ip_width);
     juan_draw_h_line_cap(renderer,
-            field->ip.x * cell_size,
-            (field->ip.y + 1) * cell_size,
+            field->ip.x * cell_size + x_offset,
+            (field->ip.y + 1) * cell_size + y_offset,
             cell_size, ip_width);
     juan_draw_v_line_cap(renderer,
-            field->ip.x * cell_size,
-            field->ip.y * cell_size,
+            field->ip.x * cell_size + x_offset,
+            field->ip.y * cell_size + y_offset,
             cell_size, ip_width);
     juan_draw_v_line_cap(renderer,
-            (field->ip.x + 1) * cell_size,
-            field->ip.y * cell_size,
+            (field->ip.x + 1) * cell_size + x_offset,
+            field->ip.y * cell_size + y_offset,
             cell_size, ip_width);
 }

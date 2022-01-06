@@ -32,7 +32,7 @@ ScreensHandler *screens_init(SDL_Point window_size)
 
     // TODO remove
     int cell_size = juan_min(window_size.x / 15, window_size.y / 15);
-    Field *field = field_create(10, 14, &window_size, cell_size);
+    Field *field = field_create(200, 200, &window_size, cell_size);
     Keyboard *keyb = keyb_create(window_size);
     Hud *hud = hud_create(window_size, 32, field_get_stack(field));
     if (field == NULL || keyb == NULL || hud == NULL)

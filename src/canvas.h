@@ -28,6 +28,9 @@ typedef struct Canvas
  * Must be freed.
  *
  * On error returns NULL.
+ *
+ * TODO: Do not ask for width and input as parameters, the canvas should be
+ * resized automatically
  */
 Canvas *canvas_create(int width, int height);
 
