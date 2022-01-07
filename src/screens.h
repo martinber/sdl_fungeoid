@@ -3,10 +3,8 @@
 
 #include <stdbool.h>
 
-#include "keyb.h"
-#include "hud.h"
+#include "game.h"
 #include "input.h"
-#include "field.h"
 
 enum SCREEN_ID
 {
@@ -17,28 +15,21 @@ enum SCREEN_ID
     SCREEN_TOTAL,
 };
 
-/// Game screen
-typedef struct GameScreen
-{
-    Field *field;
-    Keyboard *keyb;
-    Hud *hud;
-} GameScreen;
-
 /// Contains the main loop of every screen.
 /**
  * There are so few screens, so each one is handled differently depending on
- * what I need. For example the GameScreen stays in memory when the FileScreen
- * is opened.
+ * what I need.
  */
 typedef struct ScreensHandler
 {
-    enum SCREEN_ID current_screen;
-    InputHandler *input;
     SDL_Point window_size;
-    bool loop_running; // If main loop is running
 
-    GameScreen game_screen;
+    enum SCREEN_ID _current_screen;
+    InputHandler *_input;
+    bool _loop_running; // If main loop is running
+
+    // Screen of game, so far the only screen
+    Game *_game;
 } ScreensHandler;
 
 
@@ -51,7 +42,7 @@ typedef struct ScreensHandler
  *
  * Must be freed with screens_free().
  */
-ScreensHandler *screens_init(SDL_Point window_size);
+ScreensHandler *screens_create(SDL_Point window_size);
 
 /// Free everything.
 /**

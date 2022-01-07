@@ -39,7 +39,7 @@ Field *field_create(int width, int height, SDL_Point window_size)
     }
 
     // Sets rest of variables
-    field_resize_screen(field, window_size);
+    field_update_geometry(field, window_size);
 
     return field;
 }
@@ -184,7 +184,7 @@ void field_autosave(Field *field)
     }
 }
 
-void field_resize_screen(Field *field, SDL_Point window_size)
+void field_update_geometry(Field *field, SDL_Point window_size)
 {
     field->window_size = window_size;
     field->cell_size = juan_min(window_size.x / 15, window_size.y / 15);

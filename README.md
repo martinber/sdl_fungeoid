@@ -77,6 +77,10 @@ I'm learning C, I have to remember to:
 
 - Can't define global variables on header files, see `COLOR_XX` for example.
 
+- Cannot do circular imports.
+
+- Private members of structs start with `_`.
+
 - For every struct with a constructor:
 
     - Create a constructor `structname_create()` function that returns NULL on

@@ -113,7 +113,7 @@ void field_autosave(Field *field);
 
 void field_free(Field *field);
 
-void field_resize_screen(Field *field, SDL_Point window_size);
+void field_update_geometry(Field *field, SDL_Point window_size);
 
 /// Update interpreter if running
 void field_update(Field *field, Uint32 time_abs_ms);

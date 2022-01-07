@@ -3,12 +3,9 @@
 #include <time.h>
 
 #include "input.h"
-#include "field.h"
-#include "keyb.h"
-#include "hud.h"
 #include "os.h"
 
-ScreensHandler *screens_init(SDL_Point window_size)
+ScreensHandler *screens_create(SDL_Point window_size)
 {
     ScreensHandler *screens = (ScreensHandler*) malloc(sizeof(ScreensHandler));
     if (screens == NULL)
@@ -17,34 +14,20 @@ ScreensHandler *screens_init(SDL_Point window_size)
         return NULL;
     }
 
-    screens->current_screen = SCREEN_GAME;
-    screens->input = input_create();
+    screens->_current_screen = SCREEN_GAME;
     screens->window_size = window_size;
-    screens->loop_running = true;
-    if (screens->input == NULL)
+    screens->_loop_running = true;
+
+    screens->_input = input_create();
+    screens->_game = game_create(window_size);
+    if (screens->_input == NULL || screens->_game == NULL)
     {
         screens_free(screens);
         screens = NULL;
 
-        SDL_Log("Error creating screens->input");
+        SDL_Log("Error creating screens->_input or screens->_game");
         return NULL;
     }
-
-    Field *field = field_create(200, 200, window_size);
-    Keyboard *keyb = keyb_create(window_size);
-    Hud *hud = hud_create(window_size, 32, field_get_stack(field));
-    if (field == NULL || keyb == NULL || hud == NULL)
-    {
-        screens_free(screens);
-        screens = NULL;
-
-        SDL_Log("Failed to create field, keyb or InputHandler");
-        return NULL;
-    }
-
-    screens->game_screen.field = field;
-    screens->game_screen.keyb = keyb;
-    screens->game_screen.hud = hud;
 
     return screens;
 }
@@ -53,97 +36,19 @@ void screens_free(ScreensHandler *screens)
 {
     if (screens != NULL)
     {
-        if (screens->input != NULL)
+        if (screens->_input != NULL)
         {
-            input_free(screens->input);
-            screens->input = NULL;
+            input_free(screens->_input);
+            screens->_input = NULL;
         }
-        if (screens->game_screen.field != NULL)
+        if (screens->_game != NULL)
         {
-            field_free(screens->game_screen.field);
-            screens->input = NULL;
-        }
-        if (screens->game_screen.keyb != NULL)
-        {
-            keyb_free(screens->game_screen.keyb);
-            screens->input = NULL;
-        }
-        if (screens->game_screen.hud != NULL)
-        {
-            hud_free(screens->game_screen.hud);
-            screens->input = NULL;
+            game_free(screens->_game);
+            screens->_game = NULL;
         }
     }
     free(screens);
     screens = NULL;
-}
-
-static void game_screen_handle_event(ScreensHandler *screens, SDL_Event *event)
-{
-    switch (event->type)
-    {
-        case SDL_KEYUP:
-            if (event->key.keysym.sym == SDLK_AC_BACK)
-            {
-                screens->loop_running = false;
-            }
-            break;
-
-        case SDL_DROPFILE:
-            if (!strncmp(event->drop.file, "open:", 5))
-            {
-                field_load_filename_selected(screens->game_screen.field, event->drop.file + 5);
-            }
-            else if (!strncmp(event->drop.file, "saveas:", 7))
-            {
-                field_save_filename_selected(screens->game_screen.field, event->drop.file + 7);
-            }
-            else
-            {
-                SDL_Log("Received file drop event without prefix: %s", event->drop.file);
-            }
-            break;
-
-        case SDL_WINDOWEVENT:
-            if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-            {
-                field_resize_screen(screens->game_screen.field, screens->window_size);
-                keyb_update_geometry(screens->game_screen.keyb, screens->window_size);
-                hud_update_geometry(screens->game_screen.hud, screens->window_size, 32);
-            }
-
-        default:
-            break;
-    }
-}
-
-static void game_screen_handle_input(ScreensHandler *screens, Input *input)
-{
-    KeyboardEvent event = keyb_handle_input(screens->game_screen.keyb, input);
-    if (event.type == KEYB_EVENT_NOT_HANDLED)
-    {
-        if (hud_handle_input(screens->game_screen.hud, input) != 0)
-        {
-            field_handle_input(screens->game_screen.field, input);
-        }
-    }
-    else
-    {
-        field_handle_keyb(screens->game_screen.field, &event);
-    }
-}
-
-static void game_screen_update
-(
-    ScreensHandler *screens,
-    SDL_Renderer *renderer,
-    Uint32 time_abs_ms
-) {
-    field_update(screens->game_screen.field, time_abs_ms);
-
-    field_draw(renderer, screens->game_screen.field);
-    hud_draw(renderer, screens->game_screen.hud);
-    keyb_draw(renderer, screens->game_screen.keyb);
 }
 
 void screens_loop(ScreensHandler *screens, SDL_Renderer *renderer)
@@ -151,14 +56,11 @@ void screens_loop(ScreensHandler *screens, SDL_Renderer *renderer)
 
     // Time in milliseconds since start of the game
     Uint32 time_abs_ms = SDL_GetTicks();
-    // Time in milliseconds since last loop
-    Uint32 time_rel_ms = time_abs_ms;
 
     SDL_Event event;
     SDL_StartTextInput(); // So we get events of type SDL_TextInputEvent
-    while (screens->loop_running)
+    while (screens->_loop_running)
     {
-        time_rel_ms = SDL_GetTicks() - time_abs_ms;
         time_abs_ms = SDL_GetTicks();
 
         while (SDL_PollEvent(&event) != 0)
@@ -169,12 +71,24 @@ void screens_loop(ScreensHandler *screens, SDL_Renderer *renderer)
             switch (event.type)
             {
                 case SDL_QUIT:
-                    screens->loop_running = false;
+                    screens->_loop_running = false;
                     break;
 
                 case SDL_WINDOWEVENT:
-                    screens->window_size.x = event.window.data1;
-                    screens->window_size.y = event.window.data2;
+                    if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED
+                            || event.window.event == SDL_WINDOWEVENT_RESIZED)
+                    {
+                        screens->window_size.x = event.window.data1;
+                        screens->window_size.y = event.window.data2;
+                        game_update_geometry(screens->_game, screens->window_size);
+                    }
+                    break;
+
+                case SDL_KEYUP:
+                    if (event.key.keysym.sym == SDLK_AC_BACK)
+                    {
+                        screens->_loop_running = false;
+                    }
                     break;
 
                 default:
@@ -183,17 +97,17 @@ void screens_loop(ScreensHandler *screens, SDL_Renderer *renderer)
 
             // Handle events for each screen
 
-            Input input_event = input_handle_event(screens->input, &screens->window_size, &event);
+            Input input_event = input_handle_event(screens->_input, &screens->window_size, &event);
 
-            switch (screens->current_screen)
+            switch (screens->_current_screen)
             {
                 case SCREEN_GAME:
-                    game_screen_handle_event(screens, &event);
-                    game_screen_handle_input(screens, &input_event);
+                    game_handle_event(screens->_game, &event);
+                    game_handle_input(screens->_game, &input_event);
                     break;
 
                 default:
-                    SDL_Log("Tried to handle event on invalid screen %d", screens->current_screen);
+                    SDL_Log("Tried to handle event on invalid screen %d", screens->_current_screen);
                     break;
             }
         }
@@ -203,14 +117,14 @@ void screens_loop(ScreensHandler *screens, SDL_Renderer *renderer)
         juan_set_render_draw_color(renderer, &COLOR_BG);
         SDL_RenderClear(renderer);
 
-        switch (screens->current_screen)
+        switch (screens->_current_screen)
         {
             case SCREEN_GAME:
-                game_screen_update(screens, renderer, time_abs_ms);
+                game_update(screens->_game, renderer, time_abs_ms);
                 break;
 
             default:
-                SDL_Log("Tried to update invalid screen %d", screens->current_screen);
+                SDL_Log("Tried to update invalid screen %d", screens->_current_screen);
                 break;
 
         }

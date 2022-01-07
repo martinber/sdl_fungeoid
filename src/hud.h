@@ -34,6 +34,7 @@ Hud *hud_create(SDL_Point window_size, int line_height, Stack *stack);
 void hud_free(Hud *hud);
 
 /// Update size and position from window and line height
+// TODO: Remove line_height parameter
 void hud_update_geometry(Hud *hud, SDL_Point window_size, int line_height);
 
 /// Draw keyboard

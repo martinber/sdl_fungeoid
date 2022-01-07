@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
     if (res_load_all(renderer) == 0)
     {
-        ScreensHandler *screens = screens_init(window_size);
+        ScreensHandler *screens = screens_create(window_size);
         if (screens != NULL)
         {
             screens_loop(screens, renderer);
