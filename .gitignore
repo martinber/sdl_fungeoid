@@ -1,6 +1,7 @@
 bin/
 obj/
 android/app/build
+android/app/.externalNativeBuild
 .gradle
 
 # Befunge Programs
