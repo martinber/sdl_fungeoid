@@ -31,6 +31,8 @@ typedef struct Field
 
     // Absolute time in milliseconds when last simulation step was done
     Uint32 last_step_ms;
+    // Time interval between steps
+    Uint32 interval_step_ms;
 
     SDL_Point screen_size;
     SDL_Point ip; // Instruction pointer

@@ -101,6 +101,18 @@ int stack_pop(Stack *stack, signed long int *v)
     return 0;
 }
 
+int stack_clear(Stack *stack)
+{
+    if (stack_realloc(stack, 0) != 0)
+    {
+        SDL_Log("Failed to clear and reallocate stack\n");
+        return 2;
+    }
+
+    stack->size = 0;
+    return 0;
+}
+
 void stack_print(Stack *stack)
 {
     SDL_Log("size: %lu, alloc_size: %lu\n", stack->size, stack->alloc_size);

@@ -336,7 +336,7 @@ static void update_buttons(Keyboard *keyb)
         grid_position(&keyb->run_buttons[KEYB_RUN_STEP].geometry,
                 button_size * 2 + spacing, button_size, spacing,
                 origin_x, origin_y, 1, 0);
-        grid_position(&keyb->run_buttons[KEYB_RUN_PAUSE].geometry,
+        grid_position(&keyb->run_buttons[KEYB_RUN_RESUME].geometry,
                 button_size * 2 + spacing, button_size, spacing,
                 origin_x, origin_y, 1, 1);
         grid_position(&keyb->run_buttons[KEYB_RUN_FASTER].geometry,
@@ -553,10 +553,10 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_STEP),
                     NULL, &keyb->run_buttons[KEYB_RUN_STEP].geometry);
-            SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_PAUSE].geometry);
+            SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_RESUME].geometry);
             SDL_RenderCopy(renderer,
-                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_PAUSE),
-                    NULL, &keyb->run_buttons[KEYB_RUN_PAUSE].geometry);
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_RESUME),
+                    NULL, &keyb->run_buttons[KEYB_RUN_RESUME].geometry);
             SDL_RenderFillRect(renderer, &keyb->run_buttons[KEYB_RUN_FASTER].geometry);
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_TIME_FASTER),
@@ -826,6 +826,26 @@ KeyboardEvent keyb_handle_input
 
                     case KEYB_RUN_STOP:
                         event.type = KEYB_EVENT_STOP;
+                        return event;
+                        break;
+
+                    case KEYB_RUN_STEP:
+                        event.type = KEYB_EVENT_STEP;
+                        return event;
+                        break;
+
+                    case KEYB_RUN_RESUME:
+                        event.type = KEYB_EVENT_RESUME;
+                        return event;
+                        break;
+
+                    case KEYB_RUN_FASTER:
+                        event.type = KEYB_EVENT_FASTER;
+                        return event;
+                        break;
+
+                    case KEYB_RUN_SLOWER:
+                        event.type = KEYB_EVENT_SLOWER;
                         return event;
                         break;
 

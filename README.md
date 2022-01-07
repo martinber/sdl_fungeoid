@@ -178,27 +178,38 @@ sudo apt install openjdk-8-jdk ant android-sdk-platform-tools-common
 ```
 
 As `openjdk-8-jdk` is not available on Debian Buster I downloaded the SDK
-manually so I set the `JAVA_HOME` variable on each command.
+manually from Oracle and put in a folder. This is why from now on I set the
+`JAVA_HOME` variable on each command. Not sure if I need this old java version,
+but the SDL guides say to use Java 8.
 
-Download `sdk-tools-linux-4333796`. Accept licenses:
+Also download [Android SDK Platform Tools](https://developer.android.com/studio/releases/platform-tools)
+and put in a folder. Then download the Android `commandlinetools-linux`
+(previously called `sdk-tools-linux`), this has to be placed inside the SDK
+Platform tools folder, inside a folder named `latest` (if not, an error will
+remind you).
+
+With that done, accept the licenses. Pay attention to the paths in the command:
 
 ```
-env JAVA_HOME="/android/java-se-8u40-ri" /home/mbernardi/extra/async/android/sdk-tools-linux/tools/bin/sdkmanager --licenses
+env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/platform-tools/cmdline-tools/latest/bin/sdkmanager --licenses
 ```
 
 Install build tools, SDK and NDK for the target version. I had to use
 `--no_https`:
 
 ```
-env JAVA_HOME="/home/mbernardi/extra/async/android/java-se-8u40-ri" /home/mbernardi/extra/async/android/sdk-tools-linux/tools/bin/sdkmanager --no_https "build-tools;26.0.0" "platforms;android-26"
-env JAVA_HOME="/home/mbernardi/extra/async/android/java-se-8u40-ri" /home/mbernardi/extra/async/android/sdk-tools-linux/tools/bin/sdkmanager --no_https "ndk-bundle"
+env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/platform-tools/cmdline-tools/latest/bin/sdkmanager --no_https "build-tools;26.0.0" "platforms;android-26"
+env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/platform-tools/cmdline-tools/latest/bin/sdkmanager --no_https "ndk-bundle"
 ```
 
 Compiling:
 
 ```
-env ANDROID_HOME="/home/mbernardi/extra/async/android/sdk-tools-linux" JAVA_HOME="/home/mbernardi/extra/async/android/java-se-8u40-ri" ./gradlew installDebug
+cd ./android
+env ANDROID_HOME="/home/mbernardi/extra/async/android/platform-tools/cmdline-tools/latest/bin/" JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" ./gradlew installDebug
 ```
+
+If it gives license errors, maybe the `ANDROID_HOME` is wrong.
 
 ## Acknowledgments
 

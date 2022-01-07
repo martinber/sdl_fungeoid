@@ -83,6 +83,13 @@ int stack_push(Stack *stack, signed long int v);
  */
 int stack_pop(Stack *stack, signed long int *v);
 
+/// Clear stack
+/**
+ * Returns 2 if failed to allocate memory, remember to later free the stack
+ * anyways
+ */
+int stack_clear(Stack *stack);
+
 /// Print stack to SDL_Log for debugging
 void stack_print(Stack *stack);
 

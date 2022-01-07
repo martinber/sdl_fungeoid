@@ -14,6 +14,7 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
     field->state = FIELD_EDITING;
     *field->filename = '\0';
     field->last_step_ms = 0;
+    field->interval_step_ms = 100;
     field->screen_size = *screen_size;
     field->ip = (SDL_Point) { 0, 0 };
     field->speed = (SDL_Point) { 1, 0 };
@@ -41,6 +42,24 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
     }
 
     return field;
+}
+
+static void step_faster(Field *field)
+{
+    field->interval_step_ms /= 2;
+    if (field->interval_step_ms < 20)
+    {
+        field->interval_step_ms = 20;
+    }
+}
+
+static void step_slower(Field *field)
+{
+    field->interval_step_ms *= 2;
+    if (field->interval_step_ms > 2000)
+    {
+        field->interval_step_ms = 2000;
+    }
 }
 
 void field_free(Field *field)
@@ -183,6 +202,7 @@ static void field_step(Field *field)
     Stack *stack = field->stack;
     enum INSTR_ID instr = canvas_get_instr(field->canvas, field->ip.x, field->ip.y);
 
+    // TODO Check alloc errors of stack
     switch (instr)
     {
         case INSTR_0: stack_push(stack, 0); break;
@@ -480,18 +500,12 @@ void field_update(Field *field, Uint32 time_abs_ms)
     drag_update(field->canvas_drag, time_abs_ms);
     if (field->state == FIELD_RUNNING)
     {
-        if (time_abs_ms - field->last_step_ms > 300)
+        // TODO: Do several steps if we are very late
+        if (time_abs_ms - field->last_step_ms > field->interval_step_ms)
         {
             field->last_step_ms = time_abs_ms;
             field_step(field);
         }
-        /*
-        field->last_step_ms = time_abs_ms;
-        for (int i = 0; i < 100000; i++)
-        {
-            field_step(field);
-        }
-        */
     }
 }
 
@@ -567,6 +581,17 @@ void field_handle_input(Field *field, Input *input)
 
 void field_handle_keyb(Field *field, KeyboardEvent *event)
 {
+    switch (event->type)
+    {
+        case KEYB_EVENT_FASTER:
+            step_faster(field);
+            break;
+        case KEYB_EVENT_SLOWER:
+            step_slower(field);
+            break;
+        default:
+            break;
+    }
     if (field->state == FIELD_EDITING)
     {
         switch (event->type)
@@ -604,7 +629,19 @@ void field_handle_keyb(Field *field, KeyboardEvent *event)
                 break;
 
             case KEYB_EVENT_START:
+                // TODO check errors of stack
+                stack_clear(field->stack);
                 field->state = FIELD_RUNNING;
+                field->ip = (SDL_Point) { 0, 0 };
+                field->speed = (SDL_Point) { 1, 0 };
+                break;
+
+            case KEYB_EVENT_RESUME:
+                field->state = FIELD_RUNNING;
+                break;
+
+            case KEYB_EVENT_STEP:
+                field_step(field);
                 break;
 
             default:
@@ -723,4 +760,32 @@ void field_draw(SDL_Renderer *renderer, Field *field)
             (field->ip.x + 1) * cell_size + x_offset,
             field->ip.y * cell_size + y_offset,
             cell_size, ip_width);
+    if (field->speed.x == 1)
+    {
+        juan_draw_v_line_cap(renderer,
+                field->ip.x * cell_size + x_offset + ip_width,
+                field->ip.y * cell_size + y_offset,
+                cell_size, ip_width);
+    }
+    else if (field->speed.x == -1)
+    {
+        juan_draw_v_line_cap(renderer,
+                (field->ip.x + 1) * cell_size + x_offset - ip_width,
+                field->ip.y * cell_size + y_offset,
+                cell_size, ip_width);
+    }
+    else if (field->speed.y == 1)
+    {
+        juan_draw_h_line_cap(renderer,
+                field->ip.x * cell_size + x_offset,
+                field->ip.y * cell_size + y_offset + ip_width,
+                cell_size, ip_width);
+    }
+    else if (field->speed.y == -1)
+    {
+        juan_draw_h_line_cap(renderer,
+                field->ip.x * cell_size + x_offset,
+                (field->ip.y + 1) * cell_size + y_offset - ip_width,
+                cell_size, ip_width);
+    }
 }

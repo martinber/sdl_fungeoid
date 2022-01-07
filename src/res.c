@@ -219,11 +219,11 @@ int res_load_all(SDL_Renderer *renderer)
                         "step", COLOR_WHITE);
                 break;
 
-            case RES_KEYB_ICON_PAUSE:
+            case RES_KEYB_ICON_RESUME:
                 KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
                         INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
                         INSTR_TEXTURES_RES,
-                        "pause", COLOR_WHITE);
+                        "resume", COLOR_WHITE);
                 break;
 
             case RES_KEYB_ICON_TIME_FASTER:
