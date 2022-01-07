@@ -2,7 +2,7 @@
 
 #include "os.h"
 
-Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size)
+Field *field_create(int width, int height, SDL_Point window_size)
 {
     Field *field = (Field*) malloc(sizeof(Field));
     if (field == NULL)
@@ -15,16 +15,13 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
     *field->filename = '\0';
     field->last_step_ms = 0;
     field->interval_step_ms = 100;
-    field->screen_size = *screen_size;
     field->ip = (SDL_Point) { 0, 0 };
     field->speed = (SDL_Point) { 1, 0 };
-    field->cell_size = cell_size;
     field->stack = NULL;
 
     field->canvas = canvas_create(width, height);
     field->stack = stack_create();
     field->canvas_drag = drag_create();
-    drag_set_snapping(field->canvas_drag, (float) cell_size, (float) cell_size);
     if (field->canvas == NULL || field->stack == NULL || field->canvas_drag == NULL)
     {
         canvas_free(field->canvas);
@@ -40,6 +37,9 @@ Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size
         SDL_Log("Error creating field->canvas or field->stack");
         return NULL;
     }
+
+    // Sets rest of variables
+    field_resize_screen(field, window_size);
 
     return field;
 }
@@ -184,11 +184,11 @@ void field_autosave(Field *field)
     }
 }
 
-void field_resize_screen(Field *field, SDL_Point *screen_size, int cell_size)
+void field_resize_screen(Field *field, SDL_Point window_size)
 {
-    field->screen_size = *screen_size;
-    field->cell_size = cell_size;
-    drag_set_snapping(field->canvas_drag, (float) cell_size, (float) cell_size);
+    field->window_size = window_size;
+    field->cell_size = juan_min(window_size.x / 15, window_size.y / 15);
+    drag_set_snapping(field->canvas_drag, (float) field->cell_size, (float) field->cell_size);
 }
 
 /// Run simulation step

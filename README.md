@@ -182,31 +182,33 @@ manually from Oracle and put in a folder. This is why from now on I set the
 `JAVA_HOME` variable on each command. Not sure if I need this old java version,
 but the SDL guides say to use Java 8.
 
-Also download [Android SDK Platform Tools](https://developer.android.com/studio/releases/platform-tools)
-and put in a folder. Then download the Android `commandlinetools-linux`
-(previously called `sdk-tools-linux`), this has to be placed inside the SDK
-Platform tools folder, inside a folder named `latest` (if not, an error will
-remind you).
+Then download the Android
+[commandlinetools-linux](https://developer.android.com/studio#command-tools)
+(previously called `sdk-tools-linux`). This has to be placed inside a folder
+named `sdk` and the contents of `cmdline-tools` have to be put in a folder named
+`latest` (if not, an error will remind you). In the end you should have the
+`sdkmanager` in this path: `.../sdk/cmdline-tools/latest/bin/sdkmanager`. Do not
+download the SDK manually, we will use the SDK Manager for that.
 
 With that done, accept the licenses. Pay attention to the paths in the command:
 
 ```
-env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/platform-tools/cmdline-tools/latest/bin/sdkmanager --licenses
+env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 ```
 
-Install build tools, SDK and NDK for the target version. I had to use
+Install build tools, SDK and NDK for the target version. Once I had to use
 `--no_https`:
 
 ```
-env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/platform-tools/cmdline-tools/latest/bin/sdkmanager --no_https "build-tools;26.0.0" "platforms;android-26"
-env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/platform-tools/cmdline-tools/latest/bin/sdkmanager --no_https "ndk-bundle"
+env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/sdk/cmdline-tools/latest/bin/sdkmanager --install "build-tools;26.0.0" "platforms;android-26"
+env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/sdk/cmdline-tools/latest/bin/sdkmanager --install "ndk-bundle"
 ```
 
 Compiling:
 
 ```
 cd ./android
-env ANDROID_HOME="/home/mbernardi/extra/async/android/platform-tools/cmdline-tools/latest/bin/" JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" ./gradlew installDebug
+env PATH="/home/mbernardi/extra/async/android/platform-tools/:$PATH" ANDROID_HOME="/home/mbernardi/extra/async/android/sdk/cmdline-tools/latest/bin/" JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" ./gradlew installDebug
 ```
 
 If it gives license errors, maybe the `ANDROID_HOME` is wrong.

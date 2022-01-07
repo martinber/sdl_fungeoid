@@ -30,9 +30,7 @@ ScreensHandler *screens_init(SDL_Point window_size)
         return NULL;
     }
 
-    // TODO remove
-    int cell_size = juan_min(window_size.x / 15, window_size.y / 15);
-    Field *field = field_create(200, 200, &window_size, cell_size);
+    Field *field = field_create(200, 200, window_size);
     Keyboard *keyb = keyb_create(window_size);
     Hud *hud = hud_create(window_size, 32, field_get_stack(field));
     if (field == NULL || keyb == NULL || hud == NULL)
@@ -109,9 +107,7 @@ static void game_screen_handle_event(ScreensHandler *screens, SDL_Event *event)
         case SDL_WINDOWEVENT:
             if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
             {
-                // TODO make these take references to the window size
-                int cell_size = juan_min(screens->window_size.x / 15, screens->window_size.y / 15);
-                field_resize_screen(screens->game_screen.field, &screens->window_size, cell_size);
+                field_resize_screen(screens->game_screen.field, screens->window_size);
                 keyb_update_geometry(screens->game_screen.keyb, screens->window_size);
                 hud_update_geometry(screens->game_screen.hud, screens->window_size, 32);
             }

@@ -34,7 +34,7 @@ typedef struct Field
     // Time interval between steps
     Uint32 interval_step_ms;
 
-    SDL_Point screen_size;
+    SDL_Point window_size;
     SDL_Point ip; // Instruction pointer
     SDL_Point speed; // Next relative motion of IP, e.g. (-1, 0)
     int cell_size;
@@ -50,7 +50,7 @@ typedef struct Field
  *
  * On error returns NULL.
  */
-Field *field_create(int width, int height, SDL_Point *screen_size, int cell_size);
+Field *field_create(int width, int height, SDL_Point window_size);
 
 /// User pressed "new"
 /**
@@ -107,12 +107,13 @@ void field_new_user_sure(Field *field);
 /// Save canvas to autosave filename
 /**
  * This function is called once in a while.
+ * // TODO
  */
 void field_autosave(Field *field);
 
 void field_free(Field *field);
 
-void field_resize_screen(Field *field, SDL_Point *screen_size, int cell_size);
+void field_resize_screen(Field *field, SDL_Point window_size);
 
 /// Update interpreter if running
 void field_update(Field *field, Uint32 time_abs_ms);
