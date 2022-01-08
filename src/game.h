@@ -1,8 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <stdbool.h>
-
 #include "intrpr.h"
 #include "keyb.h"
 #include "hud.h"

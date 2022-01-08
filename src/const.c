@@ -139,8 +139,7 @@ enum INSTR_ID const_befunge_from_char(char c)
         case '\'': return INSTR_FETCH;
         case 's': return INSTR_STORE;
 
-        default: SDL_Log("Invalid instruction character \"%c\"", c);
-                 return INSTR_NULL;
+        default: return INSTR_NULL;
     }
 }
 

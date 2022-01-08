@@ -11,8 +11,6 @@ Intrpr *intrpr_create()
 
     intrpr->_last_step_ms = 0;
     intrpr->_interval_step_ms = 100;
-    intrpr->_ip = (SDL_Point) { 0, 0 };
-    intrpr->_ip_sp = (SDL_Point) { 1, 0 };
 
     intrpr->_canvas = canvas_create(100, 100);
     intrpr->_stack = stack_create();
@@ -29,6 +27,9 @@ Intrpr *intrpr_create()
         SDL_Log("Error creating intrpr->_canvas or intrpr->_stack");
         return NULL;
     }
+
+    // Set rest of variables
+    intrpr_reset(intrpr);
 
     return intrpr;
 }
@@ -49,6 +50,7 @@ void intrpr_reset(Intrpr* intrpr)
     stack_clear(intrpr->_stack);
     intrpr->_ip = (SDL_Point) { 0, 0 };
     intrpr->_ip_sp = (SDL_Point) { 1, 0 };
+    intrpr->_string_mode = false;
 }
 
 void intrpr_resume(Intrpr* intrpr)
@@ -130,295 +132,320 @@ void intrpr_step(Intrpr *intrpr)
     SDL_Point *ip = &(intrpr->_ip);
     SDL_Point *speed = &(intrpr->_ip_sp);
     Stack *stack = intrpr->_stack;
-    enum INSTR_ID instr = canvas_get_instr(intrpr->_canvas, ip->x, ip->y);
 
-    // TODO Check alloc errors of stack
-    switch (instr)
+    char _c = canvas_get_char(intrpr->_canvas, ip->x, ip->y);
+    char c = ' ';
+
+    if (_c < 0) {
+        SDL_Log("Error reading canvas char");
+    } else {
+        c = (char) _c;
+    }
+
+    enum INSTR_ID instr = const_befunge_from_char(c);
+
+    if (intrpr->_string_mode == true)
     {
-        case INSTR_0: stack_push(stack, 0); break;
-        case INSTR_1: stack_push(stack, 1); break;
-        case INSTR_2: stack_push(stack, 2); break;
-        case INSTR_3: stack_push(stack, 3); break;
-        case INSTR_4: stack_push(stack, 4); break;
-        case INSTR_5: stack_push(stack, 5); break;
-        case INSTR_6: stack_push(stack, 6); break;
-        case INSTR_7: stack_push(stack, 7); break;
-        case INSTR_8: stack_push(stack, 8); break;
-        case INSTR_9: stack_push(stack, 9); break;
-        case INSTR_A: stack_push(stack, 10); break;
-        case INSTR_B: stack_push(stack, 11); break;
-        case INSTR_C: stack_push(stack, 12); break;
-        case INSTR_D: stack_push(stack, 13); break;
-        case INSTR_E: stack_push(stack, 14); break;
-        case INSTR_F: stack_push(stack, 15); break;
+        if (c == '"') {
+            intrpr->_string_mode = false;
+        } else {
+            stack_push(stack, (int) c);
+        }
+    }
+    else
+    {
+        // TODO Check alloc errors of stack
+        switch (instr)
+        {
+            case INSTR_0: stack_push(stack, 0); break;
+            case INSTR_1: stack_push(stack, 1); break;
+            case INSTR_2: stack_push(stack, 2); break;
+            case INSTR_3: stack_push(stack, 3); break;
+            case INSTR_4: stack_push(stack, 4); break;
+            case INSTR_5: stack_push(stack, 5); break;
+            case INSTR_6: stack_push(stack, 6); break;
+            case INSTR_7: stack_push(stack, 7); break;
+            case INSTR_8: stack_push(stack, 8); break;
+            case INSTR_9: stack_push(stack, 9); break;
+            case INSTR_A: stack_push(stack, 10); break;
+            case INSTR_B: stack_push(stack, 11); break;
+            case INSTR_C: stack_push(stack, 12); break;
+            case INSTR_D: stack_push(stack, 13); break;
+            case INSTR_E: stack_push(stack, 14); break;
+            case INSTR_F: stack_push(stack, 15); break;
 
-        case INSTR_UP:
-            speed->x = 0;
-            speed->y = -1;
-            break;
-        case INSTR_DOWN:
-            speed->x = 0;
-            speed->y = +1;
-            break;
-        case INSTR_LEFT:
-            speed->x = -1;
-            speed->y = 0;
-            break;
-        case INSTR_RIGHT:
-            speed->x = +1;
-            speed->y = 0;
-            break;
-        case INSTR_BRIDGE:
-            ip->x += speed->x;
-            ip->y += speed->y;
-            break;
-        case INSTR_RND:
-            // Number between 0 and 3, not perfectry uniform but almost
-            switch (rand() % 4)
-            {
-                case 0:
-                    speed->x = 0;
-                    speed->y = -1;
-                    break;
-                case 1:
-                    speed->x = 0;
-                    speed->y = +1;
-                    break;
-                case 2:
-                    speed->x = -1;
-                    speed->y = 0;
-                    break;
-                case 3:
-                    speed->x = +1;
-                    speed->y = 0;
-                    break;
-            }
-            break;
-        case INSTR_STOP:
-            speed->x = 0;
-            speed->y = 0;
-            break;
-
-        case INSTR_ADD:
-            {
-                signed long int a;
-                signed long int b;
-                if (stack_pop(stack, &a) == 0
-                        && stack_pop(stack, &b) == 0)
+            case INSTR_UP:
+                speed->x = 0;
+                speed->y = -1;
+                break;
+            case INSTR_DOWN:
+                speed->x = 0;
+                speed->y = +1;
+                break;
+            case INSTR_LEFT:
+                speed->x = -1;
+                speed->y = 0;
+                break;
+            case INSTR_RIGHT:
+                speed->x = +1;
+                speed->y = 0;
+                break;
+            case INSTR_BRIDGE:
+                ip->x += speed->x;
+                ip->y += speed->y;
+                break;
+            case INSTR_RND:
+                // Number between 0 and 3, not perfectry uniform but almost
+                switch (rand() % 4)
                 {
-                    stack_push(stack, b + a);
-                }
-            }
-            break;
-        case INSTR_SUB:
-            {
-                signed long int a;
-                signed long int b;
-                if (stack_pop(stack, &a) == 0
-                        && stack_pop(stack, &b) == 0)
-                {
-                    stack_push(stack, b - a);
-                }
-            }
-            break;
-        case INSTR_MUL:
-            {
-                signed long int a;
-                signed long int b;
-                if (stack_pop(stack, &a) == 0
-                        && stack_pop(stack, &b) == 0)
-                {
-                    stack_push(stack, b * a);
-                }
-            }
-            break;
-        case INSTR_INTDIV:
-            {
-                signed long int a;
-                signed long int b;
-                if (stack_pop(stack, &a) == 0
-                        && stack_pop(stack, &b) == 0)
-                {
-                    stack_push(stack, b / a);
-                }
-            }
-            break;
-        case INSTR_MOD:
-            {
-                signed long int a;
-                signed long int b;
-                if (stack_pop(stack, &a) == 0
-                        && stack_pop(stack, &b) == 0)
-                {
-                    stack_push(stack, b % a);
-                }
-            }
-            break;
-        case INSTR_NOT:
-            {
-                signed long int a;
-                if (stack_pop(stack, &a) == 0)
-                {
-                    if (a == 0)
-                    {
-                        stack_push(stack, 1);
-                    }
-                    else
-                    {
-                        stack_push(stack, 0);
-                    }
-                }
-            }
-            break;
-        case INSTR_GT:
-            {
-                signed long int a;
-                signed long int b;
-                if (stack_pop(stack, &a) == 0
-                        && stack_pop(stack, &b) == 0)
-                {
-                    if (b > a)
-                    {
-                        stack_push(stack, 1);
-                    }
-                    else
-                    {
-                        stack_push(stack, 0);
-                    }
-                }
-            }
-            break;
-        case INSTR_LT:
-            {
-                signed long int a;
-                signed long int b;
-                if (stack_pop(stack, &a) == 0
-                        && stack_pop(stack, &b) == 0)
-                {
-                    if (b < a)
-                    {
-                        stack_push(stack, 1);
-                    }
-                    else
-                    {
-                        stack_push(stack, 0);
-                    }
-                }
-            }
-            break;
-
-        case INSTR_DUP:
-            {
-                signed long int v;
-                if (stack_pop(stack, &v) == 0)
-                {
-                    stack_push(stack, v);
-                    stack_push(stack, v);
-                }
-            }
-            break;
-        case INSTR_SWP:
-            {
-                signed long int a;
-                signed long int b;
-                if (stack_pop(stack, &a) == 0
-                        && stack_pop(stack, &b) == 0)
-                {
-                    stack_push(stack, a);
-                    stack_push(stack, b);
-                }
-            }
-            break;
-        case INSTR_POP:
-            {
-                signed long int v;
-                stack_pop(stack, &v);
-            }
-            break;
-        case INSTR_HIF:
-            {
-                signed long int a;
-                if (stack_pop(stack, &a) == 0)
-                {
-                    if (a == 0)
-                    {
-                        speed->x = +1;
-                        speed->y = 0;
-                    }
-                    else
-                    {
-                        speed->x = -1;
-                        speed->y = 0;
-                    }
-                }
-            }
-            break;
-        case INSTR_VIF:
-            {
-                signed long int a;
-                if (stack_pop(stack, &a) == 0)
-                {
-                    if (a == 0)
-                    {
-                        speed->x = 0;
-                        speed->y = +1;
-                    }
-                    else
-                    {
+                    case 0:
                         speed->x = 0;
                         speed->y = -1;
+                        break;
+                    case 1:
+                        speed->x = 0;
+                        speed->y = +1;
+                        break;
+                    case 2:
+                        speed->x = -1;
+                        speed->y = 0;
+                        break;
+                    case 3:
+                        speed->x = +1;
+                        speed->y = 0;
+                        break;
+                }
+                break;
+            case INSTR_STOP:
+                speed->x = 0;
+                speed->y = 0;
+                break;
+
+            case INSTR_ADD:
+                {
+                    signed long int a;
+                    signed long int b;
+                    if (stack_pop(stack, &a) == 0
+                            && stack_pop(stack, &b) == 0)
+                    {
+                        stack_push(stack, b + a);
                     }
                 }
-            }
-            break;
-        case INSTR_STR:
-            // TODO
-            break;
-        case INSTR_ITER:
-            // TODO show on screen some indicator of the action being made
-            break;
-
-        case INSTR_INTIN:
-            // TODO
-            break;
-        case INSTR_CHARIN:
-            // TODO
-            break;
-        case INSTR_INTOUT:
-            {
-                signed long int v;
-                if (stack_pop(stack, &v) == 0)
+                break;
+            case INSTR_SUB:
                 {
-                    SDL_Log("INTOUT: %lu", v);
+                    signed long int a;
+                    signed long int b;
+                    if (stack_pop(stack, &a) == 0
+                            && stack_pop(stack, &b) == 0)
+                    {
+                        stack_push(stack, b - a);
+                    }
                 }
-            }
-            break;
-        case INSTR_CHAROUT:
-            {
-                signed long int v;
-                if (stack_pop(stack, &v) == 0)
+                break;
+            case INSTR_MUL:
                 {
-                    SDL_Log("CHAROUT: %lx", v);
-                    // TODO is printing hex instead of char
+                    signed long int a;
+                    signed long int b;
+                    if (stack_pop(stack, &a) == 0
+                            && stack_pop(stack, &b) == 0)
+                    {
+                        stack_push(stack, b * a);
+                    }
                 }
-            }
-            break;
+                break;
+            case INSTR_INTDIV:
+                {
+                    signed long int a;
+                    signed long int b;
+                    if (stack_pop(stack, &a) == 0
+                            && stack_pop(stack, &b) == 0)
+                    {
+                        stack_push(stack, b / a);
+                    }
+                }
+                break;
+            case INSTR_MOD:
+                {
+                    signed long int a;
+                    signed long int b;
+                    if (stack_pop(stack, &a) == 0
+                            && stack_pop(stack, &b) == 0)
+                    {
+                        stack_push(stack, b % a);
+                    }
+                }
+                break;
+            case INSTR_NOT:
+                {
+                    signed long int a;
+                    if (stack_pop(stack, &a) == 0)
+                    {
+                        if (a == 0)
+                        {
+                            stack_push(stack, 1);
+                        }
+                        else
+                        {
+                            stack_push(stack, 0);
+                        }
+                    }
+                }
+                break;
+            case INSTR_GT:
+                {
+                    signed long int a;
+                    signed long int b;
+                    if (stack_pop(stack, &a) == 0
+                            && stack_pop(stack, &b) == 0)
+                    {
+                        if (b > a)
+                        {
+                            stack_push(stack, 1);
+                        }
+                        else
+                        {
+                            stack_push(stack, 0);
+                        }
+                    }
+                }
+                break;
+            case INSTR_LT:
+                {
+                    signed long int a;
+                    signed long int b;
+                    if (stack_pop(stack, &a) == 0
+                            && stack_pop(stack, &b) == 0)
+                    {
+                        if (b < a)
+                        {
+                            stack_push(stack, 1);
+                        }
+                        else
+                        {
+                            stack_push(stack, 0);
+                        }
+                    }
+                }
+                break;
 
-        case INSTR_GET:
-            // TODO
-            break;
-        case INSTR_PUT:
-            // TODO
-            break;
-        case INSTR_FETCH:
-            // TODO
-            break;
-        case INSTR_STORE:
-            // TODO
-            break;
+            case INSTR_DUP:
+                {
+                    signed long int v;
+                    if (stack_pop(stack, &v) == 0)
+                    {
+                        stack_push(stack, v);
+                        stack_push(stack, v);
+                    }
+                }
+                break;
+            case INSTR_SWP:
+                {
+                    signed long int a;
+                    signed long int b;
+                    if (stack_pop(stack, &a) == 0
+                            && stack_pop(stack, &b) == 0)
+                    {
+                        stack_push(stack, a);
+                        stack_push(stack, b);
+                    }
+                }
+                break;
+            case INSTR_POP:
+                {
+                    signed long int v;
+                    stack_pop(stack, &v);
+                }
+                break;
+            case INSTR_HIF:
+                {
+                    signed long int a;
+                    if (stack_pop(stack, &a) == 0)
+                    {
+                        if (a == 0)
+                        {
+                            speed->x = +1;
+                            speed->y = 0;
+                        }
+                        else
+                        {
+                            speed->x = -1;
+                            speed->y = 0;
+                        }
+                    }
+                }
+                break;
+            case INSTR_VIF:
+                {
+                    signed long int a;
+                    if (stack_pop(stack, &a) == 0)
+                    {
+                        if (a == 0)
+                        {
+                            speed->x = 0;
+                            speed->y = +1;
+                        }
+                        else
+                        {
+                            speed->x = 0;
+                            speed->y = -1;
+                        }
+                    }
+                }
+                break;
+            case INSTR_STR:
+                intrpr->_string_mode = true;
+                break;
+            case INSTR_ITER:
+                // TODO show on screen some indicator of the action being made
+                break;
 
-        default:
-            break;
+            case INSTR_INTIN:
+                // TODO
+                break;
+            case INSTR_CHARIN:
+                // TODO
+                break;
+            case INSTR_INTOUT:
+                {
+                    signed long int v;
+                    if (stack_pop(stack, &v) == 0)
+                    {
+                        SDL_Log("INTOUT: %lu", v);
+                    }
+                }
+                break;
+            case INSTR_CHAROUT:
+                {
+                    signed long int v;
+                    if (stack_pop(stack, &v) == 0)
+                    {
+                        SDL_Log("CHAROUT: %lx", v);
+                        // TODO is printing hex instead of char
+                    }
+                }
+                break;
+
+            case INSTR_GET:
+                // TODO
+                break;
+            case INSTR_PUT:
+                // TODO
+                break;
+            case INSTR_FETCH:
+                // TODO
+                break;
+            case INSTR_STORE:
+                // TODO
+                break;
+
+            case INSTR_NULL:
+                SDL_Log("Found null instruction");
+                break;
+
+            default:
+                break;
+        }
     }
 
     ip->x += speed->x;

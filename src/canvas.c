@@ -6,9 +6,9 @@
 
 static void canvas_clear(Canvas *canvas)
 {
-    for (int i = 0; i < canvas->width * canvas->height; i++)
+    for (int i = 0; i < canvas->_width * canvas->_height; i++)
     {
-        canvas->matrix[i] = INSTR_SPACE;
+        canvas->_matrix[i] = ' ';
     }
 }
 
@@ -20,12 +20,12 @@ Canvas *canvas_create(int width, int height)
         SDL_Log("Failed to malloc Canvas\n");
         return NULL;
     }
-    canvas->width = width;
-    canvas->height = height;
-    canvas->matrix = NULL;
+    canvas->_width = width;
+    canvas->_height = height;
+    canvas->_matrix = NULL;
 
-    canvas->matrix = (int*) malloc(sizeof(int) * width * height);
-    if (canvas->matrix == NULL)
+    canvas->_matrix = (char*) malloc(sizeof(char) * width * height);
+    if (canvas->_matrix == NULL)
     {
         free(canvas);
         canvas = NULL;
@@ -41,55 +41,65 @@ void canvas_free(Canvas *canvas)
 {
     if (canvas != NULL)
     {
-        free(canvas->matrix);
-        canvas->matrix = NULL;
+        free(canvas->_matrix);
+        canvas->_matrix = NULL;
     }
     free(canvas);
     canvas = NULL;
 }
 
-enum INSTR_ID canvas_get_instr(Canvas *canvas, int x, int y)
+int canvas_get_width(Canvas *canvas)
 {
-    if (canvas->matrix == NULL)
-    {
-        SDL_Log("Tried to use NULL canvas\n");
-        return INSTR_NULL;
-    }
-    if (x >= canvas->width)
-    {
-        SDL_Log("x position %d out of canvas width %d\n", x, canvas->width);
-        return INSTR_NULL;
-    }
-    if (y >= canvas->height)
-    {
-        SDL_Log("y position %d out of canvas height %d\n", y, canvas->height);
-        return INSTR_NULL;
-    }
-
-    int memory_position = y * canvas->width + x;
-    return canvas->matrix[memory_position];
+    return canvas->_width;
 }
 
-int canvas_set_instr(Canvas *canvas, int x, int y, enum INSTR_ID id)
+int canvas_get_height(Canvas *canvas)
 {
-    if (canvas->matrix == NULL)
+    return canvas->_height;
+}
+
+int canvas_get_char(Canvas *canvas, int x, int y)
+{
+    if (canvas->_matrix == NULL)
     {
         SDL_Log("Tried to use NULL canvas\n");
-        return 1;
+        return -1;
     }
-    if (x >= canvas->width || x < 0)
+    if (x >= canvas->_width)
     {
-        SDL_Log("x position %d out of bounds", x);
-        return 1;
+        SDL_Log("x position %d out of canvas width %d\n", x, canvas->_width);
+        return -1;
     }
-    if (y >= canvas->height || y < 0)
+    if (y >= canvas->_height)
     {
-        SDL_Log("y position %d out of bounds", y);
-        return 1;
+        SDL_Log("y position %d out of canvas height %d\n", y, canvas->_height);
+        return -1;
     }
 
-    int memory_position = y * canvas->width + x;
-    canvas->matrix[memory_position] = id;
+    int memory_position = y * canvas->_width + x;
+    return (int) canvas->_matrix[memory_position];
+}
+
+int canvas_set_char(Canvas *canvas, int x, int y, char c)
+{
+    if (canvas->_matrix == NULL)
+    {
+        SDL_Log("Tried to use NULL canvas\n");
+        return -1;
+    }
+    if (x >= canvas->_width || x < 0)
+    {
+        SDL_Log("x position %d out of bounds", x);
+        return -1;
+    }
+    if (y >= canvas->_height || y < 0)
+    {
+        SDL_Log("y position %d out of bounds", y);
+        return -1;
+    }
+
+    int memory_position = y * canvas->_width + x;
+    canvas->_matrix[memory_position] = c;
     return 0;
 }
 
@@ -112,36 +122,39 @@ int canvas_save(Canvas *canvas, char *filename)
         return 1;
     }
 
-    // Malloc current line to write to file, has size canvas->width + 1 to leave
+    // Malloc current line to write to file, has size canvas->_width + 1 to leave
     // room for \0
 
     char *line = NULL;
-    line = (char*) malloc(sizeof(char) * canvas->width + 1);
+    line = (char*) malloc(sizeof(char) * canvas->_width + 1);
     if (line == NULL)
     {
         SDL_Log("Failed to malloc line when saving canvas\n");
         return 1;
     }
-    line[canvas->width] = '\0';
+    line[canvas->_width] = '\0';
 
     // Iterate over canvas and write to file, ignoring trailing spaces
 
-    for (int y = 0; y < canvas->height; y++)
+    for (int y = 0; y < canvas->_height; y++)
     {
         // Write instructions to line array
-        for (int x = 0; x < canvas->width; x++)
+        for (int x = 0; x < canvas->_width; x++)
         {
-            char c = const_befunge_char(canvas_get_instr(canvas, x, y));
-            if (c == 0)
+            int c = canvas_get_char(canvas, x, y);
+            if (c < 0)
             {
-                SDL_Log("Ignoring unknown or null character when saving to file");
-                line[x] = const_befunge_char(INSTR_SPACE);
+                SDL_Log("Error reading character when saving to file, putting space");
+                line[x] = ' ';
             }
-            line[x] = c;
+            else
+            {
+                line[x] = (char) c;
+            }
         }
         // Trim trailing spaces
         // Point to last character (excluding the last \0)
-        char *end = line + canvas->width - 1;
+        char *end = line + canvas->_width - 1;
         while (*end == ' ')
         {
             *end = '\0';
@@ -209,24 +222,16 @@ int canvas_load(Canvas *canvas, char *filename)
         }
         else
         {
-            if (x >= canvas->width)
+            if (x >= canvas->_width)
             {
                 SDL_Log("File too wide to fit on canvas");
             }
-            if (y >= canvas->height)
+            if (y >= canvas->_height)
             {
                 SDL_Log("File too tall to fit on canvas");
                 break; // File too tall
             }
-            int id = const_befunge_from_char(c);
-            if (id == INSTR_NULL)
-            {
-                SDL_Log("Ignoring NULL instruction at (%d, %d)", x, y);
-            }
-            else
-            {
-                canvas_set_instr(canvas, x, y, id);
-            }
+            canvas_set_char(canvas, x, y, c);
             x += 1;
         }
     }

@@ -1,6 +1,8 @@
 #ifndef INTRPR_H
 #define INTRPR_H
 
+#include <stdbool.h>
+
 #include "canvas.h"
 #include "stack.h"
 
@@ -27,6 +29,8 @@ typedef struct Intrpr
 
     // If running or not
     enum INTRPR_STATE _state;
+    // True if in string reading mode
+    bool _string_mode;
 
     SDL_Point _ip; // Instruction pointer position
     SDL_Point _ip_sp; // IP Speed. Next relative motion of IP, e.g. (-1, 0)

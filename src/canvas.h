@@ -3,24 +3,25 @@
 
 #include "const.h"
 
-/// Array of instructions
+/// Array of chars
 /**
  * The canvas has integer coordinates, x increases left to right and y increases
  * top to bottom.
  */
 typedef struct Canvas
 {
-    int width;
-    int height;
+    int _width;
+    int _height;
 
     /// Pointer to malloc of canvas.
     /**
-     * Consists of integers that represent values of enum INSTR_ID.
+     * Consists of chars, most normally is converted after to values of enum
+     * INSTR_ID.
      *
-     * The first integer represents (x, y) = (0, 0), the second one (1, 0), the
+     * The first char represents (x, y) = (0, 0), the second one (1, 0), the
      * third (2, 0), etc.
      */
-    int *matrix;
+    char *_matrix;
 } Canvas;
 
 /// Create canvas
@@ -36,20 +37,32 @@ Canvas *canvas_create(int width, int height);
 
 void canvas_free(Canvas *canvas);
 
-/// Get instruction on given position
-/**
- * Returns INSTR_NULL on error.
- */
-enum INSTR_ID canvas_get_instr(Canvas *canvas, int x, int y);
+int canvas_get_width(Canvas *canvas);
 
-/// Set instruction on given position
+int canvas_get_height(Canvas *canvas);
+
+/// Get character on given position
+/**
+ * Returns -1 on error. Result can be casted to char otherwise.
+ */
+int canvas_get_char(Canvas *canvas, int x, int y);
+
+/// Set character on given position
 /**
  * Returns 0 on success.
  */
-int canvas_set_instr(Canvas *canvas, int x, int y, enum INSTR_ID id);
+int canvas_set_char(Canvas *canvas, int x, int y, char c);
 
+/// Save to file
+/**
+ * Returns 0 on success.
+ */
 int canvas_save(Canvas *canvas, char *filename);
 
+/// Load from file
+/**
+ * Returns 0 on success.
+ */
 int canvas_load(Canvas *canvas, char *filename);
 
 #endif

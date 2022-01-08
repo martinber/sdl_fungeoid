@@ -85,11 +85,7 @@ void field_handle_input(Field *field, Input *input)
             // letter
             if (strlen(input->text) == 1)
             {
-                enum INSTR_ID id = const_befunge_from_char(input->text[0]);
-                if (id != INSTR_NULL)
-                {
-                    canvas_set_instr(canvas, ip.x, ip.y, id);
-                }
+                canvas_set_char(canvas, ip.x, ip.y, input->text[0]);
             }
         }
         else if (input->type == INPUT_KEY_DOWN)
@@ -109,7 +105,7 @@ void field_handle_input(Field *field, Input *input)
                     intrpr_move_ip_rel(field->_intrpr, 1, 0);
                     break;
                 case SDLK_BACKSPACE:
-                    canvas_set_instr(canvas, ip.x, ip.y, INSTR_SPACE);
+                    canvas_set_char(canvas, ip.x, ip.y, ' ');
                     break;
 
                 default:
@@ -140,10 +136,10 @@ void field_handle_keyb(Field *field, KeyboardEvent *event)
         switch (event->type)
         {
             case KEYB_EVENT_ADD_INSTR:
-                canvas_set_instr(canvas, ip.x, ip.y, event->instr_id);
+                canvas_set_char(canvas, ip.x, ip.y, const_befunge_char(event->instr_id));
                 break;
             case KEYB_EVENT_RM_INSTR:
-                canvas_set_instr(canvas, ip.x, ip.y, INSTR_SPACE);
+                canvas_set_char(canvas, ip.x, ip.y, ' ');
                 break;
 
             case KEYB_EVENT_MOVE_UP:
@@ -196,8 +192,8 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     Canvas *canvas = intrpr_get_canvas(field->_intrpr);
 
     // Total size of canvas
-    int width = canvas->width;
-    int height = canvas->height;
+    int width = canvas_get_width(canvas);
+    int height = canvas_get_height(canvas);
 
     // Offset because of scrolling
     int x_offset = (int) field->_drag->x;
@@ -225,7 +221,17 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     {
         for (int y = 0; y < height; y++)
         {
-            enum INSTR_ID id = canvas_get_instr(canvas, x, y);
+            char _c = canvas_get_char(canvas, x, y);
+            char c = ' ';
+
+            if (_c < 0) {
+                SDL_Log("Error reading canvas char when drawing");
+            } else {
+                c = (char) _c;
+            }
+
+            enum INSTR_ID id = const_befunge_from_char(c);
+
             if (id != INSTR_NULL && id != INSTR_SPACE)
             {
                 SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, id);
@@ -239,7 +245,7 @@ void field_draw(SDL_Renderer *renderer, Field *field)
 
                 // Draw ascii value
                 char str_buf[4];
-                snprintf(str_buf, 4, "%d", const_befunge_char(id));
+                snprintf(str_buf, 4, "%d", c);
                 str_buf[3] = '\0';
                 tex = juan_text_texture (
                     renderer,
