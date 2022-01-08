@@ -74,11 +74,14 @@ int res_load_all(SDL_Renderer *renderer);
  */
 void res_free_all();
 
-/// Get texture by theme and id.
+/// Get instruction texture by theme and id.
 /*
  * Returns NULL on invalid IDs, e.g. INSTR_NULL or INSTR_SPACE.
  */
 SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id);
+
+/// Get instruction texture by theme and char.
+SDL_Texture *res_get_instr_char_tex(enum INSTR_THEME theme, char c);
 
 SDL_Texture *res_get_keyb_icon_tex(enum INSTR_THEME theme, enum RES_KEYB_ICON_ID id);
 

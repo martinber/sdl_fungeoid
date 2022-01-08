@@ -230,44 +230,41 @@ void field_draw(SDL_Renderer *renderer, Field *field)
                 c = (char) _c;
             }
 
-            enum INSTR_ID id = const_befunge_from_char(c);
+            SDL_Texture* tex = res_get_instr_char_tex(INSTR_THEME_BEFUNGE_CHAR, c);
+            SDL_Rect r = {
+                x * cell_size + x_offset,
+                y * cell_size + y_offset,
+                cell_size,
+                cell_size
+            };
+            SDL_RenderCopy(renderer, tex, NULL, &r);
 
-            if (id != INSTR_NULL && id != INSTR_SPACE)
+            continue; // TODO: Optimize number drawing
+
+            // Draw ascii value
+            char str_buf[4];
+            snprintf(str_buf, 4, "%d", c);
+            str_buf[3] = '\0';
+            tex = juan_text_texture(
+                renderer,
+                res_get_font(RES_FONT_STACK),
+                str_buf,
+                COLOR_WHITE
+            );
+            if (tex == NULL)
             {
-                SDL_Texture* tex = res_get_instr_tex(INSTR_THEME_BEFUNGE_CHAR, id);
-                SDL_Rect r = {
-                    x * cell_size + x_offset,
-                    y * cell_size + y_offset,
-                    cell_size,
-                    cell_size
-                };
-                SDL_RenderCopy(renderer, tex, NULL, &r);
-
-                // Draw ascii value
-                char str_buf[4];
-                snprintf(str_buf, 4, "%d", c);
-                str_buf[3] = '\0';
-                tex = juan_text_texture (
-                    renderer,
-                    res_get_font(RES_FONT_STACK),
-                    str_buf,
-                    COLOR_WHITE
-                );
-                if (tex == NULL)
-                {
-                    SDL_Log("Error rendering text for stack value: %d", const_befunge_char(id));
-                    return;
-                }
-                SDL_Rect rect;
-                SDL_QueryTexture(tex, NULL, NULL, &rect.w, &rect.h);
-                rect.x = x * cell_size + x_offset;
-                rect.y = y * cell_size + y_offset;
-                double factor = (cell_size / 2) / (float) rect.h;
-                rect.h *= factor;
-                rect.w *= factor;
-                SDL_RenderCopy(renderer, tex, NULL, &rect);
-                SDL_DestroyTexture(tex);
+                SDL_Log("Error rendering text for canvas value: %d", c);
+                return;
             }
+            SDL_Rect rect;
+            SDL_QueryTexture(tex, NULL, NULL, &rect.w, &rect.h);
+            rect.x = x * cell_size + x_offset;
+            rect.y = y * cell_size + y_offset;
+            double factor = (cell_size / 2) / (float) rect.h;
+            rect.h *= factor;
+            rect.w *= factor;
+            SDL_RenderCopy(renderer, tex, NULL, &rect);
+            SDL_DestroyTexture(tex);
         }
     }
 

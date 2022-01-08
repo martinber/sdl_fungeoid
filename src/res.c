@@ -6,11 +6,8 @@ static TTF_Font* font_128 = NULL;
 static TTF_Font* font_90 = NULL;
 static TTF_Font* font_32 = NULL;
 
-/// Array of textures for every instruction for the current theme and the current resolution
-/**
- * Pointers for INSTR_NULL and INSTR_SPACE should be NULL
- */
-static SDL_Texture *INSTR_TEXTURES[INSTR_ID_TOTAL] = { NULL };
+/// Array of textures for every char until c=127
+static SDL_Texture *CHAR_TEXTURES[128] = { NULL };
 
 /// Array of textures for every keyboard icon for the current theme and the current resolution
 static SDL_Texture *KEYB_ICON_TEXTURES[RES_KEYB_ICON_ID_TOTAL] = { NULL };
@@ -51,7 +48,7 @@ static SDL_Texture *tex_from_centered_text(
         return NULL;
     }
 
-    SDL_Surface* text_surface = TTF_RenderText_Blended(font, text, color);
+    SDL_Surface* text_surface = TTF_RenderUTF8_Blended(font, text, color);
     if (text_surface == NULL)
     {
         SDL_FreeSurface(surface);
@@ -94,7 +91,51 @@ static SDL_Texture *instr_tex_from_char(
     char character,
     SDL_Color color
 ) {
-    char text[2] = { character, '\0' };
+    // The text will be simly the character if printable, or caret notation
+    // which consists of two characters
+    char text[3] = { '\0', '\0', '\0' };
+    switch (character)
+    {
+        case 0:  strcpy(text, "^@"); break;
+        case 1:  strcpy(text, "^A"); break;
+        case 2:  strcpy(text, "^B"); break;
+        case 3:  strcpy(text, "^C"); break;
+        case 4:  strcpy(text, "^D"); break;
+        case 5:  strcpy(text, "^E"); break;
+        case 6:  strcpy(text, "^F"); break;
+        case 7:  strcpy(text, "^G"); break;
+        case 8:  strcpy(text, "^H"); break;
+        case 9:  strcpy(text, "^I"); break;
+        case 10: strcpy(text, "^J"); break;
+        case 11: strcpy(text, "^K"); break;
+        case 12: strcpy(text, "^L"); break;
+        case 13: strcpy(text, "^M"); break;
+        case 14: strcpy(text, "^N"); break;
+        case 15: strcpy(text, "^O"); break;
+        case 16: strcpy(text, "^P"); break;
+        case 17: strcpy(text, "^Q"); break;
+        case 18: strcpy(text, "^R"); break;
+        case 19: strcpy(text, "^S"); break;
+        case 20: strcpy(text, "^T"); break;
+        case 21: strcpy(text, "^U"); break;
+        case 22: strcpy(text, "^V"); break;
+        case 23: strcpy(text, "^W"); break;
+        case 24: strcpy(text, "^X"); break;
+        case 25: strcpy(text, "^Y"); break;
+        case 26: strcpy(text, "^Z"); break;
+        case 27: strcpy(text, "^["); break;
+        case 28: strcpy(text, "^\\"); break;
+        case 29: strcpy(text, "^]"); break;
+        case 30: strcpy(text, "^^"); break;
+        case 31: strcpy(text, "^_"); break;
+        case 127: strcpy(text, "^?"); break;
+
+        default:
+            text[0] = character;
+            break;
+
+    }
+
     return tex_from_centered_text(renderer, font,
             INSTR_TEXTURES_RES, INSTR_TEXTURES_RES, text, color);
 }
@@ -117,20 +158,16 @@ int res_load_all(SDL_Renderer *renderer)
         return 1;
     }
 
-    // Load every instruction texture from characters
+    // Load every instruction texture for characters
 
-    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+    for (unsigned char c = 0; c < 128; c++) // Until 128, where ASCII ends
     {
-        if (i != INSTR_NULL && i != INSTR_SPACE)
+        CHAR_TEXTURES[c] = instr_tex_from_char(renderer, font_128, (char) c, COLOR_WHITE);
+        if (CHAR_TEXTURES[c] == NULL)
         {
-            INSTR_TEXTURES[i] = instr_tex_from_char(
-                    renderer, font_128, const_befunge_char(i), COLOR_WHITE);
-            if (INSTR_TEXTURES[i] == NULL)
-            {
-                SDL_Log("Error creating instruction texture for ID %d\n", i);
-                res_free_all();
-                return 1;
-            }
+            SDL_Log("Error creating instruction texture for char %d\n", c);
+            res_free_all();
+            return 1;
         }
     }
 
@@ -322,12 +359,12 @@ void res_free_all()
     //SDL_DestroyTexture(RES_TEXTURES[RES_TEX_BALL]);
     //RES_TEXTURES[RES_TEX_BALL] = NULL;
 
-    for (enum INSTR_ID i = 0; i < INSTR_ID_TOTAL; i++)
+    for (int i = 0; i < 128; i++)
     {
-        if (INSTR_TEXTURES[i] != NULL)
+        if (CHAR_TEXTURES[i] != NULL)
         {
-            SDL_DestroyTexture(INSTR_TEXTURES[i]);
-            INSTR_TEXTURES[i] = NULL;
+            SDL_DestroyTexture(CHAR_TEXTURES[i]);
+            CHAR_TEXTURES[i] = NULL;
         }
     }
 
@@ -364,11 +401,18 @@ void res_free_all()
 SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id)
 {
     UNUSED(theme);
-    if (id == INSTR_NULL || id == INSTR_SPACE) {
+    char c = const_befunge_char(id);
+    if (c == 0) {
         SDL_Log("Tried to get instruction texture of ID %d\n", id);
         return NULL;
     }
-    return INSTR_TEXTURES[id];
+    return CHAR_TEXTURES[(unsigned char)c];
+}
+
+SDL_Texture *res_get_instr_char_tex(enum INSTR_THEME theme, char c)
+{
+    UNUSED(theme);
+    return CHAR_TEXTURES[(unsigned char)c];
 }
 
 SDL_Texture *res_get_keyb_icon_tex(enum INSTR_THEME theme, enum RES_KEYB_ICON_ID id)
