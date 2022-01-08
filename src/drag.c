@@ -17,9 +17,9 @@ DragState *drag_create()
     drag->vx = 0;
     drag->vy = 0;
 
-    drag->friction = 0.1;
+    drag->friction = 0.05;
     drag->input_accel = 0.2;
-    drag->snap_accel = 0.005;
+    drag->snap_accel = 0.001;
 
     drag->last_update_time = 0;
     drag->last_input_time = 0;

@@ -217,6 +217,20 @@ env PATH="/home/mbernardi/extra/async/android/platform-tools/:$PATH" ANDROID_HOM
 
 If it gives license errors, maybe the `ANDROID_HOME` is wrong.
 
+It gave me an error about mising `platform` folder in `ndk`. I installed an
+older version according to
+[this](https://stackoverflow.com/questions/46741528/ndk-is-missing-a-platforms-directory-while-trying-to-build):
+
+```
+env JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" /home/mbernardi/extra/async/android/sdk/cmdline-tools/latest/bin/sdkmanager --install "ndk;20.0.5594570"
+```
+
+And in this case compile with:
+
+```
+env ANDROID_HOME="/home/mbernardi/extra/async/android/sdk/" ANDROID_NDK_HOME="/home/mbernardi/extra/async/android/sdk/ndk/20.0.5594570/" JAVA_HOME="/home/mbernardi/extra/async/android/jdk1.8.0_301/" ./gradlew installDebug
+```
+
 ## Acknowledgments
 
 Font:
