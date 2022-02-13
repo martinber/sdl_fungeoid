@@ -337,6 +337,62 @@ int res_load_all(SDL_Renderer *renderer)
                         "res/keyb_icons/arrow_up.png");
                 break;
 
+            case RES_KEYB_ICON_CHAR_GET:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "get", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_CHAR_PUT:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
+                        INSTR_TEXTURES_RES,
+                        "put", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_CHAR_ADD_1:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES,
+                        INSTR_TEXTURES_RES,
+                        "+1", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_CHAR_SUB_1:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES,
+                        INSTR_TEXTURES_RES,
+                        "-1", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_CHAR_ADD_10:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES,
+                        INSTR_TEXTURES_RES,
+                        "+10", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_CHAR_SUB_10:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES,
+                        INSTR_TEXTURES_RES,
+                        "-10", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_CHAR_ADD_16:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES,
+                        INSTR_TEXTURES_RES,
+                        "+16", COLOR_WHITE);
+                break;
+
+            case RES_KEYB_ICON_CHAR_SUB_16:
+                KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
+                        INSTR_TEXTURES_RES,
+                        INSTR_TEXTURES_RES,
+                        "-16", COLOR_WHITE);
+                break;
+
             default:
                 SDL_Log("Tried to load unknown keyb_icon texture ID %d\n", i);
                 res_free_all();

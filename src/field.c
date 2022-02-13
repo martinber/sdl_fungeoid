@@ -77,6 +77,15 @@ void field_handle_input(Field *field, Input *input)
     Canvas *canvas = intrpr_get_canvas(field->_intrpr);
     SDL_Point ip = intrpr_get_ip(field->_intrpr);
 
+    if (input->type == INPUT_CLICK_MOVE)
+    {
+        drag_move(field->_drag, input->point, input->timestamp);
+    }
+    else if (input->type == INPUT_CLICK_MOVE_UP)
+    {
+        drag_up(field->_drag);
+    }
+
     if (intrpr_get_state(field->_intrpr) == INTRPR_PAUSED)
     {
         if (input->type == INPUT_CLICK_UP)
@@ -85,14 +94,6 @@ void field_handle_input(Field *field, Input *input)
                     (input->point.x + x_offset) / field->_cell_size,
                     (input->point.y + y_offset) / field->_cell_size
                 );
-        }
-        else if (input->type == INPUT_CLICK_MOVE)
-        {
-            drag_move(field->_drag, input->point, input->timestamp);
-        }
-        else if (input->type == INPUT_CLICK_MOVE_UP)
-        {
-            drag_up(field->_drag);
         }
         else if (input->type == INPUT_TEXT)
         {

@@ -64,6 +64,19 @@ enum KEYB_MISC_BUTTON_ID
     KEYB_MISC_BUTTON_ID_TOTAL,
 };
 
+enum KEYB_CHAR_BUTTON_ID
+{
+    KEYB_CHAR_GET,
+    KEYB_CHAR_PUT,
+    KEYB_CHAR_ADD_1,
+    KEYB_CHAR_SUB_1,
+    KEYB_CHAR_ADD_10,
+    KEYB_CHAR_SUB_10,
+    KEYB_CHAR_ADD_16,
+    KEYB_CHAR_SUB_16,
+    KEYB_CHAR_BUTTON_ID_TOTAL,
+};
+
 // IMPORTANT: Keep in sync with res.c:RES_KEYB_TAB_ID
 enum KEYB_TAB_ID
 {
@@ -99,6 +112,7 @@ typedef struct Keyboard
     Button oper_buttons[KEYB_OPER_BUTTONS_TOTAL];
     Button run_buttons[KEYB_RUN_BUTTON_ID_TOTAL];
     Button misc_buttons[KEYB_MISC_BUTTON_ID_TOTAL];
+    Button char_buttons[KEYB_CHAR_BUTTON_ID_TOTAL];
 
     // Remaining buttons available on most tabs
     Button arrow_buttons[KEYB_ARROW_BUTTON_ID_TOTAL];

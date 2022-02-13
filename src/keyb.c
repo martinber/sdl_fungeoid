@@ -84,6 +84,10 @@ Keyboard *keyb_create(SDL_Point window_size)
     {
         button_init(&keyb->misc_buttons[i], BUTTON_KEYB_INSTR, i);
     }
+    for (int i = 0; i < KEYB_CHAR_BUTTON_ID_TOTAL; i++)
+    {
+        button_init(&keyb->char_buttons[i], BUTTON_KEYB_INSTR, i);
+    }
     for (int i = 0; i < KEYB_ARROW_BUTTON_ID_TOTAL; i++)
     {
         button_init(&keyb->arrow_buttons[i], BUTTON_KEYB_ARROW, i);
@@ -235,7 +239,7 @@ static void update_buttons(Keyboard *keyb)
                 origin_x, origin_y, 3, 0);
     }
 
-    // Buttons
+    // MOVIO buttons
     for (int i = 0; i < KEYB_MOVIO_BUTTONS_TOTAL; i++)
     {
         int origin_x = keyb_x + spacing;
@@ -253,6 +257,7 @@ static void update_buttons(Keyboard *keyb)
                     origin_x, origin_y, i - 8, 1);
         }
     }
+    // OPER buttons
     for (int i = 0; i < KEYB_OPER_BUTTONS_TOTAL; i++)
     {
         int origin_x = keyb_x + spacing;
@@ -270,7 +275,7 @@ static void update_buttons(Keyboard *keyb)
                     origin_x, origin_y, i - 7, 1);
         }
     }
-    for (int i = 0; i < KEYB_VALUES_BUTTONS_TOTAL; i++)
+    // VALUES buttons
     {
         int origin_x = keyb_x + margin + button_size + spacing * 2;
         int origin_y = keyb_y + spacing;
@@ -323,7 +328,8 @@ static void update_buttons(Keyboard *keyb)
                 button_size, button_size, spacing,
                 origin_x, origin_y, 5, 1);
     }
-    for (int i = 0; i < KEYB_RUN_BUTTON_ID_TOTAL; i++)
+
+    // RUN buttons
     {
         int origin_x = keyb_x + spacing;
         int origin_y = keyb_y + spacing;
@@ -346,7 +352,8 @@ static void update_buttons(Keyboard *keyb)
                 button_size, button_size, spacing,
                 origin_x, origin_y, 2, 1); // 4 because previous buttons are larger
     }
-    for (int i = 0; i < KEYB_MISC_BUTTON_ID_TOTAL; i++)
+
+    // MISC buttons
     {
         int origin_x = keyb_x + spacing;
         int origin_y = keyb_y + spacing;
@@ -377,6 +384,36 @@ static void update_buttons(Keyboard *keyb)
         grid_position(&keyb->misc_buttons[KEYB_MISC_ZOOM_OUT].geometry,
                 button_size, button_size, spacing,
                 origin_x, origin_y, 5, 1); // 5 because previous buttons are larger
+    }
+    // Char buttons
+    {
+        int origin_x = keyb_x + spacing;
+        int origin_y = keyb_y + spacing;
+        grid_position(&keyb->char_buttons[KEYB_CHAR_GET].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 3, 0);
+        grid_position(&keyb->char_buttons[KEYB_CHAR_PUT].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 3, 1);
+
+        grid_position(&keyb->char_buttons[KEYB_CHAR_ADD_1].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 0, 0);
+        grid_position(&keyb->char_buttons[KEYB_CHAR_SUB_1].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 0, 1);
+        grid_position(&keyb->char_buttons[KEYB_CHAR_ADD_10].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 1, 0);
+        grid_position(&keyb->char_buttons[KEYB_CHAR_SUB_10].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 1, 1);
+        grid_position(&keyb->char_buttons[KEYB_CHAR_ADD_16].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 2, 0);
+        grid_position(&keyb->char_buttons[KEYB_CHAR_SUB_16].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 2, 1);
     }
 }
 
@@ -652,6 +689,38 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             break;
 
         case KEYB_TAB_CHAR:
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_GET].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_GET),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_GET].geometry);
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_PUT].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_PUT),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_PUT].geometry);
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_ADD_1].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_ADD_1),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_ADD_1].geometry);
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_SUB_1].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_SUB_1),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_SUB_1].geometry);
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_ADD_10].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_ADD_10),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_ADD_10].geometry);
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_SUB_10].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_SUB_10),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_SUB_10].geometry);
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_ADD_16].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_ADD_16),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_ADD_16].geometry);
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_SUB_16].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_SUB_16),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_SUB_16].geometry);
             break;
 
         default:
