@@ -210,8 +210,7 @@ void intrpr_step(Intrpr *intrpr)
                 speed->y = 0;
                 break;
             case INSTR_BRIDGE:
-                ip->x += speed->x;
-                ip->y += speed->y;
+                intrpr_move_ip_rel(intrpr, speed->x, speed->y);
                 break;
             case INSTR_RND:
                 // Number between 0 and 3, not perfectry uniform but almost
@@ -474,8 +473,7 @@ void intrpr_step(Intrpr *intrpr)
                 break;
             case INSTR_FETCH:
                 {
-                    ip->x += speed->x;
-                    ip->y += speed->y;
+                    intrpr_move_ip_rel(intrpr, speed->x, speed->y);
                     char c = canvas_get_char(intrpr->_canvas, ip->x, ip->y);
                     if (c >= 0) {
                         stack_push(stack, (signed long int) c);
@@ -484,8 +482,7 @@ void intrpr_step(Intrpr *intrpr)
                 break;
             case INSTR_STORE:
                 {
-                    ip->x += speed->x;
-                    ip->y += speed->y;
+                    intrpr_move_ip_rel(intrpr, speed->x, speed->y);
                     signed long int v;
                     if (stack_pop(stack, &v) == 0)
                     {
@@ -503,8 +500,7 @@ void intrpr_step(Intrpr *intrpr)
         }
     }
 
-    ip->x += speed->x;
-    ip->y += speed->y;
+    intrpr_move_ip_rel(intrpr, speed->x, speed->y);
 }
 
 void intrpr_update(Intrpr *intrpr, Uint32 time_abs_ms)
