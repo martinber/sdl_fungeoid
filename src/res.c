@@ -149,8 +149,8 @@ int res_load_all(SDL_Renderer *renderer)
         return 1;
     }
     */
-    font_128 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 128);
-    font_90 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 90);
+    font_128 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 110);
+    font_90 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 76);
     font_32 = juan_load_font("res/inconsolata/Inconsolata-Bold.ttf", 32);
     if (font_128 == NULL || font_90 == NULL || font_32 == NULL)
     {
@@ -174,7 +174,7 @@ int res_load_all(SDL_Renderer *renderer)
     // Load every tab texture from characters
     char *tab_text[RES_KEYB_TAB_ID_TOTAL] =
     {
-        "run", "123", "<>io", "+*/", "misc", "char",
+        "run", "misc", "123", "<>io", "+*/", "char",
     };
 
     for (enum RES_KEYB_TAB_ID i = 0; i < RES_KEYB_TAB_ID_TOTAL; i++)
@@ -298,7 +298,7 @@ int res_load_all(SDL_Renderer *renderer)
                 KEYB_ICON_TEXTURES[i] = tex_from_centered_text(renderer, font_90,
                         INSTR_TEXTURES_RES * 2 + INSTR_TEXTURES_RES / 8,
                         INSTR_TEXTURES_RES,
-                        "save as", COLOR_WHITE);
+                        "saveas", COLOR_WHITE);
                 break;
 
             case RES_KEYB_ICON_T_HELP:

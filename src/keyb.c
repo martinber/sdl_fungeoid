@@ -330,21 +330,21 @@ static void update_buttons(Keyboard *keyb)
         grid_position(&keyb->run_buttons[KEYB_RUN_START].geometry,
                 button_size * 2 + spacing, button_size, spacing,
                 origin_x, origin_y, 0, 0);
-        grid_position(&keyb->run_buttons[KEYB_RUN_STOP].geometry,
-                button_size * 2 + spacing, button_size, spacing,
-                origin_x, origin_y, 0, 1);
-        grid_position(&keyb->run_buttons[KEYB_RUN_STEP].geometry,
-                button_size * 2 + spacing, button_size, spacing,
-                origin_x, origin_y, 1, 0);
         grid_position(&keyb->run_buttons[KEYB_RUN_RESUME].geometry,
                 button_size * 2 + spacing, button_size, spacing,
-                origin_x, origin_y, 1, 1);
+                origin_x, origin_y, 0, 1);
+        grid_position(&keyb->run_buttons[KEYB_RUN_STOP].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 0, 2);
+        grid_position(&keyb->run_buttons[KEYB_RUN_STEP].geometry,
+                button_size * 2 + spacing, button_size, spacing,
+                origin_x, origin_y, 0, 3);
         grid_position(&keyb->run_buttons[KEYB_RUN_FASTER].geometry,
                 button_size, button_size, spacing,
-                origin_x, origin_y, 4, 0); // 4 because previous buttons are larger
+                origin_x, origin_y, 2, 0); // 4 because previous buttons are larger
         grid_position(&keyb->run_buttons[KEYB_RUN_SLOWER].geometry,
                 button_size, button_size, spacing,
-                origin_x, origin_y, 4, 1); // 4 because previous buttons are larger
+                origin_x, origin_y, 2, 1); // 4 because previous buttons are larger
     }
     for (int i = 0; i < KEYB_MISC_BUTTON_ID_TOTAL; i++)
     {
@@ -363,10 +363,10 @@ static void update_buttons(Keyboard *keyb)
                 button_size * 2 + spacing, button_size, spacing,
                 origin_x, origin_y, 1, 1);
         grid_position(&keyb->misc_buttons[KEYB_MISC_T_HELP].geometry,
-                button_size * 4 + spacing, button_size, spacing,
+                button_size * 4 + spacing * 3, button_size, spacing,
                 origin_x, origin_y, 0, 2);
         grid_position(&keyb->misc_buttons[KEYB_MISC_T_VALUES].geometry,
-                button_size * 4 + spacing, button_size, spacing,
+                button_size * 4 + spacing * 3, button_size, spacing,
                 origin_x, origin_y, 0, 3);
         grid_position(&keyb->misc_buttons[KEYB_MISC_QUIT].geometry,
                 button_size * 2 + spacing, button_size, spacing,
@@ -465,7 +465,7 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
 
     // Draw arrows
 
-    if (keyb->active_tab != KEYB_TAB_MISC)
+    if (keyb->active_tab != KEYB_TAB_MISC && keyb->active_tab != KEYB_TAB_RUN)
     {
         SDL_Texture* tex = NULL;
         juan_set_render_draw_color(renderer, &COLOR_BUTTON_1);
@@ -490,7 +490,7 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
 
     // Draw shift and special buttons
 
-    if (keyb->active_tab != KEYB_TAB_MISC)
+    if (keyb->active_tab != KEYB_TAB_MISC && keyb->active_tab != KEYB_TAB_RUN)
     {
         juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
 
@@ -770,7 +770,7 @@ KeyboardEvent keyb_handle_input
 
         // Check action buttons
 
-        if (keyb->active_tab != KEYB_TAB_MISC)
+        if (keyb->active_tab != KEYB_TAB_MISC && keyb->active_tab != KEYB_TAB_RUN)
         {
             pressed = get_button_on_point(&input->point,
                     keyb->action_buttons, 2);

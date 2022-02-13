@@ -133,6 +133,7 @@ void intrpr_step(Intrpr *intrpr)
     SDL_Point *speed = &(intrpr->_ip_sp);
     Stack *stack = intrpr->_stack;
 
+    // Handle better, chars can be negative
     char _c = canvas_get_char(intrpr->_canvas, ip->x, ip->y);
     char c = ' ';
 
@@ -427,16 +428,52 @@ void intrpr_step(Intrpr *intrpr)
                 break;
 
             case INSTR_GET:
-                // TODO
+                {
+                    signed long int y;
+                    signed long int x;
+                    if (stack_pop(stack, &y) == 0
+                            && stack_pop(stack, &x) == 0)
+                    {
+                        char c = canvas_get_char(intrpr->_canvas, x, y);
+                        if (c >= 0) {
+                            stack_push(stack, (signed long int) c);
+                        }
+                    }
+                }
                 break;
             case INSTR_PUT:
-                // TODO
+                {
+                    signed long int y;
+                    signed long int x;
+                    signed long int v;
+                    if (stack_pop(stack, &y) == 0
+                            && stack_pop(stack, &x) == 0
+                            && stack_pop(stack, &v) == 0)
+                    {
+                        canvas_set_char(intrpr->_canvas, x, y, (char) v);
+                    }
+                }
                 break;
             case INSTR_FETCH:
-                // TODO
+                {
+                    ip->x += speed->x;
+                    ip->y += speed->y;
+                    char c = canvas_get_char(intrpr->_canvas, ip->x, ip->y);
+                    if (c >= 0) {
+                        stack_push(stack, (signed long int) c);
+                    }
+                }
                 break;
             case INSTR_STORE:
-                // TODO
+                {
+                    ip->x += speed->x;
+                    ip->y += speed->y;
+                    signed long int v;
+                    if (stack_pop(stack, &v) == 0)
+                    {
+                        canvas_set_char(intrpr->_canvas, ip->x, ip->y, (char) v);
+                    }
+                }
                 break;
 
             case INSTR_NULL:
