@@ -77,12 +77,30 @@ void intrpr_move_ip(Intrpr* intrpr, int x, int y)
 {
     intrpr->_ip.x = x;
     intrpr->_ip.y = y;
+
+    intrpr->_ip.x = juan_max(0, intrpr->_ip.x);
+    intrpr->_ip.x = juan_min(canvas_get_width(intrpr->_canvas) - 1, intrpr->_ip.x);
+    intrpr->_ip.y = juan_max(0, intrpr->_ip.y);
+    intrpr->_ip.y = juan_min(canvas_get_height(intrpr->_canvas) - 1, intrpr->_ip.y);
 }
 
 void intrpr_move_ip_rel(Intrpr* intrpr, int x, int y)
 {
     intrpr->_ip.x += x;
     intrpr->_ip.y += y;
+
+    if (intrpr->_ip.x < 0) {
+        intrpr->_ip.x = canvas_get_width(intrpr->_canvas) - 1;
+    }
+    if (intrpr->_ip.x > canvas_get_width(intrpr->_canvas) - 1) {
+        intrpr->_ip.x = 0;
+    }
+    if (intrpr->_ip.y < 0) {
+        intrpr->_ip.y = canvas_get_height(intrpr->_canvas) - 1;
+    }
+    if (intrpr->_ip.y > canvas_get_height(intrpr->_canvas) - 1) {
+        intrpr->_ip.y = 0;
+    }
 }
 
 enum INTRPR_STATE intrpr_get_state(Intrpr* intrpr)

@@ -54,8 +54,10 @@ void field_update_geometry(Field *field, SDL_Point window_size)
 
     drag_set_snapping(field->_drag, (float) field->_cell_size, (float) field->_cell_size);
     drag_set_limits(field->_drag,
-            - (canvas_get_width(canvas) - 1) * (float) field->_cell_size, 0,
-            - (canvas_get_height(canvas) - 1) * (float) field->_cell_size, 0
+            - (canvas_get_width(canvas) - 1) * (float) field->_cell_size,
+            (float) field->_cell_size,
+            - (canvas_get_height(canvas) - 1) * (float) field->_cell_size,
+            (float) field->_cell_size
         );
 }
 
@@ -66,9 +68,11 @@ void field_update(Field *field, Uint32 time_abs_ms)
 
 void field_handle_input(Field *field, Input *input)
 {
-    // Offset because of scrolling
-    int x_offset = (int) field->_drag->x;
-    int y_offset = (int) field->_drag->y;
+    // Offset because of scrolling. The drag coordinates are always negative
+    // because it represents the position of the field respect to screen, but
+    // makes more sense to think the offsets as positive in this function.
+    int x_offset = (int) -field->_drag->x;
+    int y_offset = (int) -field->_drag->y;
 
     Canvas *canvas = intrpr_get_canvas(field->_intrpr);
     SDL_Point ip = intrpr_get_ip(field->_intrpr);
@@ -78,8 +82,8 @@ void field_handle_input(Field *field, Input *input)
         if (input->type == INPUT_CLICK_UP)
         {
             intrpr_move_ip(field->_intrpr,
-                    (input->point.x - x_offset) / field->_cell_size,
-                    (input->point.y - y_offset) / field->_cell_size
+                    (input->point.x + x_offset) / field->_cell_size,
+                    (input->point.y + y_offset) / field->_cell_size
                 );
         }
         else if (input->type == INPUT_CLICK_MOVE)
@@ -219,9 +223,11 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     int window_width = field->_window_size.x;
     int window_height = field->_window_size.y;
 
-    // Offset because of scrolling
-    int x_offset = (int) field->_drag->x;
-    int y_offset = (int) field->_drag->y;
+    // Offset because of scrolling. The drag coordinates are always negative
+    // because it represents the position of the field respect to screen, but
+    // makes more sense to think the offsets as positive in this function.
+    int x_offset = (int) -field->_drag->x;
+    int y_offset = (int) -field->_drag->y;
 
     // TODO: draw only things on screen
 
@@ -234,9 +240,9 @@ void field_draw(SDL_Renderer *renderer, Field *field)
         // Vertical lines
         for (int x = 0; x < width + 1; x++)
         {
-            int line_x = x * cell_size + x_offset;
-            int line_y = juan_max(0, y_offset);
-            int line_length = juan_min(window_height, height * cell_size + y_offset);
+            int line_x = x * cell_size - x_offset;
+            int line_y = juan_max(0, -y_offset);
+            int line_length = juan_min(window_height, height * cell_size - y_offset);
             if (0 < line_x && line_x < window_width)
             {
                 juan_draw_v_line_cap(renderer, line_x, line_y, line_length, line_width);
@@ -245,9 +251,9 @@ void field_draw(SDL_Renderer *renderer, Field *field)
         // Horizontal lines
         for (int y = 0; y < height + 1; y++)
         {
-            int line_y = y * cell_size + y_offset;
-            int line_x = juan_max(0, x_offset);
-            int line_length = juan_min(window_width, width * cell_size + x_offset);
+            int line_y = y * cell_size - y_offset;
+            int line_x = juan_max(0, -x_offset);
+            int line_length = juan_min(window_width, width * cell_size - x_offset);
             if (0 < line_y && line_y < window_height)
             {
                 juan_draw_h_line_cap(renderer, line_x, line_y, line_length, line_width);
@@ -255,10 +261,16 @@ void field_draw(SDL_Renderer *renderer, Field *field)
         }
     }
 
-    // Draw instructions
-    for (int x = 0; x < width; x++)
+    // Draw instructions, but first check the start and end x and y to use to
+    // avoid drawing out of screen
+
+    int start_x = juan_max(0, x_offset / cell_size);
+    int end_x = juan_min(width - 1, (x_offset + window_width) / cell_size);
+    int start_y = juan_max(0, y_offset / cell_size);
+    int end_y = juan_min(height - 1, (y_offset + window_height) / cell_size);
+    for (int x = start_x; x <= end_x; x++)
     {
-        for (int y = 0; y < height; y++)
+        for (int y = start_y; y <= end_y; y++)
         {
             char _c = canvas_get_char(canvas, x, y);
             char c = ' ';
@@ -271,16 +283,17 @@ void field_draw(SDL_Renderer *renderer, Field *field)
 
             SDL_Texture* tex = res_get_instr_char_tex(INSTR_THEME_BEFUNGE_CHAR, c);
             SDL_Rect r = {
-                x * cell_size + x_offset,
-                y * cell_size + y_offset,
+                x * cell_size - x_offset,
+                y * cell_size - y_offset,
                 cell_size,
                 cell_size
             };
             SDL_RenderCopy(renderer, tex, NULL, &r);
 
-            continue; // TODO: Optimize number drawing
+            // TODO: Optimize and draw ASCII numbers
 
             // Draw ascii value
+            /*
             char str_buf[4];
             snprintf(str_buf, 4, "%d", c);
             str_buf[3] = '\0';
@@ -297,13 +310,14 @@ void field_draw(SDL_Renderer *renderer, Field *field)
             }
             SDL_Rect rect;
             SDL_QueryTexture(tex, NULL, NULL, &rect.w, &rect.h);
-            rect.x = x * cell_size + x_offset;
-            rect.y = y * cell_size + y_offset;
+            rect.x = x * cell_size - x_offset;
+            rect.y = y * cell_size - y_offset;
             double factor = (cell_size / 2) / (float) rect.h;
             rect.h *= factor;
             rect.w *= factor;
             SDL_RenderCopy(renderer, tex, NULL, &rect);
             SDL_DestroyTexture(tex);
+            */
         }
     }
 
@@ -315,47 +329,47 @@ void field_draw(SDL_Renderer *renderer, Field *field)
 
     juan_set_render_draw_color(renderer, &COLOR_SELECT_1);
     juan_draw_h_line_cap(renderer,
-            ip.x * cell_size + x_offset,
-            ip.y * cell_size + y_offset,
+            ip.x * cell_size - x_offset,
+            ip.y * cell_size - y_offset,
             cell_size, ip_width);
     juan_draw_h_line_cap(renderer,
-            ip.x * cell_size + x_offset,
-            (ip.y + 1) * cell_size + y_offset,
+            ip.x * cell_size - x_offset,
+            (ip.y + 1) * cell_size - y_offset,
             cell_size, ip_width);
     juan_draw_v_line_cap(renderer,
-            ip.x * cell_size + x_offset,
-            ip.y * cell_size + y_offset,
+            ip.x * cell_size - x_offset,
+            ip.y * cell_size - y_offset,
             cell_size, ip_width);
     juan_draw_v_line_cap(renderer,
-            (ip.x + 1) * cell_size + x_offset,
-            ip.y * cell_size + y_offset,
+            (ip.x + 1) * cell_size - x_offset,
+            ip.y * cell_size - y_offset,
             cell_size, ip_width);
     if (ip_speed.x == 1)
     {
         juan_draw_v_line_cap(renderer,
-                ip.x * cell_size + x_offset + ip_width,
-                ip.y * cell_size + y_offset,
+                ip.x * cell_size - x_offset + ip_width,
+                ip.y * cell_size - y_offset,
                 cell_size, ip_width);
     }
     else if (ip_speed.x == -1)
     {
         juan_draw_v_line_cap(renderer,
-                (ip.x + 1) * cell_size + x_offset - ip_width,
-                ip.y * cell_size + y_offset,
+                (ip.x + 1) * cell_size - x_offset - ip_width,
+                ip.y * cell_size - y_offset,
                 cell_size, ip_width);
     }
     else if (ip_speed.y == 1)
     {
         juan_draw_h_line_cap(renderer,
-                ip.x * cell_size + x_offset,
-                ip.y * cell_size + y_offset + ip_width,
+                ip.x * cell_size - x_offset,
+                ip.y * cell_size - y_offset + ip_width,
                 cell_size, ip_width);
     }
     else if (ip_speed.y == -1)
     {
         juan_draw_h_line_cap(renderer,
-                ip.x * cell_size + x_offset,
-                (ip.y + 1) * cell_size + y_offset - ip_width,
+                ip.x * cell_size - x_offset,
+                (ip.y + 1) * cell_size - y_offset - ip_width,
                 cell_size, ip_width);
     }
 }
