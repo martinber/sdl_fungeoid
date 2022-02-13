@@ -8,12 +8,15 @@
 #include "res.h"
 #include "drag.h"
 
+#define FIELD_ZOOM_LEVEL_MAX 6
+
 /// Draws the field/canvas and handles user input to control the intrpr and edit
 /// code.
 typedef struct Field
 {
     SDL_Point _window_size;
     int _cell_size;
+    int _zoom_level; // From 1 to FIELD_ZOOM_LEVEL_MAX
 
     DragState *_drag;
     Intrpr *_intrpr; // A reference, owned by Game

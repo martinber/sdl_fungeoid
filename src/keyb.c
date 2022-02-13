@@ -915,6 +915,16 @@ KeyboardEvent keyb_handle_input
                         event.type = KEYB_EVENT_SAVE_AS;
                         return event;
                         break;
+
+                    case KEYB_MISC_ZOOM_IN:
+                        event.type = KEYB_EVENT_ZOOM_IN;
+                        return event;
+                        break;
+
+                    case KEYB_MISC_ZOOM_OUT:
+                        event.type = KEYB_EVENT_ZOOM_OUT;
+                        return event;
+                        break;
                 }
 
             case KEYB_TAB_CHAR:

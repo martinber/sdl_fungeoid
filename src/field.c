@@ -11,6 +11,7 @@ Field *field_create(SDL_Point window_size, Intrpr *intrpr)
 
     field->_intrpr = intrpr; // A reference, owned by Game
     field->_drag = drag_create();
+    field->_zoom_level = 3;
     if (field->_drag == NULL)
     {
         drag_free(field->_drag);
@@ -43,7 +44,11 @@ void field_free(Field *field)
 void field_update_geometry(Field *field, SDL_Point window_size)
 {
     field->_window_size = window_size;
-    field->_cell_size = juan_min(window_size.x / 15, window_size.y / 15);
+    float multiplier = (float)field->_zoom_level / 50;
+    field->_cell_size = juan_min(
+            (int)round(window_size.x * multiplier),
+            (int)round(window_size.y * multiplier)
+        );
     drag_set_snapping(field->_drag, (float) field->_cell_size, (float) field->_cell_size);
 }
 
@@ -124,6 +129,14 @@ void field_handle_keyb(Field *field, KeyboardEvent *event)
             break;
         case KEYB_EVENT_SLOWER:
             intrpr_slower(field->_intrpr);
+            break;
+        case KEYB_EVENT_ZOOM_IN:
+            field->_zoom_level = juan_min(FIELD_ZOOM_LEVEL_MAX, field->_zoom_level + 1);
+            field_update_geometry(field, field->_window_size);
+            break;
+        case KEYB_EVENT_ZOOM_OUT:
+            field->_zoom_level = juan_max(1, field->_zoom_level - 1);
+            field_update_geometry(field, field->_window_size);
             break;
         default:
             break;

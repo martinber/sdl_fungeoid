@@ -40,6 +40,8 @@ choose between two languages:
 - Befunge93: The most popular one.
 - VeryFunge93: Befunge93 plus some instructions.
 
+The best alternative I found is [jsFunge IDE](https://esolang.rutteric.com/fungejs/).
+
 ## Development
 
 ### Code overview
