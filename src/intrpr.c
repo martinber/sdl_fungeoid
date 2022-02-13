@@ -12,7 +12,7 @@ Intrpr *intrpr_create()
     intrpr->_last_step_ms = 0;
     intrpr->_interval_step_ms = 100;
 
-    intrpr->_canvas = canvas_create(100, 100);
+    intrpr->_canvas = canvas_create(128, 128);
     intrpr->_stack = stack_create();
     if (intrpr->_canvas == NULL || intrpr->_stack == NULL)
     {

@@ -143,6 +143,11 @@ void drag_update(DragState *drag, Uint32 time)
                 drag->friction, drag->snap_accel);
         update_coord(&(drag->y), &(drag->vy), drag->snap_spacing_y, delta_time,
                 drag->friction, drag->snap_accel);
+
+        drag->x = juan_max_f(drag->x, drag->min_x);
+        drag->x = juan_min_f(drag->x, drag->max_x);
+        drag->y = juan_max_f(drag->y, drag->min_y);
+        drag->y = juan_min_f(drag->y, drag->max_y);
     }
 
     drag->last_update_time = time;
@@ -162,6 +167,11 @@ void drag_move(DragState *drag, SDL_Point point, Uint32 timestamp)
         {
             drag->x += input_x - drag->last_input_x;
             drag->y += input_y - drag->last_input_y;
+
+            drag->x = juan_max_f(drag->x, drag->min_x);
+            drag->x = juan_min_f(drag->x, drag->max_x);
+            drag->y = juan_max_f(drag->y, drag->min_y);
+            drag->y = juan_min_f(drag->y, drag->max_y);
 
             // Velocity calculated from last two inputs
             float new_vx = (input_x - drag->last_input_x)

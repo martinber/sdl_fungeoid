@@ -233,20 +233,36 @@ void juan_draw_v_line_cap
 
 int juan_min(int a, int b)
 {
-    if (a > b)
-    {
+    if (a > b) {
         return b;
-    }
-    else
+    } else {
         return a;
+    }
 }
 
 int juan_max(int a, int b)
 {
-    if (a > b)
-    {
+    if (a > b) {
+        return a;
+    } else {
+        return b;
+    }
+}
+
+float juan_min_f(float a, float b)
+{
+    if (a > b) {
+        return b;
+    } else {
         return a;
     }
-    else
+}
+
+float juan_max_f(float a, float b)
+{
+    if (a > b) {
+        return a;
+    } else {
         return b;
+    }
 }

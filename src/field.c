@@ -49,7 +49,14 @@ void field_update_geometry(Field *field, SDL_Point window_size)
             (int)round(window_size.x * multiplier),
             (int)round(window_size.y * multiplier)
         );
+
+    Canvas* canvas = intrpr_get_canvas(field->_intrpr);
+
     drag_set_snapping(field->_drag, (float) field->_cell_size, (float) field->_cell_size);
+    drag_set_limits(field->_drag,
+            - (canvas_get_width(canvas) - 1) * (float) field->_cell_size, 0,
+            - (canvas_get_height(canvas) - 1) * (float) field->_cell_size, 0
+        );
 }
 
 void field_update(Field *field, Uint32 time_abs_ms)
@@ -208,25 +215,44 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     int width = canvas_get_width(canvas);
     int height = canvas_get_height(canvas);
 
+    // Total size of canvas
+    int window_width = field->_window_size.x;
+    int window_height = field->_window_size.y;
+
     // Offset because of scrolling
     int x_offset = (int) field->_drag->x;
     int y_offset = (int) field->_drag->y;
 
     // TODO: draw only things on screen
 
-    // Draw lines
+    // Draw lines of the canvas
     juan_set_render_draw_color(renderer, &COLOR_LINES);
     int line_width = cell_size / 20;
 
-    for (int x = 0; x < width + 1; x++)
+    if (line_width > 0)
     {
-        juan_draw_v_line_cap(renderer,
-                x * cell_size + x_offset, 0, height * cell_size, line_width);
-    }
-    for (int y = 0; y < height + 1; y++)
-    {
-        juan_draw_h_line_cap(renderer,
-                0, y * cell_size + y_offset, width * cell_size, line_width);
+        // Vertical lines
+        for (int x = 0; x < width + 1; x++)
+        {
+            int line_x = x * cell_size + x_offset;
+            int line_y = juan_max(0, y_offset);
+            int line_length = juan_min(window_height, height * cell_size + y_offset);
+            if (0 < line_x && line_x < window_width)
+            {
+                juan_draw_v_line_cap(renderer, line_x, line_y, line_length, line_width);
+            }
+        }
+        // Horizontal lines
+        for (int y = 0; y < height + 1; y++)
+        {
+            int line_y = y * cell_size + y_offset;
+            int line_x = juan_max(0, x_offset);
+            int line_length = juan_min(window_width, width * cell_size + x_offset);
+            if (0 < line_y && line_y < window_height)
+            {
+                juan_draw_h_line_cap(renderer, line_x, line_y, line_length, line_width);
+            }
+        }
     }
 
     // Draw instructions

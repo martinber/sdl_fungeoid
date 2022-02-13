@@ -110,4 +110,10 @@ int juan_min(int a, int b);
 /// Maximum of two ints
 int juan_max(int a, int b);
 
+/// Minimum of two floats
+float juan_min_f(float a, float b);
+
+/// Maximum of two floats
+float juan_max_f(float a, float b);
+
 #endif
