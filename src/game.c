@@ -127,15 +127,6 @@ void game_handle_input(Game *game, Input *input)
         // If keyboard handled the input, process it or pass it to the field
         switch (event.type)
         {
-            case KEYB_EVENT_NOT_HANDLED:
-                // If not handled, ask hud to handle
-                if (hud_handle_input(game->_hud, input) != 0)
-                {
-                    // If neither of them handled, then it should be done by the field
-                    field_handle_input(game->_field, input);
-                }
-                break;
-
             case KEYB_EVENT_LOAD:
                 game_load_intent(game);
                 break;

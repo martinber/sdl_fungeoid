@@ -109,6 +109,11 @@ I'm learning C, I have to remember to:
 
 - Implement function to select and delete an area of the field.
 
+- Draw on the field the possible code paths, looking at arrows and conditionals.
+
+- In the run screen, add possibility to clear the stack and to change the
+  pointer direction.
+
 - Autosave once in a while.
 
 ### SDL Notes

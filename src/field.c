@@ -160,10 +160,10 @@ void field_handle_keyb(Field *field, KeyboardEvent *event)
 
         switch (event->type)
         {
-            case KEYB_EVENT_ADD_INSTR:
-                canvas_set_char(canvas, ip.x, ip.y, const_befunge_char(event->instr_id));
+            case KEYB_EVENT_ADD_CHAR:
+                canvas_set_char(canvas, ip.x, ip.y, event->character);
                 break;
-            case KEYB_EVENT_RM_INSTR:
+            case KEYB_EVENT_RM_CHAR:
                 canvas_set_char(canvas, ip.x, ip.y, ' ');
                 break;
 
@@ -273,14 +273,7 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     {
         for (int y = start_y; y <= end_y; y++)
         {
-            char _c = canvas_get_char(canvas, x, y);
-            char c = ' ';
-
-            if (_c < 0) {
-                SDL_Log("Error reading canvas char when drawing");
-            } else {
-                c = (char) _c;
-            }
+            char c = canvas_get_char(canvas, x, y);
 
             SDL_Texture* tex = res_get_instr_char_tex(INSTR_THEME_BEFUNGE_CHAR, c);
             SDL_Rect r = {

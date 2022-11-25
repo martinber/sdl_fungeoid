@@ -6,8 +6,8 @@ static TTF_Font* font_128 = NULL;
 static TTF_Font* font_90 = NULL;
 static TTF_Font* font_32 = NULL;
 
-/// Array of textures for every char until c=127
-static SDL_Texture *CHAR_TEXTURES[128] = { NULL };
+/// Array of textures for every char, element 0 corresponds to char -128
+static SDL_Texture *CHAR_TEXTURES[256] = { NULL };
 
 /// Array of textures for every keyboard icon for the current theme and the current resolution
 static SDL_Texture *KEYB_ICON_TEXTURES[RES_KEYB_ICON_ID_TOTAL] = { NULL };
@@ -91,8 +91,10 @@ static SDL_Texture *instr_tex_from_char(
     char character,
     SDL_Color color
 ) {
-    // The text will be simly the character if printable, or caret notation
+    // The text will be simply the character if printable, or caret notation
     // which consists of two characters
+    // For negative numbers I add a minus in the front or an underscore which
+    // would be a "minus caret notation char"
     char text[3] = { '\0', '\0', '\0' };
     switch (character)
     {
@@ -129,11 +131,49 @@ static SDL_Texture *instr_tex_from_char(
         case 30: strcpy(text, "^^"); break;
         case 31: strcpy(text, "^_"); break;
         case 127: strcpy(text, "^?"); break;
+        case -1:  strcpy(text, "_A"); break;
+        case -2:  strcpy(text, "_B"); break;
+        case -3:  strcpy(text, "_C"); break;
+        case -4:  strcpy(text, "_D"); break;
+        case -5:  strcpy(text, "_E"); break;
+        case -6:  strcpy(text, "_F"); break;
+        case -7:  strcpy(text, "_G"); break;
+        case -8:  strcpy(text, "_H"); break;
+        case -9:  strcpy(text, "_I"); break;
+        case -10: strcpy(text, "_J"); break;
+        case -11: strcpy(text, "_K"); break;
+        case -12: strcpy(text, "_L"); break;
+        case -13: strcpy(text, "_M"); break;
+        case -14: strcpy(text, "_N"); break;
+        case -15: strcpy(text, "_O"); break;
+        case -16: strcpy(text, "_P"); break;
+        case -17: strcpy(text, "_Q"); break;
+        case -18: strcpy(text, "_R"); break;
+        case -19: strcpy(text, "_S"); break;
+        case -20: strcpy(text, "_T"); break;
+        case -21: strcpy(text, "_U"); break;
+        case -22: strcpy(text, "_V"); break;
+        case -23: strcpy(text, "_W"); break;
+        case -24: strcpy(text, "_X"); break;
+        case -25: strcpy(text, "_Y"); break;
+        case -26: strcpy(text, "_Z"); break;
+        case -27: strcpy(text, "_["); break;
+        case -28: strcpy(text, "_\\"); break;
+        case -29: strcpy(text, "_]"); break;
+        case -30: strcpy(text, "_^"); break;
+        case -31: strcpy(text, "__"); break;
+        case -127: strcpy(text, "_?"); break;
+        case -128: strcpy(text, "_@"); break;
 
         default:
-            text[0] = character;
-            break;
+            if (character > 0) {
+                text[0] = character;
+            } else {
+                text[0] = '-';
+                text[1] = -character;
+            }
 
+            break;
     }
 
     return tex_from_centered_text(renderer, font,
@@ -160,12 +200,13 @@ int res_load_all(SDL_Renderer *renderer)
 
     // Load every instruction texture for characters
 
-    for (unsigned char c = 0; c < 128; c++) // Until 128, where ASCII ends
+    for (int c = 0; c < 256; c++)
     {
-        CHAR_TEXTURES[c] = instr_tex_from_char(renderer, font_128, (char) c, COLOR_WHITE);
+        char character = (char)(c - 128);
+        CHAR_TEXTURES[c] = instr_tex_from_char(renderer, font_128, character, COLOR_WHITE);
         if (CHAR_TEXTURES[c] == NULL)
         {
-            SDL_Log("Error creating instruction texture for char %d\n", c);
+            SDL_Log("Error creating instruction texture for char %d\n", character);
             res_free_all();
             return 1;
         }
@@ -415,7 +456,7 @@ void res_free_all()
     //SDL_DestroyTexture(RES_TEXTURES[RES_TEX_BALL]);
     //RES_TEXTURES[RES_TEX_BALL] = NULL;
 
-    for (int i = 0; i < 128; i++)
+    for (int i = 0; i < 256; i++)
     {
         if (CHAR_TEXTURES[i] != NULL)
         {
@@ -462,13 +503,13 @@ SDL_Texture *res_get_instr_tex(enum INSTR_THEME theme, enum INSTR_ID id)
         SDL_Log("Tried to get instruction texture of ID %d\n", id);
         return NULL;
     }
-    return CHAR_TEXTURES[(unsigned char)c];
+    return res_get_instr_char_tex(theme, c);
 }
 
 SDL_Texture *res_get_instr_char_tex(enum INSTR_THEME theme, char c)
 {
     UNUSED(theme);
-    return CHAR_TEXTURES[(unsigned char)c];
+    return CHAR_TEXTURES[(unsigned char)(c + 128)];
 }
 
 SDL_Texture *res_get_keyb_icon_tex(enum INSTR_THEME theme, enum RES_KEYB_ICON_ID id)

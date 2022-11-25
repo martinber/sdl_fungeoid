@@ -74,6 +74,7 @@ enum KEYB_CHAR_BUTTON_ID
     KEYB_CHAR_SUB_10,
     KEYB_CHAR_ADD_16,
     KEYB_CHAR_SUB_16,
+    KEYB_CHAR_DISPLAY,
     KEYB_CHAR_BUTTON_ID_TOTAL,
 };
 
@@ -122,14 +123,17 @@ typedef struct Keyboard
     SDL_Rect tab_geometry[KEYB_TAB_ID_TOTAL];
     enum KEYB_TAB_ID active_tab;
 
+    // Char tab
+    char curr_char;
+
 } Keyboard;
 
 enum KEYB_EVENT_TYPE
 {
     KEYB_EVENT_NONE,
     KEYB_EVENT_NOT_HANDLED,
-    KEYB_EVENT_ADD_INSTR,
-    KEYB_EVENT_RM_INSTR,
+    KEYB_EVENT_ADD_CHAR,
+    KEYB_EVENT_RM_CHAR,
     KEYB_EVENT_MOVE_UP,
     KEYB_EVENT_MOVE_DOWN,
     KEYB_EVENT_MOVE_LEFT,
@@ -157,7 +161,7 @@ enum KEYB_EVENT_TYPE
 typedef struct KeyboardEvent
 {
     enum KEYB_EVENT_TYPE type;
-    enum INSTR_ID instr_id; // Used only if type is ADD_INSTR
+    char character; // Used only if type is ADD_CHAR
 } KeyboardEvent;
 
 /// Create keyb

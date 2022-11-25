@@ -45,6 +45,8 @@ Keyboard *keyb_create(SDL_Point window_size)
     keyb->active_tab = 0;
     keyb->shift_state = KEYB_SHIFT_NONE;
 
+    keyb->curr_char = 0;
+
     for (enum KEYB_TAB_ID i = 0; i < KEYB_TAB_ID_TOTAL; i++)
     {
         keyb->tab_geometry[i] = (SDL_Rect) { 0, 0, 0, 0 };
@@ -414,6 +416,10 @@ static void update_buttons(Keyboard *keyb)
         grid_position(&keyb->char_buttons[KEYB_CHAR_SUB_16].geometry,
                 button_size, button_size, spacing,
                 origin_x, origin_y, 2, 1);
+
+        grid_position(&keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 4, 1);
     }
 }
 
@@ -721,11 +727,34 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_SUB_16),
                     NULL, &keyb->char_buttons[KEYB_CHAR_SUB_16].geometry);
+
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_instr_char_tex(INSTR_THEME_BEFUNGE_CHAR, keyb->curr_char),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry);
             break;
 
         default:
             SDL_Log("Error rendering invalid tab %d\n", keyb->active_tab);
             break;
+    }
+
+    // Draw other things
+
+    switch (keyb->active_tab)
+    {
+        case KEYB_TAB_CHAR:
+
+            juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
+            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry);
+            SDL_RenderCopy(renderer,
+                    res_get_instr_char_tex(INSTR_THEME_BEFUNGE_CHAR, keyb->curr_char),
+                    NULL, &keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry);
+            break;
+
+        default:
+            break;
+
     }
 }
 
@@ -759,7 +788,7 @@ KeyboardEvent keyb_handle_input
     KeyboardEvent event =
     {
         .type = KEYB_EVENT_NOT_HANDLED,
-        .instr_id = INSTR_NULL,
+        .character = 0,
     };
 
     // Ignore events outside the keyboard
@@ -847,7 +876,7 @@ KeyboardEvent keyb_handle_input
             switch (pressed)
             {
                 case KEYB_ACTION_DELETE:
-                    event.type = KEYB_EVENT_RM_INSTR;
+                    event.type = KEYB_EVENT_RM_CHAR;
                     return event;
                     break;
 
@@ -928,8 +957,8 @@ KeyboardEvent keyb_handle_input
 
                 if (pressed != -1)
                 {
-                    event.type = KEYB_EVENT_ADD_INSTR;
-                    event.instr_id = pressed;
+                    event.type = KEYB_EVENT_ADD_CHAR;
+                    event.character = const_befunge_char(pressed);
                 }
                 break;
 
@@ -940,8 +969,8 @@ KeyboardEvent keyb_handle_input
 
                 if (pressed != -1)
                 {
-                    event.type = KEYB_EVENT_ADD_INSTR;
-                    event.instr_id = pressed;
+                    event.type = KEYB_EVENT_ADD_CHAR;
+                    event.character = const_befunge_char(pressed);
                 }
                 break;
 
@@ -949,12 +978,11 @@ KeyboardEvent keyb_handle_input
 
                 pressed = get_button_on_point(&input->point,
                         keyb->oper_buttons, KEYB_OPER_BUTTONS_TOTAL);
-                event.instr_id = pressed;
 
                 if (pressed != -1)
                 {
-                    event.type = KEYB_EVENT_ADD_INSTR;
-                    event.instr_id = pressed;
+                    event.type = KEYB_EVENT_ADD_CHAR;
+                    event.character = const_befunge_char(pressed);
                 }
                 break;
 
@@ -995,8 +1023,28 @@ KeyboardEvent keyb_handle_input
                         return event;
                         break;
                 }
+                break;
 
             case KEYB_TAB_CHAR:
+                pressed = get_button_on_point(&input->point,
+                        keyb->char_buttons, KEYB_CHAR_BUTTON_ID_TOTAL);
+
+                int curr_char = (int)keyb->curr_char;
+                switch (pressed)
+                {
+                    case KEYB_CHAR_ADD_1:  curr_char += 1;  break;
+                    case KEYB_CHAR_ADD_10: curr_char += 10; break;
+                    case KEYB_CHAR_ADD_16: curr_char += 16; break;
+                    case KEYB_CHAR_SUB_1:  curr_char -= 1;  break;
+                    case KEYB_CHAR_SUB_10: curr_char -= 10; break;
+                    case KEYB_CHAR_SUB_16: curr_char -= 16; break;
+                    case KEYB_CHAR_PUT:
+                        event.type = KEYB_EVENT_ADD_CHAR;
+                        event.character = keyb->curr_char;
+                        break;
+                }
+                keyb->curr_char = (char)juan_min(juan_max(curr_char, -128), 127);
+
                 break;
 
             default:
@@ -1013,11 +1061,6 @@ KeyboardEvent keyb_handle_input
                 keyb->active_tab = i;
             }
         }
-    }
-    else if (input->type == INPUT_CLICK_MOVE)
-    {
-        // TODO: Move tabs?
-
     }
     return event;
 }
