@@ -5,6 +5,7 @@
 #include "const.h"
 #include "input.h"
 #include "button.h"
+#include "text.h"
 
 // TODO remove and replace with a boolean?
 enum KEYB_SHIFT_STATE
@@ -123,9 +124,9 @@ typedef struct Keyboard
     SDL_Rect tab_geometry[KEYB_TAB_ID_TOTAL];
     enum KEYB_TAB_ID active_tab;
 
-    // Char tab
-    char curr_char;
-
+    // Variables for the "Char" tab
+    char curr_char; // Current character being shown
+    Text *curr_char_repr; // Text with the decimal and hex representation
 } Keyboard;
 
 enum KEYB_EVENT_TYPE

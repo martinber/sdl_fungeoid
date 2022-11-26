@@ -92,7 +92,7 @@ void hud_draw(SDL_Renderer *renderer, Hud *hud)
         snprintf(str_buf, 9, "%lu", stack_elements[i]);
         str_buf[8] = '~';
         str_buf[9] = '\0';
-        tex = juan_text_texture (
+        tex = juan_text_texture(
             renderer,
             res_get_font(RES_FONT_STACK),
             str_buf,

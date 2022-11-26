@@ -28,6 +28,13 @@ static const enum INSTR_ID KEYB_OPER_INSTR_ID[KEYB_OPER_BUTTONS_TOTAL] =
     INSTR_ITER,
 };
 
+static void update_curr_char_repr_str(Keyboard *keyb)
+{
+    char str_buf[32];
+    sprintf(str_buf, "% 4d == 0x%02hhX", keyb->curr_char, keyb->curr_char);
+    text_set_str(keyb->curr_char_repr, str_buf);
+}
+
 Keyboard *keyb_create(SDL_Point window_size)
 {
     Keyboard *keyb = (Keyboard*) malloc(sizeof(Keyboard));
@@ -45,7 +52,7 @@ Keyboard *keyb_create(SDL_Point window_size)
     keyb->active_tab = 0;
     keyb->shift_state = KEYB_SHIFT_NONE;
 
-    keyb->curr_char = 0;
+    keyb->curr_char = '0';
 
     for (enum KEYB_TAB_ID i = 0; i < KEYB_TAB_ID_TOTAL; i++)
     {
@@ -99,12 +106,34 @@ Keyboard *keyb_create(SDL_Point window_size)
         button_init(&keyb->action_buttons[i], BUTTON_KEYB_ACTION, i);
     }
 
+    // Texture for the current selected character in the char tab
+
+    keyb->curr_char_repr = text_create(32, res_get_font(RES_FONT_STACK), COLOR_WHITE);
+    if (keyb->curr_char_repr == NULL)
+    {
+        SDL_Log("Error creating text char repr");
+        keyb_free(keyb);
+        keyb = NULL;
+        return NULL;
+    }
+    keyb->curr_char_repr->h_align = TEXT_ALIGN_CENTER;
+    keyb->curr_char_repr->v_align = TEXT_ALIGN_CENTER;
+
+    // Finish
+
     keyb_update_geometry(keyb, window_size);
+    update_curr_char_repr_str(keyb);
     return keyb;
 }
 
 void keyb_free(Keyboard *keyb)
 {
+    if (keyb != NULL)
+    {
+        text_free(keyb->curr_char_repr);
+        keyb->curr_char_repr = NULL;
+    }
+
     free(keyb);
     keyb = NULL;
 }
@@ -420,6 +449,14 @@ static void update_buttons(Keyboard *keyb)
         grid_position(&keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry,
                 button_size, button_size, spacing,
                 origin_x, origin_y, 4, 1);
+
+        SDL_Rect boundary; // Region where the char_repr should be drawn. The
+                           // char_repr will be actually bigger
+        grid_position(&boundary,
+                button_size, button_size, spacing,
+                origin_x, origin_y, 4, 0);
+        keyb->curr_char_repr->position.x = (boundary.x + boundary.w / 2);
+        keyb->curr_char_repr->position.y = (boundary.y + boundary.h / 2);
     }
 }
 
@@ -727,11 +764,6 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
             SDL_RenderCopy(renderer,
                     res_get_keyb_icon_tex(INSTR_THEME_BEFUNGE_CHAR, RES_KEYB_ICON_CHAR_SUB_16),
                     NULL, &keyb->char_buttons[KEYB_CHAR_SUB_16].geometry);
-
-            SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry);
-            SDL_RenderCopy(renderer,
-                    res_get_instr_char_tex(INSTR_THEME_BEFUNGE_CHAR, keyb->curr_char),
-                    NULL, &keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry);
             break;
 
         default:
@@ -745,11 +777,15 @@ void keyb_draw(SDL_Renderer *renderer, Keyboard *keyb)
     {
         case KEYB_TAB_CHAR:
 
+            // Current character
+
             juan_set_render_draw_color(renderer, &COLOR_BUTTON_3);
             SDL_RenderFillRect(renderer, &keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry);
             SDL_RenderCopy(renderer,
                     res_get_instr_char_tex(INSTR_THEME_BEFUNGE_CHAR, keyb->curr_char),
                     NULL, &keyb->char_buttons[KEYB_CHAR_DISPLAY].geometry);
+
+            text_draw(renderer, keyb->curr_char_repr);
             break;
 
         default:
@@ -1044,6 +1080,8 @@ KeyboardEvent keyb_handle_input
                         break;
                 }
                 keyb->curr_char = (char)juan_min(juan_max(curr_char, -128), 127);
+
+                update_curr_char_repr_str(keyb);
 
                 break;
 

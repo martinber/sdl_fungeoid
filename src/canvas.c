@@ -142,14 +142,14 @@ int canvas_save(Canvas *canvas, char *filename)
         for (int x = 0; x < canvas->_width; x++)
         {
             int c = canvas_get_char(canvas, x, y);
-            if (c < 0)
+            if (c >= 32 && c <= 126)
             {
-                SDL_Log("Error reading character when saving to file, putting space");
-                line[x] = ' ';
+                line[x] = (char) c;
             }
             else
             {
-                line[x] = (char) c;
+                // Non printable characters are not saved
+                line[x] = ' ';
             }
         }
         // Trim trailing spaces
