@@ -9,6 +9,7 @@ Intrpr *intrpr_create()
         return NULL;
     }
 
+    intrpr->_state = INTRPR_PAUSED;
     intrpr->_last_step_ms = 0;
     intrpr->_interval_step_ms = 100;
 

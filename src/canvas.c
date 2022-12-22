@@ -158,13 +158,16 @@ int canvas_save(Canvas *canvas, char *filename)
         while (*end == ' ')
         {
             *end = '\0';
+            if (end == line) { break; }
             end--;
         }
         // Write line to file
         fputs(line, f);
         fputc('\n', f);
     }
-    // TODO: Maube trim extra lines at the end
+    // TODO: Maybe trim extra lines at the end
+
+    free(line);
 
     // Close file
 

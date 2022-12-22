@@ -96,6 +96,8 @@ I'm learning C, I have to remember to:
 
 ### Things to do
 
+- Use `int8_t` for cells or bigger
+
 - Fix that the game looks fullscreen on Android and is drawn below the
     notification bar.
 

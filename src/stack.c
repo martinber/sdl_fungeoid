@@ -115,7 +115,7 @@ int stack_clear(Stack *stack)
 
 void stack_print(Stack *stack)
 {
-    SDL_Log("size: %lu, alloc_size: %lu\n", stack->size, stack->alloc_size);
+    SDL_Log("size: %zu, alloc_size: %zu\n", stack->size, stack->alloc_size);
     SDL_Log("Bottom of stack... (first item pushed)\n");
     for (size_t i = 0; i < stack->size; i++)
     {

@@ -40,5 +40,9 @@ remove: clean
 	@$(rm) $(BINDIR)/$(TARGET)
 	@echo "Executable removed!"
 
+valgrind: CFLAGS += -O0
+valgrind: $(BINDIR)/$(TARGET)
+	valgrind $(BINDIR)/$(TARGET)
+
 run: $(BINDIR)/$(TARGET)
 	$(BINDIR)/$(TARGET)

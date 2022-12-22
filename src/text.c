@@ -25,6 +25,7 @@ Text *text_create(int size, TTF_Font *font, SDL_Color color)
         SDL_Log("Failed to malloc text->_str\n");
         return NULL;
     }
+    strcpy(text->_str, "");
 
     text->_texture = NULL;
     text_set_str(text, "");

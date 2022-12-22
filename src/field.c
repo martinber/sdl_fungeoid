@@ -230,8 +230,6 @@ void field_draw(SDL_Renderer *renderer, Field *field)
     int x_offset = (int) -field->_drag->x;
     int y_offset = (int) -field->_drag->y;
 
-    // TODO: draw only things on screen
-
     // Draw lines of the canvas
     juan_set_render_draw_color(renderer, &COLOR_LINES);
     int line_width = cell_size / 20;
@@ -242,10 +240,10 @@ void field_draw(SDL_Renderer *renderer, Field *field)
         for (int x = 0; x < width + 1; x++)
         {
             int line_x = x * cell_size - x_offset;
-            int line_y = juan_max(0, -y_offset);
-            int line_length = juan_min(window_height, height * cell_size - y_offset);
             if (0 < line_x && line_x < window_width)
             {
+                int line_y = juan_max(0, -y_offset);
+                int line_length = juan_min(window_height, height * cell_size - y_offset);
                 juan_draw_v_line_cap(renderer, line_x, line_y, line_length, line_width);
             }
         }
@@ -253,10 +251,10 @@ void field_draw(SDL_Renderer *renderer, Field *field)
         for (int y = 0; y < height + 1; y++)
         {
             int line_y = y * cell_size - y_offset;
-            int line_x = juan_max(0, -x_offset);
-            int line_length = juan_min(window_width, width * cell_size - x_offset);
             if (0 < line_y && line_y < window_height)
             {
+                int line_x = juan_max(0, -x_offset);
+                int line_length = juan_min(window_width, width * cell_size - x_offset);
                 juan_draw_h_line_cap(renderer, line_x, line_y, line_length, line_width);
             }
         }

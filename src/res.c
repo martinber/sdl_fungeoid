@@ -131,6 +131,8 @@ static SDL_Texture *instr_tex_from_char(
         case 30: strcpy(text, "^^"); break;
         case 31: strcpy(text, "^_"); break;
         case 127: strcpy(text, "^?"); break;
+        // TODO: Apparently I should see how to rewrite this to be positive
+        // warning: overflow converting case value to switch condition type [-Wswitch]
         case -1:  strcpy(text, "_A"); break;
         case -2:  strcpy(text, "_B"); break;
         case -3:  strcpy(text, "_C"); break;
